@@ -3,7 +3,7 @@ using JobMatchBackend.Services;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("auth/[controller]")]
 public class RegisterController : ControllerBase
 {
 
@@ -15,7 +15,7 @@ public class RegisterController : ControllerBase
     }
 
 
-    [HttpPost("student")]
+    [HttpPost]
     public async Task<IActionResult> RegisterStudent([FromBody] RegisterStudent request)
     {
         if (!ModelState.IsValid)
