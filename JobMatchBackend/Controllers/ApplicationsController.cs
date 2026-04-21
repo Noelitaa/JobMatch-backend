@@ -30,10 +30,10 @@ public class ApplicationsController : ControllerBase
         {
             return StatusCode(403, new { message = ex.Message });
         }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = "Internal server error" });
-        }
+        catch (Exception)
+{
+    return StatusCode(500, new { message = "Internal server error" });
+}
     }
 
     private Guid GetCurrentUserId()
