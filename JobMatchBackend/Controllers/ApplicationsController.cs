@@ -6,7 +6,7 @@ using JobMatchBackend.Services;
 namespace JobMatchBackend.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("")]
 //[Authorize]
 public class ApplicationsController : ControllerBase
 {
@@ -17,7 +17,6 @@ public class ApplicationsController : ControllerBase
         _applicationService = applicationService;
     }
 
-    // SOLO PUT - /applications/{applicationId}
     [HttpPut("applications/{applicationId}")]
     public async Task<IActionResult> UpdateApplicationStatus(int applicationId, [FromBody] UpdateApplicationRequest request)
     {
