@@ -5,7 +5,7 @@ using JobMatchBackend.Services;
 namespace JobMatchBackend.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("")]
 //[Authorize]
 public class ApplicationsController : ControllerBase
 {
