@@ -1,14 +1,12 @@
-// Controllers/ApplicationsController.cs
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using JobMatchBackend.DTOs.Request;
 using JobMatchBackend.Services;
 
 namespace JobMatchBackend.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("[controller]")]
 //[Authorize]
 public class ApplicationsController : ControllerBase
 {
@@ -19,26 +17,8 @@ public class ApplicationsController : ControllerBase
         _applicationService = applicationService;
     }
 
-    [HttpGet("job/{jobId}")]
-    public async Task<IActionResult> GetApplicationsByJob(int jobId)
-    {
-        try
-        {
-            var companyId = GetCurrentUserId();
-            var applications = await _applicationService.GetApplicationsByJobAsync(jobId, companyId);
-            return Ok(applications);
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            return StatusCode(403, new { message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = "Internal server error" });
-        }
-    }
-
-    [HttpPut("{applicationId}")]
+    // SOLO PUT - /applications/{applicationId}
+    [HttpPut("applications/{applicationId}")]
     public async Task<IActionResult> UpdateApplicationStatus(int applicationId, [FromBody] UpdateApplicationRequest request)
     {
         try
@@ -67,7 +47,6 @@ public class ApplicationsController : ControllerBase
 
     private Guid GetCurrentUserId()
     {
-        // 🔹 TEMPORAL: Retorna el GUID de tu empresa
         return Guid.Parse("9F4AF0CA-4509-42C1-9594-BB205862F7BA");
     }
 }
