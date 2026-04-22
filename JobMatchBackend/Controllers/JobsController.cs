@@ -28,4 +28,18 @@ public class JobsController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAllJobs()
+    {
+        try
+        {
+            var jobs = await _jobService.GetAllJobsAsync();
+            return Ok(jobs);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }

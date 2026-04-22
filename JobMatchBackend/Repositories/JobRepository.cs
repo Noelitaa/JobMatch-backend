@@ -1,5 +1,6 @@
 using JobMatchBackend.Data;
 using JobMatchBackend.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace JobMatchBackend.Repositories;
 
@@ -17,5 +18,10 @@ public class JobRepository : IJobRepository
         _context.Jobs.Add(job);
         await _context.SaveChangesAsync();
         return job;
+    }
+
+    public async Task<List<Job>> GetAllAsync()
+    {
+        return await _context.Jobs.ToListAsync();
     }
 }
