@@ -1,4 +1,6 @@
 namespace JobMatchBackend.Models.Entities;
+using System.Collections.Generic;
+using JobMatchBackend.Models.Entities;
 
 public class User
 {
@@ -22,5 +24,9 @@ public class User
     public string? CompanyId { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
+
+    //for Many-to-Many relationship with Skills
+    public ICollection<Skill> Skills { get; set; } = new List<Skill>();
+
 }
 
