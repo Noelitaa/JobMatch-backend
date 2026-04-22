@@ -63,6 +63,10 @@ public class RegisterController : ControllerBase
         {
             return Conflict(new { message = ex.Message });
         }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("correo"))
+        {
+            return Conflict(new { message = ex.Message });
+        }
 
 
     }

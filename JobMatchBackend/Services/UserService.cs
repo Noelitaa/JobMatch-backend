@@ -52,6 +52,13 @@ public class UserService : IUserService
             throw new InvalidOperationException("La cedula de identificacion de esta empresa ya se encuentra registrada.");
         }
 
+        var existingUserByEmail = await _dbContext.User.FirstOrDefaultAsync(u => u.Email == request.Email);
+
+        if (existingUserByEmail != null)
+        {
+            throw new InvalidOperationException("El correo electrónico ya se encuentra registrado.");
+        }
+
 
         var user = RegisterMapper.RegisterCompanyToUser(request);
 
