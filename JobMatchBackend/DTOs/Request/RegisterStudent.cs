@@ -7,6 +7,10 @@ public class RegisterStudent
     [EmailAddress]
     public string Email { get; set; } = string.Empty;
     [Required]
+    [MinLength(8)]
+    [MaxLength(100)]
+    [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$",
+    ErrorMessage = "La contraseña debe contener al menos una letra mayúscula, una letra minúscula y un número.")]
     public string PasswordHash { get; set; } = string.Empty;
     [Required]
     [MaxLength(100)]
