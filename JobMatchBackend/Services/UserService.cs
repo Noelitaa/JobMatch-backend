@@ -42,4 +42,26 @@ public class UserService : IUserService
 
     }
 
+    public async Task<RegisterCompanyResponse> CreateCompanyAsync(RegisterCompany request)
+    {
+
+        var existingUser = await _dbContext.User.FirstOrDefaultAsync(u => u.CompanyId == request.CompanyId);
+
+        if (existingUser != null)
+        {
+            throw new InvalidOperationException("La cedula de identificacion de esta empresa ya se encuentra registrada.");
+        }
+
+
+        var user = RegisterMapper.RegisterCompanyToUser(request);
+
+        var passwordHasher = new PasswordHasher<User>();
+        user.PasswordHash = passwordHasher.HashPassword(user, request.PasswordHash);
+
+        var createdUser = await _userRepository.AddCompanyAsync(user);
+
+        return RegisterMapper.UserToRegisterCompanyResponse(createdUser);
+
+    }
+
 }
