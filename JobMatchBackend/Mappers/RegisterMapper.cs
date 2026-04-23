@@ -16,7 +16,8 @@ public class RegisterMapper()
             University = request.University,
             Career = request.Career,
             StudentId = request.StudentId,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            Role = "Student"
         };
     }
 
@@ -28,4 +29,29 @@ public class RegisterMapper()
             Message = "Registro de estudiante exitoso"
         };
     }
+
+    public static User RegisterCompanyToUser(RegisterCompany request)
+    {
+        return new User
+        {
+            Email = request.Email,
+            PasswordHash = request.PasswordHash,
+            CompanyName = request.CompanyName,
+            Description = request.Description,
+            CompanyId = request.CompanyId,
+            CreatedAt = DateTime.UtcNow,
+            Role = "Company",
+            Phone = request.Phone
+        };
+    }   
+
+    public static RegisterCompanyResponse UserToRegisterCompanyResponse(User user)
+    {
+        return new RegisterCompanyResponse
+        {
+            Id = user.Id,
+            Message = "Registro de empresa exitoso"
+        };
+    }
+
 }

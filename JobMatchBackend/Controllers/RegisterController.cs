@@ -27,10 +27,10 @@ public class RegisterController : ControllerBase
         {
 
             var response = await userService.CreateStudentAsync(request);
-            
+
             return CreatedAtAction(
                 nameof(RegisterStudent),
-                new { id = response.Id }, 
+                new { id = response.Id },
                 response
             );
 
@@ -39,6 +39,36 @@ public class RegisterController : ControllerBase
         {
             return Conflict(new { message = ex.Message });
         }
+    }
+
+    [HttpPost("company")]
+    public async Task<IActionResult> RegisterCompany([FromBody] RegisterCompany request)
+    {
+
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+
+        try
+        {
+
+            var response = await userService.CreateCompanyAsync(request);
+
+            return StatusCode(201, response);
+
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("cedula"))
+        {
+            return Conflict(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("correo"))
+        {
+            return Conflict(new { message = ex.Message });
+        }
+
+
     }
 
 

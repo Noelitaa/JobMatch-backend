@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 namespace JobMatchBackend.DTOs.Request;
 
-public class RegisterStudent
+public class RegisterCompany
 {
     [Required]
     [EmailAddress]
@@ -15,11 +15,15 @@ public class RegisterStudent
     [Required]
     [MaxLength(100)]
     [MinLength(5)]
-    public string? FullName { get; set; }
+    public string? CompanyName { get; set; }
     [Required]
-    public string? University { get; set; }
+    [MaxLength(500)]
+    [MinLength(10)]
+    public string? Description { get; set; }
     [Required]
-    public string? Career { get; set; }
+    public string? CompanyId { get; set; }
     [Required]
-    public string? StudentId { get; set; }
+    [Phone]
+    [RegularExpression(@"^\d{8}$", ErrorMessage = "El telefono debe de ser de 8 digitos")]
+    public string? Phone { get; set; }
 }
