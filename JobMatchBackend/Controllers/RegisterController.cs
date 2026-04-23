@@ -1,7 +1,9 @@
 using JobMatchBackend.DTOs.Request;
 using JobMatchBackend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+[Authorize]
 [ApiController]
 [Route("auth/[controller]")]
 public class RegisterController : ControllerBase
