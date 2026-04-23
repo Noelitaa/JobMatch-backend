@@ -17,6 +17,25 @@ public class ApplicationsController : ControllerBase
         _applicationService = applicationService;
     }
 
+    [HttpGet("jobs/{jobId}/applications")]
+    public async Task<IActionResult> GetApplicationsByJob(int jobId)
+    {
+        try
+        {
+            var companyId = GetCurrentUserId();
+            var applications = await _applicationService.GetApplicationsByJobAsync(jobId, companyId);
+            return Ok(applications);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { message = ex.Message });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
     [HttpPut("applications/{applicationId}")]
     public async Task<IActionResult> UpdateApplicationStatus(int applicationId, [FromBody] UpdateApplicationRequest request)
     {
@@ -46,6 +65,6 @@ public class ApplicationsController : ControllerBase
 
     private Guid GetCurrentUserId()
     {
-        return Guid.Parse("9F4AF0CA-4509-42C1-9594-BB205862F7BA");
+    return Guid.Parse("3C0E559A-ADBF-4C79-8ED5-F1045137B21E");
     }
 }

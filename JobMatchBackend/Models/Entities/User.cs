@@ -22,5 +22,8 @@ public class User
     public string? CompanyId { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
+
+    public virtual ICollection<Contract>? CompanyContracts { get; set; }
+    public virtual ICollection<Contract>? StudentContracts { get; set; }
 }
 

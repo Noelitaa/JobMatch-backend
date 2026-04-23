@@ -4,6 +4,7 @@ using JobMatchBackend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobMatchBackend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260423005703_AddContractsTable")]
+    partial class AddContractsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,50 +24,6 @@ namespace JobMatchBackend.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("JobMatchBackend.DTOs.ContractDataDto", b =>
-                {
-                    b.Property<string>("CompanyEmail")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CompanyName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CompanyOwnerName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("IdApplication")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IdJob")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("IdStudent")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("JobTitle")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("JobType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("StudentCareer")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("StudentEmail")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("StudentName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("StudentUniversity")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.ToTable("ContractData");
-                });
 
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Application", b =>
                 {
