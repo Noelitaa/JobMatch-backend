@@ -44,8 +44,8 @@ public class ApplicationsController : ControllerBase
         }
     }
 
-    private Guid GetCurrentUserId()
+    private int GetCurrentUserId()
     {
-        return Guid.Parse("9F4AF0CA-4509-42C1-9594-BB205862F7BA");
+        return 1; // Replace with actual user ID retrieval logic
     }
 }

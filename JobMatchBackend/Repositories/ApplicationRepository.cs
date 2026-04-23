@@ -40,9 +40,9 @@ public class ApplicationRepository : IApplicationRepository
     }
 
    // Repositories/ApplicationRepository.cs
-public async Task<bool> IsCompanyOwnerAsync(int jobId, Guid companyId)
-{
-    var job = await _dbContext.Jobs.FirstOrDefaultAsync(j => j.IdJob == jobId);
-    return job != null && job.IdCompany == companyId; 
-}
+    public async Task<bool> IsCompanyOwnerAsync(int jobId, int companyId)
+    {
+        var job = await _dbContext.Jobs.FirstOrDefaultAsync(j => j.IdJob == jobId);
+        return job != null && job.IdCompany == companyId; 
+    }
 }

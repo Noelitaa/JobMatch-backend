@@ -14,7 +14,7 @@ public class ApplicationService : IApplicationService
         _applicationRepository = applicationRepository;
     }
 
-    public async Task<IEnumerable<ApplicationResponse>> GetApplicationsByJobAsync(int jobId, Guid companyId)
+    public async Task<IEnumerable<ApplicationResponse>> GetApplicationsByJobAsync(int jobId, int companyId)
     {
         // Verificar que la empresa es dueña
         var isOwner = await _applicationRepository.IsCompanyOwnerAsync(jobId, companyId);
@@ -39,7 +39,7 @@ public class ApplicationService : IApplicationService
     }
 
     public async Task<UpdateApplicationResponse> UpdateApplicationStatusAsync(
-        int applicationId, Guid companyId, UpdateApplicationRequest request)
+        int applicationId, int companyId, UpdateApplicationRequest request)
     {
         var application = await _applicationRepository.GetByIdAsync(applicationId);
         if (application == null)

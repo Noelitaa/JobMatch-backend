@@ -8,5 +8,5 @@ public interface IApplicationRepository
     Task<Application?> GetByIdAsync(int id);
     Task<IEnumerable<Application>> GetByJobIdAsync(int jobId);
     Task UpdateAsync(Application application);
-    Task<bool> IsCompanyOwnerAsync(int jobId, Guid companyId);
+    Task<bool> IsCompanyOwnerAsync(int jobId, int companyId);
 }

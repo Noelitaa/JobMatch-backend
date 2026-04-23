@@ -42,4 +42,14 @@ public class JobsController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
+    [HttpDelete("{jobId}")]
+    public async Task<IActionResult> DeleteJob(int jobId)
+    {
+        var deleted = await _jobService.DeleteJobAsync(jobId);
+        if (!deleted)
+            return NotFound(new { message = "Job no encontrado" });
+
+        return Ok(new { message = "Job eliminado correctamente" });
+    }
 }

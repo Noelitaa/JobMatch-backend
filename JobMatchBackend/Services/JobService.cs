@@ -30,4 +30,9 @@ public class JobService : IJobService
         var jobs = await _jobRepository.GetAllAsync();
         return jobs.Select(JobMapper.ToResponse).ToList();
     }
+
+    public async Task<bool> DeleteJobAsync(int id)
+    {
+        return await _jobRepository.DeleteAsync(id);
+    }
 }

@@ -12,24 +12,33 @@ namespace JobMatchBackend.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Jobs",
+                name: "jobs",
                 columns: table => new
                 {
-                    IdJob = table.Column<int>(type: "int", nullable: false)
+                    id_job = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    IdCompany = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    id_company = table.Column<int>(type: "int", nullable: false),
+                    title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    status = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    payment = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    payment_type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    work_date = table.Column<DateOnly>(type: "date", nullable: false),
+                    start_time = table.Column<TimeOnly>(type: "time", nullable: false),
+                    end_time = table.Column<TimeOnly>(type: "time", nullable: false),
+                    start_date = table.Column<DateOnly>(type: "date", nullable: true),
+                    end_date = table.Column<DateOnly>(type: "date", nullable: true),
+                    deliverables = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    created_at = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CompanyId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Jobs", x => x.IdJob);
+                    table.PrimaryKey("PK_jobs", x => x.id_job);
                     table.ForeignKey(
-                        name: "FK_Jobs_User_CompanyId",
+                        name: "FK_jobs_User_CompanyId",
                         column: x => x.CompanyId,
                         principalTable: "User",
                         principalColumn: "Id");
@@ -53,15 +62,15 @@ namespace JobMatchBackend.Migrations
                 {
                     table.PrimaryKey("PK_Applications", x => x.IdApplication);
                     table.ForeignKey(
-                        name: "FK_Applications_Jobs_JobIdJob",
-                        column: x => x.JobIdJob,
-                        principalTable: "Jobs",
-                        principalColumn: "IdJob");
-                    table.ForeignKey(
                         name: "FK_Applications_User_StudentId",
                         column: x => x.StudentId,
                         principalTable: "User",
                         principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Applications_jobs_JobIdJob",
+                        column: x => x.JobIdJob,
+                        principalTable: "jobs",
+                        principalColumn: "id_job");
                 });
 
             migrationBuilder.CreateIndex(
@@ -81,8 +90,8 @@ namespace JobMatchBackend.Migrations
                 column: "StudentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Jobs_CompanyId",
-                table: "Jobs",
+                name: "IX_jobs_CompanyId",
+                table: "jobs",
                 column: "CompanyId");
         }
 
@@ -93,7 +102,7 @@ namespace JobMatchBackend.Migrations
                 name: "Applications");
 
             migrationBuilder.DropTable(
-                name: "Jobs");
+                name: "jobs");
         }
     }
 }
