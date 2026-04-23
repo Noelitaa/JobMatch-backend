@@ -16,19 +16,19 @@ public class JobService : IJobService
 
     public async Task<JobResponse> CreateJobAsync(CreateJobRequest request)
     {
-        var jobDateTime = DateTime.Parse(request.Date + " " + request.StartTime);
-        if (jobDateTime <= DateTime.UtcNow)
+        var JobDateTime = DateTime.Parse(request.Date + " " + request.StartTime);
+        if (JobDateTime <= DateTime.UtcNow)
             throw new ArgumentException("La fecha y hora del trabajo deben ser en el futuro.");
 
-        var job = JobMapper.ToEntity(request);
-        var created = await _jobRepository.CreateAsync(job);
-        return JobMapper.ToResponse(created);
+        var Job = JobMapper.ToEntity(request);
+        var Created = await _jobRepository.CreateAsync(Job);
+        return JobMapper.ToResponse(Created);
     }
 
     public async Task<List<JobResponse>> GetAllJobsAsync()
     {
-        var jobs = await _jobRepository.GetAllAsync();
-        return jobs.Select(JobMapper.ToResponse).ToList();
+        var Jobs = await _jobRepository.GetAllAsync();
+        return Jobs.Select(JobMapper.ToResponse).ToList();
     }
 
     public async Task<bool> DeleteJobAsync(int id)
