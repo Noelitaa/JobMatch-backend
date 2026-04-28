@@ -16,9 +16,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddScoped<IApplicationRepository, ApplicationRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
+builder.Services.AddScoped<IApplicationService, ApplicationService>();
 builder.Services.AddScoped<ISkillRepository, SkillRepository>();
 builder.Services.AddScoped<ISkillService, SkillService>();
 

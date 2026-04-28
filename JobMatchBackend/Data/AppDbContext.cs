@@ -11,6 +11,8 @@ public class AppDbContext : DbContext
 
     public DbSet<User> User => Set<User>();
     public DbSet<Skill> Skills { get; set; }
+    public DbSet<Job> Jobs => Set<Job>();
+    public DbSet<Application> Applications => Set<Application>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -25,5 +27,15 @@ public class AppDbContext : DbContext
                 j => j.HasOne<Skill>().WithMany().HasForeignKey("id_skill"),
                 j => j.HasOne<User>().WithMany().HasForeignKey("id_student")
             );
+
+        modelBuilder.Entity<Job>().HasKey(j => j.IdJob);
+        modelBuilder.Entity<Application>().HasKey(a => a.IdApplication);
+        
+        modelBuilder.Entity<Application>()
+            .HasIndex(a => new { a.IdJob, a.IdStudent })
+            .IsUnique()
+            .HasDatabaseName("IX_Application_Job_Student");
+
+        
     }
 }
