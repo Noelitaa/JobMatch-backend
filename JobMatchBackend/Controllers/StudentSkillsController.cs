@@ -16,9 +16,9 @@ public class StudentSkillsController : ControllerBase
     }
 
     [HttpPost("{studentId}/skills")]
-    [ProducesResponseType(StatusCodes.Status201Created)] 
-    [ProducesResponseType(StatusCodes.Status400BadRequest)] 
-    [ProducesResponseType(StatusCodes.Status404NotFound)] 
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> AddSkill(Guid studentId, [FromBody] AddSkillRequest request)
     {
         // Validate 400 Bad Request
