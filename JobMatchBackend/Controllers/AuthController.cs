@@ -1,6 +1,7 @@
 
 using JobMatchBackend.DTOs.Request;
 using JobMatchBackend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JobMatchBackend.Controllers;
@@ -11,7 +12,7 @@ namespace JobMatchBackend.Controllers;
 public class AuthController : ControllerBase
 {
 
-     private readonly IAuthService AuthService;
+    private readonly IAuthService AuthService;
 
     public AuthController(IAuthService authService)
     {
@@ -31,5 +32,4 @@ public class AuthController : ControllerBase
             return Unauthorized(new { message = "Credenciales inválidas" });
         }
     }
-    
 }

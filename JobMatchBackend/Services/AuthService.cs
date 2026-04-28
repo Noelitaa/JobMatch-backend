@@ -38,19 +38,20 @@ public class AuthService : IAuthService
         if (result == PasswordVerificationResult.Failed)
             throw new UnauthorizedAccessException("Credenciales inválidas");
 
-        var token = GenerateToken(user);
+        var (token, expiration) = GenerateToken(user);
 
         return new LoginResponse
         {
-            email = user.Email,
-            UserId = user.Id.ToString(),
+            Email = user.Email,
+            UserId = user.Id,
             Role = user.Role,
             FullName = user.FullName,
-            Token = token
+            Token = token,
+            Expiration = expiration
         };
     }
 
-    private string GenerateToken(User user)
+    private (string Token, DateTime Expiration) GenerateToken(User user)
     {
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(_config["Jwt:Key"])
@@ -64,14 +65,18 @@ public class AuthService : IAuthService
             new Claim(ClaimTypes.Email, user.Email)
         };
 
+        var expiration = DateTime.UtcNow.AddHours(1);
+
         var token = new JwtSecurityToken(
             issuer: _config["Jwt:Issuer"],
             audience: _config["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(1), // ⏱️ 1 hora
+            expires: expiration,
             signingCredentials: creds
         );
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+        return (tokenString, expiration);
     }
 }
