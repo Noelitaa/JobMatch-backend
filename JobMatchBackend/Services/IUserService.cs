@@ -6,4 +6,5 @@ namespace JobMatchBackend.Services;
 public interface IUserService
 {
     Task<RegisterStudentResponse> CreateStudentAsync(RegisterStudent request);
+    Task<RegisterCompanyResponse> CreateCompanyAsync(RegisterCompany request);
 }

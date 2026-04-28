@@ -13,6 +13,8 @@ public class AppDbContext : DbContext
     public DbSet<Skill> Skills { get; set; }
     public DbSet<Job> Jobs => Set<Job>();
     public DbSet<Application> Applications => Set<Application>();
+    public DbSet<Job> Jobs => Set<Job>();           
+    public DbSet<Application> Applications => Set<Application>(); 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -31,6 +33,15 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Job>().HasKey(j => j.IdJob);
         modelBuilder.Entity<Application>().HasKey(a => a.IdApplication);
         
+        
+        // Configurar claves primarias
+        modelBuilder.Entity<Job>()
+            .HasKey(j => j.IdJob);
+            
+        modelBuilder.Entity<Application>()
+            .HasKey(a => a.IdApplication);
+        
+        // Índice único para evitar doble postulación
         modelBuilder.Entity<Application>()
             .HasIndex(a => new { a.IdJob, a.IdStudent })
             .IsUnique()

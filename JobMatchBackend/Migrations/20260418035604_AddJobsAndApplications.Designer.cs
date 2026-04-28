@@ -4,6 +4,7 @@ using JobMatchBackend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobMatchBackend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260418035604_AddJobsAndApplications")]
+    partial class AddJobsAndApplications
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,19 +25,6 @@ namespace JobMatchBackend.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("JobMatchBackend.Models.Entities.Skill", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Skills");
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Application", b =>
                 {
                     b.Property<int>("IdApplication")
@@ -179,34 +169,6 @@ namespace JobMatchBackend.Migrations
                     b.ToTable("User");
                 });
 
-            modelBuilder.Entity("student_skills", b =>
-                {
-                    b.Property<Guid>("id_skill")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("id_student")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("id_skill", "id_student");
-
-                    b.HasIndex("id_student");
-
-                    b.ToTable("student_skills");
-                });
-
-            modelBuilder.Entity("student_skills", b =>
-                {
-                    b.HasOne("JobMatchBackend.Models.Entities.Skill", null)
-                        .WithMany()
-                        .HasForeignKey("id_skill")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("JobMatchBackend.Models.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("id_student")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Application", b =>
                 {
                     b.HasOne("JobMatchBackend.Models.Entities.Job", "Job")
