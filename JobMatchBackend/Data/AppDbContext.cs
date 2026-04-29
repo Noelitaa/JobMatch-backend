@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using JobMatchBackend.Models.Entities;
 using JobMatchBackend.Models;
-
 namespace JobMatchBackend.Data;
 
 public class AppDbContext : DbContext

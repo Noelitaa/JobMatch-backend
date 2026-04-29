@@ -6,7 +6,7 @@ public class Job
 {
     [Key]
     public int IdJob { get; set; }
-    public int IdCompany { get; set; }  // Guid según Develop
+    public Guid IdCompany { get; set; }  // Guid según Develop
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Type { get; set; } = "fixed-time";
