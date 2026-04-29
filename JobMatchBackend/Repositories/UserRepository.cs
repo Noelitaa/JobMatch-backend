@@ -20,4 +20,11 @@ public class UserRepository : IUserRepository
         return user;
     }
 
+    public async Task<User> AddCompanyAsync(User user)
+    {
+        _dbContext.User.Add(user);
+        await _dbContext.SaveChangesAsync();
+        return user;
+    }
+
 }
