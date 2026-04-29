@@ -17,7 +17,7 @@ public class SkillRepository : ISkillRepository
     {
         return await _dbContext.User
             .Include(u => u.Skills)
-            .FirstOrDefaultAsync(u => u.Id == studentId);
+            .FirstOrDefaultAsync(u => u.Id == studentId && u.Role == "Student");
     }
 
     public async Task<Skill?> GetSkillByNameAsync(string name)
