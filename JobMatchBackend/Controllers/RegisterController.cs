@@ -1,5 +1,6 @@
 using JobMatchBackend.DTOs.Request;
 using JobMatchBackend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
