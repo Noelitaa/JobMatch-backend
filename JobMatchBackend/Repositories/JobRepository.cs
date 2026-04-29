@@ -1,4 +1,4 @@
-// Repositories/JobRepository.cs
+// JobRepository.cs
 using Microsoft.EntityFrameworkCore;
 using JobMatchBackend.Data;
 using JobMatchBackend.Models.Entities;
@@ -12,6 +12,13 @@ public class JobRepository : IJobRepository
     public JobRepository(AppDbContext dbContext)
     {
         _dbContext = dbContext;
+    }
+
+    public async Task<Job> CreateAsync(Job job)
+    {
+        _dbContext.Jobs.Add(job);
+        await _dbContext.SaveChangesAsync();
+        return job;
     }
 
     public async Task<Job?> GetByIdAsync(int id)

@@ -65,6 +65,6 @@ public class ApplicationsController : ControllerBase
 
     private Guid GetCurrentUserId()
     {
-    return Guid.Parse("3C0E559A-ADBF-4C79-8ED5-F1045137B21E");
+        return Guid.Parse("D3888166-1643-435E-BC10-347D8DEB285C");
     }
 }

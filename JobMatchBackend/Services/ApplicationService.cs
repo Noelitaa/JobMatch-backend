@@ -88,47 +88,52 @@ public class ApplicationService : IApplicationService
         return response;
     }
 
-  private async Task<Contract> GenerateContractAsync(Application application)
-{
-    var data = await _applicationRepository.GetContractDataAsync(application.IdApplication);
-
-    if (data == null)
-        throw new InvalidOperationException($"No se pudieron obtener los datos para la aplicación {application.IdApplication}");
-
-    var contractData = new
+    private async Task<Contract> GenerateContractAsync(Application application)
     {
-        jobTitle = data.JobTitle,
-        companyName = data.CompanyName ?? data.CompanyOwnerName,
-        companyEmail = data.CompanyEmail,
-        studentName = data.StudentName,
-        studentEmail = data.StudentEmail,
-        studentUniversity = data.StudentUniversity,
-        studentCareer = data.StudentCareer,
-        workType = data.JobType ?? "No especificado",
-        startDate = DateTime.UtcNow.AddDays(7).ToString("yyyy-MM-dd"),
-        endDate = DateTime.UtcNow.AddMonths(3).ToString("yyyy-MM-dd"),
-        compensation = "Por definir según acuerdo",
-        clauses = new[]
+        var data = await _applicationRepository.GetContractDataAsync(application.IdApplication);
+
+        if (data == null)
+            throw new InvalidOperationException($"No se pudieron obtener los datos para la aplicación {application.IdApplication}");
+
+        var job = await _jobRepository.GetByIdAsync(application.IdJob);
+
+        if (job == null)
+            throw new InvalidOperationException($"No se encontró el trabajo con ID {application.IdJob}");
+
+        var contractData = new
         {
-            "El estudiante se compromete a cumplir con las tareas asignadas",
-            "La empresa proporcionará los recursos necesarios",
-            "Se respetarán los horarios acordados",
-            "Cualquier modificación debe ser acordada por escrito",
-            "El incumplimiento puede resultar en terminación del contrato"
-        }
-    };
+            jobTitle = data.JobTitle,
+            companyName = data.CompanyName ?? data.CompanyOwnerName,
+            companyEmail = data.CompanyEmail,
+            studentName = data.StudentName,
+            studentEmail = data.StudentEmail,
+            studentUniversity = data.StudentUniversity,
+            studentCareer = data.StudentCareer,
+            workType = data.JobType ?? "No especificado",
+            startDate = DateTime.UtcNow.AddDays(7).ToString("yyyy-MM-dd"),
+            endDate = DateTime.UtcNow.AddMonths(3).ToString("yyyy-MM-dd"),
+            compensation = "Por definir según acuerdo",
+            clauses = new[]
+            {
+                "El estudiante se compromete a cumplir con las tareas asignadas",
+                "La empresa proporcionará los recursos necesarios",
+                "Se respetarán los horarios acordados",
+                "Cualquier modificación debe ser acordada por escrito",
+                "El incumplimiento puede resultar en terminación del contrato"
+            }
+        };
 
-    var contract = new Contract
-    {
-        IdApplication = application.IdApplication,
-        IdJob = application.IdJob,
-        IdStudent = application.IdStudent,
-        IdCompany = Guid.Parse("3C0E559A-ADBF-4C79-8ED5-F1045137B21E"),
-        Status = "pending",
-        ContractData = JsonSerializer.Serialize(contractData),
-        CreatedAt = DateTime.UtcNow
-    };
+        var contract = new Contract
+        {
+            IdApplication = application.IdApplication,
+            IdJob = application.IdJob,
+            IdStudent = application.IdStudent,
+            IdCompany = job.IdCompany,
+            Status = "pending",
+            ContractData = JsonSerializer.Serialize(contractData),
+            CreatedAt = DateTime.UtcNow
+        };
 
-    return await _contractRepository.CreateAsync(contract);
-}
+        return await _contractRepository.CreateAsync(contract);
+    }
 }
