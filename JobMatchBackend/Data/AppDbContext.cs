@@ -13,6 +13,8 @@ public class AppDbContext : DbContext
     public DbSet<Job> Jobs => Set<Job>();           
     public DbSet<Application> Applications => Set<Application>(); 
 
+    
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

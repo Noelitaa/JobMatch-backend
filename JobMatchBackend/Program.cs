@@ -21,6 +21,13 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
+
+// Repositories
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+
+// Services
+builder.Services.AddScoped<ICompanyService, CompanyService>();
+
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
