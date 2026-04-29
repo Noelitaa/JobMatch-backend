@@ -227,6 +227,8 @@ namespace JobMatchBackend.Migrations
                     b.HasKey("IdJob");
 
                     b.ToTable("Jobs");
+                });
+
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Application", b =>
                 {
                     b.HasOne("JobMatchBackend.Models.Entities.Job", "Job")
