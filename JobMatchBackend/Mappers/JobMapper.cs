@@ -10,7 +10,7 @@ public static class JobMapper
     {
         return new Job
         {
-            IdCompany = int.TryParse(dto.CompanyId, out var id) ? id : 0,
+            IdCompany = Guid.TryParse(dto.CompanyId, out var id) ? id : Guid.Empty,
             Title = dto.Title,
             Description = dto.Description,
             Payment = dto.Payment,
