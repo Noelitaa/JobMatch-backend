@@ -4,6 +4,7 @@ using JobMatchBackend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobMatchBackend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260422000936_AddJobsTable")]
+    partial class AddJobsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,86 +24,6 @@ namespace JobMatchBackend.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("JobMatchBackend.Models.Entities.Application", b =>
-                {
-                    b.Property<int>("IdApplication")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdApplication"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("IdJob")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("IdStudent")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int?>("JobIdJob")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("StudentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("IdApplication");
-
-                    b.HasIndex("JobIdJob");
-
-                    b.HasIndex("StudentId");
-
-                    b.HasIndex("IdJob", "IdStudent")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Application_Job_Student");
-
-                    b.ToTable("Applications");
-                });
-
-            modelBuilder.Entity("JobMatchBackend.Models.Entities.Job", b =>
-                {
-                    b.Property<int>("IdJob")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdJob"));
-
-                    b.Property<Guid?>("CompanyId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("IdCompany")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("IdJob");
-
-                    b.HasIndex("CompanyId");
-
-                    b.ToTable("Jobs");
-                });
 
             modelBuilder.Entity("JobMatchBackend.Models.Entities.User", b =>
                 {
@@ -227,33 +150,6 @@ namespace JobMatchBackend.Migrations
                     b.HasKey("IdJob");
 
                     b.ToTable("Jobs");
-            modelBuilder.Entity("JobMatchBackend.Models.Entities.Application", b =>
-                {
-                    b.HasOne("JobMatchBackend.Models.Entities.Job", "Job")
-                        .WithMany("Applications")
-                        .HasForeignKey("JobIdJob");
-
-                    b.HasOne("JobMatchBackend.Models.Entities.User", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId");
-
-                    b.Navigation("Job");
-
-                    b.Navigation("Student");
-                });
-
-            modelBuilder.Entity("JobMatchBackend.Models.Entities.Job", b =>
-                {
-                    b.HasOne("JobMatchBackend.Models.Entities.User", "Company")
-                        .WithMany()
-                        .HasForeignKey("CompanyId");
-
-                    b.Navigation("Company");
-                });
-
-            modelBuilder.Entity("JobMatchBackend.Models.Entities.Job", b =>
-                {
-                    b.Navigation("Applications");
                 });
 #pragma warning restore 612, 618
         }
