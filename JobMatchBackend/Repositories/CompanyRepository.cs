@@ -20,9 +20,9 @@ public class CompanyRepository : ICompanyRepository
             .FirstOrDefaultAsync(u => u.Id == companyId && u.Role == "Company");
     }
 
-   public async Task<int> GetActiveJobsCountAsync(Guid companyId)
-{
-    return await _dbContext.Jobs
-        .CountAsync(j => j.IdCompany == companyId && j.Status == "published");
-}
+    public async Task<int> GetActiveJobsCountAsync(Guid companyId)
+    {
+        return await _dbContext.Jobs
+            .CountAsync(j => j.IdCompany == companyId && j.Status == "published");
+    }
 }

@@ -6,8 +6,8 @@ using JobMatchBackend.Services;
 namespace JobMatchBackend.Controllers;
 
 [ApiController]
-[Route("")]  
-//[Authorize] 
+[Route("")]
+//[Authorize]  // Comentado para pruebas
 public class CompaniesController : ControllerBase
 {
     private readonly ICompanyService _companyService;
@@ -17,7 +17,6 @@ public class CompaniesController : ControllerBase
         _companyService = companyService;
     }
 
-    // GET /companies/{companyId}
     [HttpGet("companies/{companyId}")]
     public async Task<IActionResult> GetCompanyProfile(Guid companyId)
     {
@@ -32,7 +31,7 @@ public class CompaniesController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = ex.Message, stackTrace = ex.StackTrace });
+            return StatusCode(500, new { message = ex.Message });
         }
     }
 }

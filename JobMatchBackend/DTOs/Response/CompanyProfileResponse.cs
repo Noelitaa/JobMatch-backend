@@ -3,19 +3,15 @@ namespace JobMatchBackend.DTOs.Response;
 
 public class CompanyProfileResponse
 {
-    public Guid CompanyId { get; set; }
-    public string CompanyName { get; set; } = string.Empty;
+    public Guid Id { get; set; }
+    public string Email { get; set; } = string.Empty;
+    public string? CompanyName { get; set; }
     public string? Description { get; set; }
-    public string? ContactEmail { get; set; }
-    public string? ContactPhone { get; set; }
-    public CompanyOwnerInfo? Owner { get; set; }
-    public int ActiveJobsCount { get; set; }
+    public string? CompanyId { get; set; }      
+    public string? Phone { get; set; }
+    public string? AvatarUrl { get; set; }      
     public DateTime CreatedAt { get; set; }
-}
-
-public class CompanyOwnerInfo
-{
-    public Guid OwnerId { get; set; }
-    public string OwnerName { get; set; } = string.Empty;
-    public string? OwnerEmail { get; set; }
+    public bool IsActive { get; set; }
+    public bool EmailVerified { get; set; }
+    public int ActiveJobsCount { get; set; }
 }
