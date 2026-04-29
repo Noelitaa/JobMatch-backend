@@ -27,4 +27,10 @@ public class UserRepository : IUserRepository
         return user;
     }
 
+    public User? GetByEmail(string email)
+    {
+        return _dbContext.User
+            .FirstOrDefault(u => u.Email == email);
+    }
+
 }
