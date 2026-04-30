@@ -13,6 +13,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddControllers();
 
+builder.Services.AddScoped<IJobService, JobService>();
+builder.Services.AddScoped<IJobRepository, JobRepository>();
+
 //JWT seguridad para las apis
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!);
 
