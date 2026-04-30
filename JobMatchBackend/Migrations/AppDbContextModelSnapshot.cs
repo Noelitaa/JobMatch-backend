@@ -165,9 +165,6 @@ namespace JobMatchBackend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdJob"));
 
-                    b.Property<Guid?>("CompanyId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -217,8 +214,6 @@ namespace JobMatchBackend.Migrations
                         .HasColumnType("date");
 
                     b.HasKey("IdJob");
-
-                    b.HasIndex("CompanyId");
 
                     b.ToTable("Jobs");
                 });
@@ -339,11 +334,18 @@ namespace JobMatchBackend.Migrations
 
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Job", b =>
                 {
-                    b.HasOne("JobMatchBackend.Models.Entities.User", "Company")
-                        .WithMany()
-                        .HasForeignKey("CompanyId");
+                    b.HasOne("JobMatchBackend.Models.Entities.Application", "Application")
+                        .WithOne("Contract")
+                        .HasForeignKey("JobMatchBackend.Models.Entities.Contract", "IdApplication")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Company");
+                    b.Navigation("Application");
+                });
+
+            modelBuilder.Entity("JobMatchBackend.Models.Entities.Application", b =>
+                {
+                    b.Navigation("Contract");
                 });
 
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Application", b =>
