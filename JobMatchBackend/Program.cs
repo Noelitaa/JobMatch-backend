@@ -54,9 +54,13 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Repositories
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<IJobRepository, JobRepository>();
+
 
 // Services
 builder.Services.AddScoped<ICompanyService, CompanyService>();
+builder.Services.AddScoped<IJobService, JobService>();
+
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
