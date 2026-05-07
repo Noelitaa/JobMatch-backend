@@ -22,8 +22,5 @@ public class User
     public string? CompanyId { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
-
-    public ICollection<Skill> Skills { get; set; } = new List<Skill>();
-
 }
 
