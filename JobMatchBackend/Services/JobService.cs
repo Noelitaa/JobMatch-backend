@@ -1,4 +1,6 @@
+using JobMatchBackend.DTOs.Request;
 using JobMatchBackend.DTOs.Response;
+using JobMatchBackend.Mappers;
 using JobMatchBackend.Repositories;
 
 namespace JobMatchBackend.Services;
@@ -12,17 +14,22 @@ public class JobService : IJobService
         _jobRepository = jobRepository;
     }
 
+    public async Task<JobResponse> CreateJobAsync(CreateJobRequest request)
+    {
+        var jobDateTime = DateTime.Parse(request.Date + " " + request.StartTime);
+        if (jobDateTime <= DateTime.UtcNow)
+            throw new ArgumentException("La fecha y hora del trabajo deben ser en el futuro.");
+
+        var job = JobMapper.ToEntity(request);
+        var created = await _jobRepository.CreateAsync(job);
+        return JobMapper.ToResponse(created);
+    }
+
     public async Task<JobDetailResponse> GetJobByIdAsync(int jobId)
     {
         var job = await _jobRepository.GetByIdWithCompanyAsync(jobId);
         if (job == null)
-        {
             throw new KeyNotFoundException("Job not found");
-        }
-
-        var jobDateTime = DateTime.Parse(job.WorkDate + " " + job.StartTime);
-        if (jobDateTime <= DateTime.UtcNow)
-            throw new ArgumentException("La fecha y hora del trabajo deben ser en el futuro.");
 
         return new JobDetailResponse
         {

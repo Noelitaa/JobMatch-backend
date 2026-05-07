@@ -13,13 +13,18 @@ public class JobRepository : IJobRepository
         _dbContext = dbContext;
     }
 
+    public async Task<Job> CreateAsync(Job job)
+    {
+        _dbContext.Jobs.Add(job);
+        await _dbContext.SaveChangesAsync();
+        return job;
+    }
+
     public async Task<Job?> GetByIdWithCompanyAsync(int jobId)
     {
         var job = await _dbContext.Jobs.FirstOrDefaultAsync(j => j.IdJob == jobId);
         if (job == null)
-        {
             return null;
-        }
 
         job.Company = await _dbContext.User.FirstOrDefaultAsync(u => u.Id == job.IdCompany);
         return job;
@@ -27,6 +32,6 @@ public class JobRepository : IJobRepository
 
     public async Task<List<Job>> GetAllAsync()
     {
-        return await _context.Jobs.ToListAsync();
+        return await _dbContext.Jobs.ToListAsync();
     }
 }
