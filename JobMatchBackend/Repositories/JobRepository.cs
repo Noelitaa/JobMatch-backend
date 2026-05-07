@@ -1,21 +1,27 @@
 using JobMatchBackend.Data;
 using JobMatchBackend.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace JobMatchBackend.Repositories;
 
 public class JobRepository : IJobRepository
 {
-    private readonly AppDbContext _context;
+    private readonly AppDbContext _dbContext;
 
-    public JobRepository(AppDbContext context)
+    public JobRepository(AppDbContext dbContext)
     {
-        _context = context;
+        _dbContext = dbContext;
     }
 
-    public async Task<Job> CreateAsync(Job job)
+    public async Task<Job?> GetByIdWithCompanyAsync(int jobId)
     {
-        _context.Jobs.Add(job);
-        await _context.SaveChangesAsync();
+        var job = await _dbContext.Jobs.FirstOrDefaultAsync(j => j.IdJob == jobId);
+        if (job == null)
+        {
+            return null;
+        }
+
+        job.Company = await _dbContext.User.FirstOrDefaultAsync(u => u.Id == job.IdCompany);
         return job;
     }
 }
