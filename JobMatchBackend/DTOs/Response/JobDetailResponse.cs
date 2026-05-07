@@ -1,15 +1,12 @@
-// Models/Entities/Job.cs
-using System.ComponentModel.DataAnnotations;
+namespace JobMatchBackend.DTOs.Response;
 
-namespace JobMatchBackend.Models.Entities;
-public class Job
+public class JobDetailResponse
 {
-    [Key]
     public int IdJob { get; set; }
-    public Guid IdCompany { get; set; }  
+    public Guid IdCompany { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public string Type { get; set; } = "fixed-time";
+    public string Type { get; set; } = string.Empty;
     public string? Status { get; set; }
     public decimal Payment { get; set; }
     public string PaymentType { get; set; } = string.Empty;
@@ -19,10 +16,17 @@ public class Job
     public DateOnly? StartDate { get; set; }
     public DateOnly? EndDate { get; set; }
     public string? Deliverables { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+    public CompanySummaryResponse Company { get; set; } = new();
+}
 
-    // Navigation properties de Develop
-    public virtual User? Company { get; set; }
-    public virtual ICollection<Application>? Applications { get; set; }
+public class CompanySummaryResponse
+{
+    public Guid Id { get; set; }
+    public string? CompanyName { get; set; }
+    public string Email { get; set; } = string.Empty;
+    public string? Phone { get; set; }
+    public string? Description { get; set; }
+    public string? AvatarUrl { get; set; }
 }

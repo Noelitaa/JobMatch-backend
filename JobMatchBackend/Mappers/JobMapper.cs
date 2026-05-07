@@ -10,17 +10,17 @@ public static class JobMapper
     {
         return new Job
         {
-            IdCompany = int.TryParse(Dto.CompanyId, out var id) ? id : 0,
-            Title = Dto.Title,
-            Description = Dto.Description,
-            Payment = Dto.Payment,
-            PaymentType = Dto.PaymentType,
-            WorkDate = DateOnly.TryParse(Dto.Date, out var date) ? date : DateOnly.FromDateTime(DateTime.UtcNow),
-            StartTime = TimeOnly.TryParse(Dto.StartTime, out var start) ? start : TimeOnly.MinValue,
-            EndTime = TimeOnly.TryParse(Dto.EndTime, out var end) ? end : TimeOnly.MinValue,
-            StartDate = Dto.StartDate,
-            EndDate = Dto.EndDate,
-            Deliverables = Dto.Deliverables != null ? string.Join(",", Dto.Deliverables) : null,
+            IdCompany = Guid.TryParse(dto.CompanyId, out var id) ? id : Guid.Empty,
+            Title = dto.Title,
+            Description = dto.Description,
+            Payment = dto.Payment,
+            PaymentType = dto.PaymentType,
+            WorkDate = DateOnly.TryParse(dto.Date, out var date) ? date : DateOnly.FromDateTime(DateTime.UtcNow),
+            StartTime = TimeOnly.TryParse(dto.StartTime, out var start) ? start : TimeOnly.MinValue,
+            EndTime = TimeOnly.TryParse(dto.EndTime, out var end) ? end : TimeOnly.MinValue,
+            StartDate = dto.StartDate,
+            EndDate = dto.EndDate,
+            Deliverables = dto.Deliverables != null ? string.Join(",", dto.Deliverables) : null,
             Type = "fixed-time",
             Status = "open"
         };

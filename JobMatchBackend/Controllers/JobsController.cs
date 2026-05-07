@@ -1,4 +1,3 @@
-using JobMatchBackend.DTOs.Request;
 using JobMatchBackend.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,17 +14,17 @@ public class JobsController : ControllerBase
         _jobService = jobService;
     }
 
-    [HttpPost]
-    public async Task<IActionResult> CreateJob([FromBody] CreateJobRequest request)
+    [HttpGet("{jobId}")]
+    public async Task<IActionResult> GetJobById(int jobId)
     {
         try
         {
-            var response = await _jobService.CreateJobAsync(request);
-            return StatusCode(201, new { message = "Job creado correctamente", data = response });
+            var response = await _jobService.GetJobByIdAsync(jobId);
+            return Ok(response);
         }
-        catch (ArgumentException ex)
+        catch (KeyNotFoundException)
         {
-            return BadRequest(new { message = ex.Message });
+            return NotFound(new { message = "Job not found" });
         }
     }
 
