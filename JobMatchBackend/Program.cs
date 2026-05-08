@@ -65,6 +65,8 @@ builder.Services.AddScoped<IJobService, JobService>();
 
 builder.Services.AddScoped<ISkillService, SkillService>();
 
+builder.Services.AddScoped<IJobRepository, JobRepository>();
+builder.Services.AddScoped<IJobService, JobService>();
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -78,7 +80,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
