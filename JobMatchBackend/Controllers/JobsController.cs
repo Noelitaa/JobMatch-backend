@@ -1,3 +1,4 @@
+using JobMatchBackend.DTOs.Request;
 using JobMatchBackend.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,6 +26,24 @@ public class JobsController : ControllerBase
         catch (KeyNotFoundException)
         {
             return NotFound(new { message = "Job not found" });
+        }
+    }
+
+    [HttpPut("{jobId}")]
+    public async Task<IActionResult> UpdateJob(int jobId, [FromBody] UpdateJobRequest request)
+    {
+        try
+        {
+            var response = await _jobService.UpdateJobAsync(jobId, request);
+            return Ok(response);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { message = "Job not found" });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return StatusCode(403, new { message = ex.Message });
         }
     }
 }
