@@ -1,6 +1,7 @@
 using JobMatchBackend.Services;
 using Microsoft.AspNetCore.Mvc;
 using JobMatchBackend.DTOs.Request;
+
 namespace JobMatchBackend.Controllers;
 
 [ApiController]
@@ -25,6 +26,20 @@ public class JobsController : ControllerBase
         catch (KeyNotFoundException)
         {
             return NotFound(new { message = "Job not found" });
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAllJobs()
+    {
+        try
+        {
+            var jobs = await _jobService.GetAllJobsAsync();
+            return Ok(jobs);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
     }
 
