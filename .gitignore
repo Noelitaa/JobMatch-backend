@@ -6,3 +6,5 @@ obj/
 *.suo
 
 appsettings.json
+JobMatchBackend/appsettings.Development.json
+JobMatchBackend/appsettings.json

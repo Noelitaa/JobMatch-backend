@@ -51,12 +51,6 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJobRepository, JobRepository>();
 builder.Services.AddScoped<IJobService, JobService>();
 
-
-builder.Services.AddScoped<ISkillService, SkillService>();
-
-builder.Services.AddScoped<IJobRepository, JobRepository>();
-builder.Services.AddScoped<IJobService, JobService>();
-
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
