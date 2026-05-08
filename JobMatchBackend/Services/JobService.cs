@@ -1,7 +1,8 @@
 using JobMatchBackend.DTOs.Response;
 using JobMatchBackend.Repositories;
-
+using JobMatchBackend.DTOs.Request;
 namespace JobMatchBackend.Services;
+using JobMatchBackend.Mappers;
 
 public class JobService : IJobService
 {
@@ -49,4 +50,26 @@ public class JobService : IJobService
             }
         };
     }
+
+    public async Task<JobResponse> CreateJobAsync(CreateJobRequest request)
+{
+    // Combinar fecha y hora
+    var dateTimeString = $"{request.Date}T{request.StartTime}:00Z";
+
+    // Parsear como UTC
+    var jobDateTime = DateTime.Parse(
+        dateTimeString,
+        null,
+        System.Globalization.DateTimeStyles.AdjustToUniversal
+    );
+
+    // Validar que sea futura
+    if (jobDateTime <= DateTime.UtcNow)
+        throw new ArgumentException("La fecha y hora del trabajo deben ser en el futuro.");
+
+    var job = JobMapper.ToEntity(request);
+    var created = await _jobRepository.CreateAsync(job);
+
+    return JobMapper.ToResponse(created);
+}
 }

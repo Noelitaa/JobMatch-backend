@@ -5,4 +5,5 @@ namespace JobMatchBackend.Repositories;
 public interface IJobRepository
 {
     Task<Job?> GetByIdWithCompanyAsync(int jobId);
+    Task<Job> CreateAsync(Job job);
 }

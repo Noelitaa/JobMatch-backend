@@ -24,4 +24,11 @@ public class JobRepository : IJobRepository
         job.Company = await _dbContext.User.FirstOrDefaultAsync(u => u.Id == job.IdCompany);
         return job;
     }
+
+    public async Task<Job> CreateAsync(Job job)
+    {
+        _dbContext.Jobs.Add(job);
+        await _dbContext.SaveChangesAsync();
+        return job;
+    }
 }
