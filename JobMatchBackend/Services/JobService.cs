@@ -16,9 +16,11 @@ public class JobService : IJobService
 
     public async Task<JobResponse> CreateJobAsync(CreateJobRequest request)
     {
-        var jobDateTime = DateTime.Parse(request.Date + " " + request.StartTime);
-        if (jobDateTime <= DateTime.UtcNow)
-            throw new ArgumentException("La fecha y hora del trabajo deben ser en el futuro.");
+        if (DateTime.TryParse(request.Date + " " + request.StartTime, out var jobDateTime))
+        {
+            if (jobDateTime <= DateTime.Now)
+                throw new ArgumentException("La fecha y hora del trabajo deben ser en el futuro.");
+        }
 
         var job = JobMapper.ToEntity(request);
         var created = await _jobRepository.CreateAsync(job);

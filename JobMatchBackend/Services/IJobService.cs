@@ -1,6 +1,6 @@
 using JobMatchBackend.DTOs.Request;
 using JobMatchBackend.DTOs.Response;
-
+using JobMatchBackend.DTOs.Request;
 namespace JobMatchBackend.Services;
 
 public interface IJobService
