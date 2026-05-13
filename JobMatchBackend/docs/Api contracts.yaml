@@ -42,6 +42,8 @@ paths:
           description: Invalid input data
         "409":
           description: Email already registered
+        "500":
+          description: Internal server error
   /auth/register/company:
     post:
       tags:
@@ -66,6 +68,8 @@ paths:
           description: Invalid input data
         "409":
           description: Tax ID already registered
+        "500":
+          description: Internal server error
   /auth/login:
     post:
       tags:
@@ -88,6 +92,8 @@ paths:
                 $ref: "#/components/schemas/LoginResponse"
         "401":
           description: Invalid credentials
+        "500":
+          description: Internal server error
   /users/{userId}:
     get:
       tags:
@@ -108,6 +114,8 @@ paths:
                 $ref: "#/components/schemas/UserProfileResponse"
         "404":
           description: User not found
+        "500":
+          description: Internal server error
     put:
       tags:
         - Users
@@ -133,6 +141,8 @@ paths:
           description: Profile updated
         "404":
           description: User not found
+        "500":
+          description: Internal server error
     delete:
       tags:
         - Users
@@ -155,6 +165,8 @@ paths:
           description: Account deleted
         "401":
           description: Incorrect password
+        "500":
+          description: Internal server error
   /students/{studentId}:
     get:
       tags:
@@ -175,6 +187,12 @@ paths:
                 $ref: "#/components/schemas/StudentProfileResponse"
         "404":
           description: Student not found
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal server error
   /students/{studentId}/availability:
     get:
       tags:
@@ -194,6 +212,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AvailabilityResponse"
+        "500":
+          description: Internal server error
     put:
       tags:
         - Students
@@ -214,6 +234,8 @@ paths:
       responses:
         "200":
           description: Availability updated
+        "500":
+          description: Internal server error
   /students/{studentId}/skills:
     get:
       tags:
@@ -234,6 +256,8 @@ paths:
                 type: array
                 items:
                   type: string
+        "500":
+          description: Internal server error
     post:
       tags:
         - Students
@@ -253,6 +277,8 @@ paths:
       responses:
         "201":
           description: Skill added
+        "500":
+          description: Internal server error
   /students/{studentId}/skills/{skillId}:
     delete:
       tags:
@@ -272,6 +298,8 @@ paths:
       responses:
         "200":
           description: Skill removed
+        "500":
+          description: Internal server error
   /companies/{companyId}:
     get:
       tags:
@@ -292,6 +320,8 @@ paths:
                 $ref: "#/components/schemas/CompanyProfileResponse"
         "404":
           description: Company not found
+        "500":
+          description: Internal server error
   /skills:
     get:
       tags:
@@ -307,6 +337,8 @@ paths:
                 type: array
                 items:
                   type: string
+        "500":
+          description: Internal server error
   /jobs:
     get:
       tags:
@@ -321,6 +353,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/JobResponse"
+        "500":
+          description: Internal server error
     post:
       tags:
         - Jobs
@@ -338,6 +372,8 @@ paths:
           description: Job created
         "400":
           description: Invalid job data
+        "500":
+          description: Internal server error
   /jobs/recommended:
     get:
       tags:
@@ -361,6 +397,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/JobResponse"
+        "500":
+          description: Internal server error
   /jobs/{jobId}:
     get:
       tags:
@@ -381,6 +419,8 @@ paths:
                 $ref: "#/components/schemas/JobResponse"
         "404":
           description: Job not found
+        "500":
+          description: Internal server error
     put:
       tags:
         - Jobs
@@ -406,6 +446,8 @@ paths:
           description: Cannot edit - has accepted applicants or active contract
         "404":
           description: Job not found
+        "500":
+          description: Internal server error
     delete:
       tags:
         - Jobs
@@ -422,6 +464,8 @@ paths:
           description: Job deleted
         "404":
           description: Job not found
+        "500":
+          description: Internal server error
   /applications:
     post:
       tags:
@@ -444,6 +488,8 @@ paths:
                 $ref: "#/components/schemas/ApplicationResponse"
         "400":
           description: Already applied
+        "500":
+          description: Internal server error
   /applications/{applicationId}:
     get:
       tags:
@@ -464,6 +510,8 @@ paths:
                 $ref: "#/components/schemas/ApplicationResponse"
         "404":
           description: Application not found
+        "500":
+          description: Internal server error
     put:
       tags:
         - Applications
@@ -489,6 +537,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApplicationResponse"
+        "500":
+          description: Internal server error
   /jobs/{jobId}/applications:
     get:
       tags:
@@ -510,6 +560,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApplicationWithStudentResponse"
+        "500":
+          description: Internal server error
   /contracts:
     get:
       tags:
@@ -539,6 +591,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ContractSummary"
+        "500":
+          description: Internal server error
   /contracts/{contractId}:
     get:
       tags:
@@ -559,6 +613,8 @@ paths:
                 $ref: "#/components/schemas/ContractDetail"
         "404":
           description: Contract not found
+        "500":
+          description: Internal server error
   /contracts/{contractId}/accept:
     put:
       tags:
@@ -583,6 +639,8 @@ paths:
           description: Contract accepted
         "400":
           description: Invalid request
+        "500":
+          description: Internal server error
   /payments:
     get:
       tags:
@@ -616,6 +674,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/PaymentResponse"
+        "500":
+          description: Internal server error
     post:
       tags:
         - Payments
@@ -633,6 +693,8 @@ paths:
           description: Payment registered
         "400":
           description: Invalid payment data
+        "500":
+          description: Internal server error
   /ratings:
     post:
       tags:
@@ -651,6 +713,8 @@ paths:
           description: Rating submitted
         "400":
           description: Invalid rating data
+        "500":
+          description: Internal server error
   /users/{userId}/ratings:
     get:
       tags:
@@ -670,6 +734,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserRatingsResponse"
+        "500":
+          description: Internal server error
 components:
   schemas:
     RegisterStudentRequest:
