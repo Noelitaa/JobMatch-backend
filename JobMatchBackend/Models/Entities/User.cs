@@ -22,5 +22,9 @@ public class User
     public string? CompanyId { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
+
+    // Navigation
+    public virtual ICollection<StudentSkill> StudentSkills { get; set; } = new List<StudentSkill>();
+    public virtual ICollection<Availability> Availabilities { get; set; } = new List<Availability>();
 }
 
