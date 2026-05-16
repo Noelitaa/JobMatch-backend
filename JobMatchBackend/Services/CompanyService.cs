@@ -25,4 +25,16 @@ public class CompanyService : ICompanyService
 
         return CompanyMapper.ToProfileResponse(company, activeJobsCount);
     }
+
+     public async Task<List<CompanySummaryResponse>> GetAllCompaniesAsync()
+    {
+        var companies = await _companyRepository.GetAllCompaniesAsync();
+
+        return companies.Select(company => new CompanySummaryResponse
+        {
+            Id = company.Id,
+            CompanyName = company.CompanyName ?? string.Empty,
+            Email = company.Email
+        }).ToList();
+    }
 }

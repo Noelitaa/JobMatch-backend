@@ -34,4 +34,18 @@ public class CompaniesController : ControllerBase
             return StatusCode(500, new { message = ex.Message });
         }
     }
+
+    [HttpGet("companies")]
+    public async Task<IActionResult> GetAllCompanies()
+    {
+        try
+        {
+            var companies = await _companyService.GetAllCompaniesAsync();
+            return Ok(companies);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
 }
