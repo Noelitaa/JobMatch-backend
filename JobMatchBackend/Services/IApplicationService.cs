@@ -8,4 +8,6 @@ public interface IApplicationService
 {
     Task<IEnumerable<ApplicationResponse>> GetApplicationsByJobAsync(int jobId, Guid companyId);
     Task<UpdateApplicationResponse> UpdateApplicationStatusAsync(int applicationId, Guid companyId, UpdateApplicationRequest request);
+    Task<ApplicationResponse> GetApplicationDetailsAsync(int applicationId, Guid userId, string userRole);  // 👈 AGREGAR
+
 }

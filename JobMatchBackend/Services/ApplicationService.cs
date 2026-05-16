@@ -8,10 +8,15 @@ namespace JobMatchBackend.Services;
 public class ApplicationService : IApplicationService
 {
     private readonly IApplicationRepository _applicationRepository;
+        private readonly IJobRepository _jobRepository; 
 
-    public ApplicationService(IApplicationRepository applicationRepository)
+
+    public ApplicationService(IApplicationRepository applicationRepository,
+    IJobRepository jobRepository)  
     {
         _applicationRepository = applicationRepository;
+                _jobRepository = jobRepository;  
+
     }
 
     public async Task<IEnumerable<ApplicationResponse>> GetApplicationsByJobAsync(int jobId, Guid companyId)
@@ -67,6 +72,48 @@ public class ApplicationService : IApplicationService
             IdApplication = application.IdApplication,
             Status = application.Status,
             Message = $"Application {application.Status} successfully"
+        };
+    }
+
+    public async Task<ApplicationResponse> GetApplicationDetailsAsync(int applicationId, Guid userId, string userRole)
+    {
+        var application = await _applicationRepository.GetApplicationWithDetailsAsync(applicationId);
+        
+        if (application == null)
+            throw new KeyNotFoundException("Application not found");
+
+        // Verificar permisos
+        bool hasAccess = false;
+
+        if (userRole == "Student")
+        {
+            hasAccess = application.IdStudent == userId;
+        }
+        else if (userRole == "Company")
+        {
+            var isOwner = await _jobRepository.IsCompanyOwnerAsync(application.IdJob, userId);
+            hasAccess = isOwner;
+        }
+        else if (userRole == "Admin")
+        {
+            hasAccess = true;
+        }
+
+        if (!hasAccess)
+            throw new UnauthorizedAccessException("You don't have permission to view this application");
+
+        return new ApplicationResponse
+        {
+            IdApplication = application.IdApplication,
+            IdJob = application.IdJob,
+            JobTitle = application.Job?.Title ?? string.Empty,
+            IdStudent = application.IdStudent,
+            StudentName = application.Student?.FullName ?? string.Empty,
+            StudentEmail = application.Student?.Email ?? string.Empty,
+            StudentUniversity = application.Student?.University,
+            StudentCareer = application.Student?.Career,
+            Status = application.Status ?? "pending",
+            CreatedAt = application.CreatedAt
         };
     }
 }

@@ -39,10 +39,18 @@ public class ApplicationRepository : IApplicationRepository
         await _dbContext.SaveChangesAsync();
     }
 
-   // Repositories/ApplicationRepository.cs
 public async Task<bool> IsCompanyOwnerAsync(int jobId, Guid companyId)
 {
     var job = await _dbContext.Jobs.FirstOrDefaultAsync(j => j.IdJob == jobId);
     return job != null && job.IdCompany == companyId; 
 }
+
+    public async Task<Application?> GetApplicationWithDetailsAsync(int applicationId)
+    {
+        return await _dbContext.Applications
+            .Include(a => a.Student)
+            .Include(a => a.Job)
+                .ThenInclude(j => j!.Company)
+            .FirstOrDefaultAsync(a => a.IdApplication == applicationId);
+    }
 }

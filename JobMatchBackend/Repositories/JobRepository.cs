@@ -34,4 +34,12 @@ public class JobRepository : IJobRepository
     {
         return await _dbContext.Jobs.ToListAsync();
     }
+
+    public async Task<bool> IsCompanyOwnerAsync(int jobId, Guid companyId)
+    {
+        var job = await _dbContext.Jobs
+            .FirstOrDefaultAsync(j => j.IdJob == jobId);
+        
+        return job != null && job.IdCompany == companyId;
+    }
 }
