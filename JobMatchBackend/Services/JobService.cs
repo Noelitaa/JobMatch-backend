@@ -1,5 +1,6 @@
 using JobMatchBackend.DTOs.Request;
 using JobMatchBackend.DTOs.Response;
+using JobMatchBackend.Mappers;
 using JobMatchBackend.Repositories;
 
 namespace JobMatchBackend.Services;
@@ -11,6 +12,19 @@ public class JobService : IJobService
     public JobService(IJobRepository jobRepository)
     {
         _jobRepository = jobRepository;
+    }
+
+    public async Task<JobResponse> CreateJobAsync(CreateJobRequest request)
+    {
+        if (DateTime.TryParse(request.Date + " " + request.StartTime, out var jobDateTime))
+        {
+            if (jobDateTime <= DateTime.Now)
+                throw new ArgumentException("La fecha y hora del trabajo deben ser en el futuro.");
+        }
+
+        var job = JobMapper.ToEntity(request);
+        var created = await _jobRepository.CreateAsync(job);
+        return JobMapper.ToResponse(created);
     }
 
     public async Task<JobDetailResponse> GetJobByIdAsync(int jobId)
@@ -59,7 +73,6 @@ public class JobService : IJobService
         if (hasAccepted)
             throw new InvalidOperationException("Cannot edit a job with accepted applicants or an active contract");
 
-        // Actualiza solo los campos enviados
         if (request.Title != null) job.Title = request.Title;
         if (request.Description != null) job.Description = request.Description;
         if (request.Payment != null) job.Payment = request.Payment.Value;
@@ -92,5 +105,11 @@ public class JobService : IJobService
             CreatedAt = updated.CreatedAt,
             UpdatedAt = updated.UpdatedAt
         };
+    }
+
+    public async Task<List<JobResponse>> GetAllJobsAsync()
+    {
+        var jobs = await _jobRepository.GetAllAsync();
+        return jobs.Select(JobMapper.ToResponse).ToList();
     }
 }
