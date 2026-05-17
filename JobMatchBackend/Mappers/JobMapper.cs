@@ -6,7 +6,7 @@ namespace JobMatchBackend.Mappers;
 
 public static class JobMapper
 {
-    public static Job ToEntity(CreateJobRequest Dto)
+    public static Job ToEntity(CreateJobRequest dto)
     {
         return new Job
         {
@@ -26,21 +26,21 @@ public static class JobMapper
         };
     }
 
-    public static JobResponse ToResponse(Job Job)
+    public static JobResponse ToResponse(Job job)
     {
         return new JobResponse
         {
-            IdJob = Job.IdJob,
-            IdCompany = Job.IdCompany,
-            Title = Job.Title,
-            Type = Job.Type,
-            Status = Job.Status,
-            Payment = Job.Payment,
-            PaymentType = Job.PaymentType,
-            WorkDate = Job.WorkDate,
-            StartTime = Job.StartTime,
-            EndTime = Job.EndTime,
-            CreatedAt = Job.CreatedAt
+            IdJob = job.IdJob,
+            IdCompany = job.IdCompany,
+            Title = job.Title,
+            Type = job.Type,
+            Status = job.Status,
+            Payment = job.Payment,
+            PaymentType = job.PaymentType,
+            WorkDate = job.WorkDate,
+            StartTime = job.StartTime,
+            EndTime = job.EndTime,
+            CreatedAt = job.CreatedAt
         };
     }
 }

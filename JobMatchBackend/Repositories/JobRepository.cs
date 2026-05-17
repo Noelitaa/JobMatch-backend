@@ -37,16 +37,16 @@ public class JobRepository : IJobRepository
 
     public async Task<Job?> GetByIdAsync(int id)
     {
-        return await _context.Jobs.FindAsync(id);
+        return await _dbContext.Jobs.FindAsync(id);
     }
 
     public async Task<bool> DeleteAsync(int id)
     {
-        var Job = await _context.Jobs.FindAsync(id);
-        if (Job == null) return false;
+        var job = await _dbContext.Jobs.FindAsync(id);
+        if (job == null) return false;
 
-        _context.Jobs.Remove(Job);
-        await _context.SaveChangesAsync();
+        _dbContext.Jobs.Remove(job);
+        await _dbContext.SaveChangesAsync();
         return true;
     }
 }

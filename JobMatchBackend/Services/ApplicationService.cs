@@ -14,15 +14,14 @@ public class ApplicationService : IApplicationService
         _applicationRepository = applicationRepository;
     }
 
-    public async Task<IEnumerable<ApplicationResponse>> GetApplicationsByJobAsync(int jobId, int companyId)
+    public async Task<IEnumerable<ApplicationResponse>> GetApplicationsByJobAsync(int jobId, Guid companyId)
     {
-        // Verificar que la empresa es dueña
         var isOwner = await _applicationRepository.IsCompanyOwnerAsync(jobId, companyId);
         if (!isOwner)
             throw new UnauthorizedAccessException("Company does not own this job opening");
 
         var applications = await _applicationRepository.GetByJobIdAsync(jobId);
-        
+
         return applications.Select(a => new ApplicationResponse
         {
             IdApplication = a.IdApplication,
@@ -39,26 +38,22 @@ public class ApplicationService : IApplicationService
     }
 
     public async Task<UpdateApplicationResponse> UpdateApplicationStatusAsync(
-        int applicationId, int companyId, UpdateApplicationRequest request)
+        int applicationId, Guid companyId, UpdateApplicationRequest request)
     {
         var application = await _applicationRepository.GetByIdAsync(applicationId);
         if (application == null)
             throw new KeyNotFoundException("Application not found");
 
-        // Verificar permisos
         var isOwner = await _applicationRepository.IsCompanyOwnerAsync(application.IdJob, companyId);
         if (!isOwner)
             throw new UnauthorizedAccessException("Company does not own this job opening");
 
-        // Validar estado actual
         if (application.Status != "pending")
             throw new InvalidOperationException($"Application is already {application.Status}");
 
-        // Validar status solicitado
         if (request.Status != "accepted" && request.Status != "rejected")
             throw new ArgumentException("Invalid status. Use 'accepted' or 'rejected'");
 
-        // Actualizar estado
         application.Status = request.Status;
         await _applicationRepository.UpdateAsync(application);
 

@@ -6,6 +6,6 @@ namespace JobMatchBackend.Services;
 
 public interface IApplicationService
 {
-    Task<IEnumerable<ApplicationResponse>> GetApplicationsByJobAsync(int jobId, int companyId);
-    Task<UpdateApplicationResponse> UpdateApplicationStatusAsync(int applicationId, int companyId, UpdateApplicationRequest request);
+    Task<IEnumerable<ApplicationResponse>> GetApplicationsByJobAsync(int jobId, Guid companyId);
+    Task<UpdateApplicationResponse> UpdateApplicationStatusAsync(int applicationId, Guid companyId, UpdateApplicationRequest request);
 }

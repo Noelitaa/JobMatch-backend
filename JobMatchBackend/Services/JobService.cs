@@ -32,7 +32,7 @@ public class JobService : IJobService
         var job = await _jobRepository.GetByIdWithCompanyAsync(jobId);
         if (job == null)
             throw new KeyNotFoundException("Job not found");
-        }
+
         return new JobDetailResponse
         {
             IdJob = job.IdJob,

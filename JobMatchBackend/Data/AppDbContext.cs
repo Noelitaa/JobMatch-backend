@@ -24,24 +24,8 @@ public class AppDbContext : DbContext
         // Job
         modelBuilder.Entity<Job>(entity =>
         {
-            entity.ToTable("jobs");
             entity.HasKey(j => j.IdJob);
-            entity.Property(j => j.IdJob).HasColumnName("id_job");
-            entity.Property(j => j.IdCompany).HasColumnName("id_company");
-            entity.Property(j => j.Title).HasColumnName("title");
-            entity.Property(j => j.Description).HasColumnName("description");
-            entity.Property(j => j.Type).HasColumnName("type");
-            entity.Property(j => j.Status).HasColumnName("status");
-            entity.Property(j => j.Payment).HasColumnName("payment").HasPrecision(18, 2);
-            entity.Property(j => j.PaymentType).HasColumnName("payment_type");
-            entity.Property(j => j.WorkDate).HasColumnName("work_date");
-            entity.Property(j => j.StartTime).HasColumnName("start_time");
-            entity.Property(j => j.EndTime).HasColumnName("end_time");
-            entity.Property(j => j.StartDate).HasColumnName("start_date");
-            entity.Property(j => j.EndDate).HasColumnName("end_date");
-            entity.Property(j => j.Deliverables).HasColumnName("deliverables");
-            entity.Property(j => j.CreatedAt).HasColumnName("created_at");
-            entity.Property(j => j.UpdatedAt).HasColumnName("updated_at");
+            entity.Property(j => j.Payment).HasPrecision(18, 2);
         });
 
         // Application
@@ -56,37 +40,6 @@ public class AppDbContext : DbContext
         // Skill
         modelBuilder.Entity<Skill>()
             .HasKey(s => s.Id);
-
-        // User <-> Skill (many-to-many)
-        modelBuilder.Entity<User>()
-            .HasMany(u => u.Skills)
-            .WithMany(s => s.Students)
-            .UsingEntity<Dictionary<string, object>>(
-                "student_skills",
-                j => j.HasOne<Skill>().WithMany().HasForeignKey("id_skill"),
-                j => j.HasOne<User>().WithMany().HasForeignKey("id_student")
-            );
-
-        // Table name mappings
-        modelBuilder.Entity<User>().ToTable("users");
-        modelBuilder.Entity<Job>().ToTable("jobs");
-        modelBuilder.Entity<Application>().ToTable("applications");
-        modelBuilder.Entity<Skill>().ToTable("skills");
-        modelBuilder.Entity<StudentSkill>().ToTable("student_skills");
-        modelBuilder.Entity<Availability>().ToTable("availabilities");
-
-        // Primary keys
-        modelBuilder.Entity<Job>()
-            .HasKey(j => j.IdJob);
-
-        modelBuilder.Entity<Application>()
-            .HasKey(a => a.IdApplication);
-
-        // Unique index: prevent duplicate applications
-        modelBuilder.Entity<Application>()
-            .HasIndex(a => new { a.IdJob, a.IdStudent })
-            .IsUnique()
-            .HasDatabaseName("IX_Application_Job_Student");
 
         // StudentSkill composite PK
         modelBuilder.Entity<StudentSkill>()

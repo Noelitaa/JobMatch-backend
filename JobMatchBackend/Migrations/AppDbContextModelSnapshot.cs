@@ -109,9 +109,6 @@ namespace JobMatchBackend.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("deliverables");
 
-                    b.Property<string>("Deliverables")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
@@ -125,8 +122,8 @@ namespace JobMatchBackend.Migrations
                         .HasColumnType("time")
                         .HasColumnName("end_time");
 
-                    b.Property<int>("IdCompany")
-                        .HasColumnType("int")
+                    b.Property<Guid>("IdCompany")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("id_company");
 
                     b.Property<decimal>("Payment")
@@ -146,26 +143,6 @@ namespace JobMatchBackend.Migrations
                     b.Property<TimeOnly>("StartTime")
                         .HasColumnType("time")
                         .HasColumnName("start_time");
-                        .HasColumnType("date");
-
-                    b.Property<TimeOnly>("EndTime")
-                        .HasColumnType("time");
-
-                    b.Property<Guid>("IdCompany")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Payment")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("PaymentType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateOnly?>("StartDate")
-                        .HasColumnType("date");
-
-                    b.Property<TimeOnly>("StartTime")
-                        .HasColumnType("time");
 
                     b.Property<string>("Status")
                         .HasColumnType("nvarchar(max)")
@@ -181,10 +158,6 @@ namespace JobMatchBackend.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("type");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("updated_at");
@@ -192,9 +165,6 @@ namespace JobMatchBackend.Migrations
                     b.Property<DateOnly>("WorkDate")
                         .HasColumnType("date")
                         .HasColumnName("work_date");
-
-                    b.Property<DateOnly>("WorkDate")
-                        .HasColumnType("date");
 
                     b.HasKey("IdJob");
 
