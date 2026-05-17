@@ -8,8 +8,8 @@ public class Contract
     public int IdJob { get; set; }
     public Guid IdStudent { get; set; }
     public Guid IdCompany { get; set; }
-    public string? Status { get; set; }  // pending, active, rejected, expired
-    public string? ContractData { get; set; }  // JSON con datos del contrato
+    public string? Status { get; set; }  
+    public string? ContractData { get; set; }  
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
     public DateTime? AcceptedAt { get; set; }

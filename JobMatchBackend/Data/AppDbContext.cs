@@ -20,20 +20,17 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Configurar claves primarias
         modelBuilder.Entity<Job>()
             .HasKey(j => j.IdJob);
 
         modelBuilder.Entity<Application>()
             .HasKey(a => a.IdApplication);
 
-        // Índice único para evitar doble postulación
         modelBuilder.Entity<Application>()
             .HasIndex(a => new { a.IdJob, a.IdStudent })
             .IsUnique()
             .HasDatabaseName("IX_Application_Job_Student");
 
-        // Configurar Contract
         modelBuilder.Entity<Contract>()
             .HasKey(c => c.IdContract);
 
@@ -61,7 +58,6 @@ public class AppDbContext : DbContext
             .HasForeignKey(c => c.IdCompany)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Configurar DTO sin clave
         modelBuilder.Entity<ContractDataDto>().HasNoKey();
     }
 }
