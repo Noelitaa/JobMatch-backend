@@ -83,22 +83,22 @@ public class ApplicationService : IApplicationService
 
     public async Task<CreateApplicationResponse> CreateApplicationAsync(CreateApplicationRequest request)
     {
-        var student = await _userRepository.GetByIdAsync(request.IdStudent);
+        var student = await _userRepository.GetByIdAsync(request.IdStudent!.Value);
         if (student == null)
             throw new KeyNotFoundException("Student not found");
 
-        var job = await _jobRepository.GetByIdWithCompanyAsync(request.IdJob);
+        var job = await _jobRepository.GetByIdWithCompanyAsync(request.IdJob!.Value);
         if (job == null)
             throw new KeyNotFoundException("Job offer not found");
 
-        var alreadyApplied = await _applicationRepository.ExistsAsync(request.IdStudent, request.IdJob);
+        var alreadyApplied = await _applicationRepository.ExistsAsync(request.IdStudent.Value, request.IdJob.Value);
         if (alreadyApplied)
             throw new InvalidOperationException("Student has already applied to this job");
 
         var application = new Application
         {
-            IdStudent = request.IdStudent,
-            IdJob = request.IdJob,
+            IdStudent = request.IdStudent.Value,
+            IdJob = request.IdJob.Value,
             Status = "pending",
             CreatedAt = DateTime.UtcNow
         };
