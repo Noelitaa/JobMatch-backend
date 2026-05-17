@@ -23,7 +23,8 @@ public class User
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 
-    public ICollection<Skill> Skills { get; set; } = new List<Skill>();
-
+    // Navigation
+    public virtual ICollection<StudentSkill> StudentSkills { get; set; } = new List<StudentSkill>();
+    public virtual ICollection<Availability> Availabilities { get; set; } = new List<Availability>();
 }
 

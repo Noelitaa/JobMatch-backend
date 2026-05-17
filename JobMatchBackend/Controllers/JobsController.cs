@@ -1,5 +1,6 @@
 using JobMatchBackend.Services;
 using Microsoft.AspNetCore.Mvc;
+using JobMatchBackend.DTOs.Request;
 
 namespace JobMatchBackend.Controllers;
 
@@ -42,6 +43,7 @@ public class JobsController : ControllerBase
         }
     }
 
+
     [HttpDelete("{jobId}")]
     public async Task<IActionResult> DeleteJob(int jobId)
     {
@@ -50,5 +52,19 @@ public class JobsController : ControllerBase
             return NotFound(new { message = "Job no encontrado" });
 
         return Ok(new { message = "Job eliminado correctamente" });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateJob([FromBody] CreateJobRequest request)
+    {
+        try
+        {
+            var response = await _jobService.CreateJobAsync(request);
+            return StatusCode(201, new { message = "Job creado correctamente", data = response });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 }
