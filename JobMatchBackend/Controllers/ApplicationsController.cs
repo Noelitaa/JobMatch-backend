@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using JobMatchBackend.DTOs.Request;
 using JobMatchBackend.Services;
+using JobMatchBackend.DTOs.Request;
 
 namespace JobMatchBackend.Controllers;
 
@@ -17,6 +17,7 @@ public class ApplicationsController : ControllerBase
         _applicationService = applicationService;
     }
 
+    // GET: /jobs/{jobId}/applications
     [HttpGet("jobs/{jobId}/applications")]
     public async Task<IActionResult> GetApplicationsByJob(int jobId)
     {
@@ -36,6 +37,7 @@ public class ApplicationsController : ControllerBase
         }
     }
 
+    // PUT: /applications/{applicationId}
     [HttpPut("applications/{applicationId}")]
     public async Task<IActionResult> UpdateApplicationStatus(int applicationId, [FromBody] UpdateApplicationRequest request)
     {

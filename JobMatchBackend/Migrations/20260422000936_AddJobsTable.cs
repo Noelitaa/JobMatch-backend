@@ -1,86 +1,49 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace JobMatchBackend.Migrations
 {
+    /// <inheritdoc />
     public partial class AddJobsTable : Migration
     {
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "Type",
-                table: "Jobs",
-                type: "nvarchar(max)",
-                nullable: false,
-                defaultValue: "fixed-time");
-
-            migrationBuilder.AddColumn<string>(
-                name: "PaymentType",
-                table: "Jobs",
-                type: "nvarchar(max)",
-                nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.AddColumn<decimal>(
-                name: "Payment",
-                table: "Jobs",
-                type: "decimal(18,2)",
-                nullable: false,
-                defaultValue: 0m);
-
-            migrationBuilder.AddColumn<DateOnly>(
-                name: "WorkDate",
-                table: "Jobs",
-                type: "date",
-                nullable: false,
-                defaultValue: new DateOnly(2026, 1, 1));
-
-            migrationBuilder.AddColumn<TimeOnly>(
-                name: "StartTime",
-                table: "Jobs",
-                type: "time",
-                nullable: false,
-                defaultValue: new TimeOnly(0, 0));
-
-            migrationBuilder.AddColumn<TimeOnly>(
-                name: "EndTime",
-                table: "Jobs",
-                type: "time",
-                nullable: false,
-                defaultValue: new TimeOnly(0, 0));
-
-            migrationBuilder.AddColumn<DateOnly>(
-                name: "StartDate",
-                table: "Jobs",
-                type: "date",
-                nullable: true);
-
-            migrationBuilder.AddColumn<DateOnly>(
-                name: "EndDate",
-                table: "Jobs",
-                type: "date",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "Deliverables",
-                table: "Jobs",
-                type: "nvarchar(max)",
-                nullable: true);
+            migrationBuilder.CreateTable(
+                name: "Jobs",
+                columns: table => new
+                {
+                    IdJob = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    IdCompany = table.Column<int>(type: "int", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Payment = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PaymentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    WorkDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    StartTime = table.Column<TimeOnly>(type: "time", nullable: false),
+                    EndTime = table.Column<TimeOnly>(type: "time", nullable: false),
+                    StartDate = table.Column<DateOnly>(type: "date", nullable: true),
+                    EndDate = table.Column<DateOnly>(type: "date", nullable: true),
+                    Deliverables = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Jobs", x => x.IdJob);
+                });
         }
 
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(name: "Type", table: "Jobs");
-            migrationBuilder.DropColumn(name: "PaymentType", table: "Jobs");
-            migrationBuilder.DropColumn(name: "Payment", table: "Jobs");
-            migrationBuilder.DropColumn(name: "WorkDate", table: "Jobs");
-            migrationBuilder.DropColumn(name: "StartTime", table: "Jobs");
-            migrationBuilder.DropColumn(name: "EndTime", table: "Jobs");
-            migrationBuilder.DropColumn(name: "StartDate", table: "Jobs");
-            migrationBuilder.DropColumn(name: "EndDate", table: "Jobs");
-            migrationBuilder.DropColumn(name: "Deliverables", table: "Jobs");
+            migrationBuilder.DropTable(
+                name: "Jobs");
         }
     }
 }

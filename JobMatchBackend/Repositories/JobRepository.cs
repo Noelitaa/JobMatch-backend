@@ -1,4 +1,3 @@
-// JobRepository.cs
 using Microsoft.EntityFrameworkCore;
 using JobMatchBackend.Data;
 using JobMatchBackend.Models.Entities;
@@ -33,5 +32,20 @@ public class JobRepository : IJobRepository
             .FirstOrDefaultAsync(j => j.IdJob == jobId);
         
         return job != null && job.IdCompany == companyId;
+    }
+
+    public async Task<Job?> GetByIdWithCompanyAsync(int jobId)
+    {
+        var job = await _dbContext.Jobs.FirstOrDefaultAsync(j => j.IdJob == jobId);
+        if (job == null)
+            return null;
+
+        job.Company = await _dbContext.User.FirstOrDefaultAsync(u => u.Id == job.IdCompany);
+        return job;
+    }
+
+    public async Task<List<Job>> GetAllAsync()
+    {
+        return await _dbContext.Jobs.ToListAsync();
     }
 }

@@ -16,13 +16,56 @@ public class JobService : IJobService
 
     public async Task<JobResponse> CreateJobAsync(CreateJobRequest request)
     {
-        // Validar que fecha y hora sean en el futuro
-        var jobDateTime = DateTime.Parse(request.Date + " " + request.StartTime);
-        if (jobDateTime <= DateTime.UtcNow)
-            throw new ArgumentException("La fecha y hora del trabajo deben ser en el futuro.");
+        if (DateTime.TryParse(request.Date + " " + request.StartTime, out var jobDateTime))
+        {
+            if (jobDateTime <= DateTime.Now)
+                throw new ArgumentException("La fecha y hora del trabajo deben ser en el futuro.");
+        }
 
         var job = JobMapper.ToEntity(request);
         var created = await _jobRepository.CreateAsync(job);
         return JobMapper.ToResponse(created);
+    }
+
+    public async Task<JobDetailResponse> GetJobByIdAsync(int jobId)
+    {
+        var job = await _jobRepository.GetByIdWithCompanyAsync(jobId);
+        if (job == null)
+            throw new KeyNotFoundException("Job not found");
+
+        return new JobDetailResponse
+        {
+            IdJob = job.IdJob,
+            IdCompany = job.IdCompany,
+            Title = job.Title,
+            Description = job.Description,
+            Type = job.Type,
+            Status = job.Status,
+            Payment = job.Payment,
+            PaymentType = job.PaymentType,
+            WorkDate = job.WorkDate,
+            StartTime = job.StartTime,
+            EndTime = job.EndTime,
+            StartDate = job.StartDate,
+            EndDate = job.EndDate,
+            Deliverables = job.Deliverables,
+            CreatedAt = job.CreatedAt,
+            UpdatedAt = job.UpdatedAt,
+            Company = new CompanySummaryResponse
+            {
+                Id = job.Company?.Id ?? Guid.Empty,
+                CompanyName = job.Company?.CompanyName,
+                Email = job.Company?.Email ?? string.Empty,
+                Phone = job.Company?.Phone,
+                Description = job.Company?.Description,
+                AvatarUrl = job.Company?.AvatarUrl
+            }
+        };
+    }
+
+    public async Task<List<JobResponse>> GetAllJobsAsync()
+    {
+        var jobs = await _jobRepository.GetAllAsync();
+        return jobs.Select(JobMapper.ToResponse).ToList();
     }
 }
