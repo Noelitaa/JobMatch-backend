@@ -17,14 +17,14 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
         
-        // Configurar claves primarias
+        modelBuilder.Entity<User>().ToTable("users");
+
         modelBuilder.Entity<Job>()
             .HasKey(j => j.IdJob);
             
         modelBuilder.Entity<Application>()
             .HasKey(a => a.IdApplication);
         
-        // Índice único para evitar doble postulación
         modelBuilder.Entity<Application>()
             .HasIndex(a => new { a.IdJob, a.IdStudent })
             .IsUnique()

@@ -7,7 +7,7 @@ namespace JobMatchBackend.Controllers;
 
 [ApiController]
 [Route("")]
-//[Authorize]  // Comentado para pruebas
+[Authorize]  
 public class CompaniesController : ControllerBase
 {
     private readonly ICompanyService _companyService;

@@ -26,7 +26,6 @@ public class CompanyRepository : ICompanyRepository
             .CountAsync(j => j.IdCompany == companyId && j.Status == "published");
     }
 
-    // 👇 NUEVO MÉTODO
     public async Task<List<User>> GetAllCompaniesAsync()
     {
         return await _dbContext.User
