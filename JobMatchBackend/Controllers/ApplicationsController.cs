@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using JobMatchBackend.Services;
 using JobMatchBackend.DTOs.Request;
+
 namespace JobMatchBackend.Controllers;
 
 [ApiController]
@@ -16,7 +17,7 @@ public class ApplicationsController : ControllerBase
         _applicationService = applicationService;
     }
 
-    // SOLO GET - /jobs/{jobId}/applications
+    // GET: /jobs/{jobId}/applications
     [HttpGet("jobs/{jobId}/applications")]
     public async Task<IActionResult> GetApplicationsByJob(int jobId)
     {
@@ -31,13 +32,12 @@ public class ApplicationsController : ControllerBase
             return StatusCode(403, new { message = ex.Message });
         }
         catch (Exception)
-{
-    return StatusCode(500, new { message = "Internal server error" });
-}
+        {
+            return StatusCode(500, new { message = "Internal server error" });
+        }
     }
 
-
- // PUT: /applications/{applicationId}
+    // PUT: /applications/{applicationId}
     [HttpPut("applications/{applicationId}")]
     public async Task<IActionResult> UpdateApplicationStatus(int applicationId, [FromBody] UpdateApplicationRequest request)
     {
@@ -67,6 +67,6 @@ public class ApplicationsController : ControllerBase
 
     private Guid GetCurrentUserId()
     {
-        return Guid.Parse("9F4AF0CA-4509-42C1-9594-BB205862F7BA");
+        return Guid.Parse("D3888166-1643-435E-BC10-347D8DEB285C");
     }
 }
