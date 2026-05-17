@@ -45,6 +45,12 @@ public class JobsController : ControllerBase
         catch (InvalidOperationException ex)
         {
             return StatusCode(403, new { message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
     [HttpGet]
     public async Task<IActionResult> GetAllJobs()
     {
