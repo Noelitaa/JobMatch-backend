@@ -1,6 +1,6 @@
-using System.Runtime.Versioning;
 using JobMatchBackend.Data;
 using JobMatchBackend.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace JobMatchBackend.Repositories;
 
@@ -29,8 +29,11 @@ public class UserRepository : IUserRepository
 
     public User? GetByEmail(string email)
     {
-        return _dbContext.User
-            .FirstOrDefault(u => u.Email == email);
+        return _dbContext.User.FirstOrDefault(u => u.Email == email);
     }
 
+    public async Task<User?> GetByIdAsync(Guid id)
+    {
+        return await _dbContext.User.FirstOrDefaultAsync(u => u.Id == id);
+    }
 }

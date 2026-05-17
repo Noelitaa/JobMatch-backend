@@ -1,6 +1,7 @@
 // Services/ApplicationService.cs
 using JobMatchBackend.DTOs.Request;
 using JobMatchBackend.DTOs.Response;
+using JobMatchBackend.Models.Entities;
 using JobMatchBackend.Repositories;
 
 namespace JobMatchBackend.Services;
@@ -8,10 +9,20 @@ namespace JobMatchBackend.Services;
 public class ApplicationService : IApplicationService
 {
     private readonly IApplicationRepository _applicationRepository;
+    private readonly IUserRepository _userRepository;
+    private readonly IJobRepository _jobRepository;
+    private readonly ILogger<ApplicationService> _logger;
 
-    public ApplicationService(IApplicationRepository applicationRepository)
+    public ApplicationService(
+        IApplicationRepository applicationRepository,
+        IUserRepository userRepository,
+        IJobRepository jobRepository,
+        ILogger<ApplicationService> logger)
     {
         _applicationRepository = applicationRepository;
+        _userRepository = userRepository;
+        _jobRepository = jobRepository;
+        _logger = logger;
     }
 
     public async Task<IEnumerable<ApplicationResponse>> GetApplicationsByJobAsync(int jobId, Guid companyId)
@@ -68,5 +79,45 @@ public class ApplicationService : IApplicationService
             Status = application.Status,
             Message = $"Application {application.Status} successfully"
         };
+    }
+
+    public async Task<CreateApplicationResponse> CreateApplicationAsync(CreateApplicationRequest request)
+    {
+        var student = await _userRepository.GetByIdAsync(request.IdStudent);
+        if (student == null)
+            throw new KeyNotFoundException("Student not found");
+
+        var job = await _jobRepository.GetByIdWithCompanyAsync(request.IdJob);
+        if (job == null)
+            throw new KeyNotFoundException("Job offer not found");
+
+        var alreadyApplied = await _applicationRepository.ExistsAsync(request.IdStudent, request.IdJob);
+        if (alreadyApplied)
+            throw new InvalidOperationException("Student has already applied to this job");
+
+        var application = new Application
+        {
+            IdStudent = request.IdStudent,
+            IdJob = request.IdJob,
+            Status = "pending",
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await _applicationRepository.CreateAsync(application);
+
+        NotifyCompany(job.Company?.Email, job.Title, student.FullName);
+
+        return new CreateApplicationResponse
+        {
+            Message = "Application submitted successfully",
+            Status = application.Status
+        };
+    }
+
+    private void NotifyCompany(string? companyEmail, string jobTitle, string? studentName)
+    {
+        _logger.LogInformation(
+            "NOTIFICATION: New application received — Job: '{JobTitle}', Applicant: '{StudentName}', Company email: '{CompanyEmail}'",
+            jobTitle, studentName ?? "Unknown", companyEmail ?? "Unknown");
     }
 }

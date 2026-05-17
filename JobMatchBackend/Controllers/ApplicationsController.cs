@@ -16,7 +16,26 @@ public class ApplicationsController : ControllerBase
         _applicationService = applicationService;
     }
 
-    // SOLO GET - /jobs/{jobId}/applications
+    // POST: /applications
+    [HttpPost("applications")]
+    public async Task<IActionResult> CreateApplication([FromBody] CreateApplicationRequest request)
+    {
+        try
+        {
+            var result = await _applicationService.CreateApplicationAsync(request);
+            return StatusCode(201, result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
+    }
+
+    // GET: /jobs/{jobId}/applications
     [HttpGet("jobs/{jobId}/applications")]
     public async Task<IActionResult> GetApplicationsByJob(int jobId)
     {
