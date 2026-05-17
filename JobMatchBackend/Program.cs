@@ -42,6 +42,8 @@ builder.Services.AddAuthentication(options =>
 // Repositories
 builder.Services.AddScoped<IApplicationRepository, ApplicationRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IContractRepository, ContractRepository>();
+builder.Services.AddScoped<IJobRepository, JobRepository>();
 
 // Services
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
@@ -52,6 +54,8 @@ builder.Services.AddScoped<IJobRepository, JobRepository>();
 builder.Services.AddScoped<IJobService, JobService>();
 
 
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IStudentService, StudentService>();
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();

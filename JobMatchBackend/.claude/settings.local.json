@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\andre\\\\OneDrive\\\\Documents\\\\Univesidad\\\\Cuarto año\\\\Movile\\\\Proyecto\\\\JobMatch-backend\\\\JobMatchBackend\" -Directory -Force)",
+      "Bash(Select-Object Name)",
+      "Bash(dotnet build *)",
+      "Bash(dotnet ef *)",
+      "Bash(Remove-Item *)"
+    ]
+  }
+}

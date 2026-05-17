@@ -1,6 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using JobMatchBackend.Data;
 using JobMatchBackend.Models.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace JobMatchBackend.Repositories;
 
@@ -18,6 +18,20 @@ public class JobRepository : IJobRepository
         _dbContext.Jobs.Add(job);
         await _dbContext.SaveChangesAsync();
         return job;
+    }
+
+    public async Task<Job?> GetByIdAsync(int id)
+    {
+        return await _dbContext.Jobs
+            .FirstOrDefaultAsync(j => j.IdJob == id);
+    }
+
+    public async Task<bool> IsCompanyOwnerAsync(int jobId, Guid companyId)
+    {
+        var job = await _dbContext.Jobs
+            .FirstOrDefaultAsync(j => j.IdJob == jobId);
+        
+        return job != null && job.IdCompany == companyId;
     }
 
     public async Task<Job?> GetByIdWithCompanyAsync(int jobId)
