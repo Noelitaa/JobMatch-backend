@@ -68,88 +68,86 @@ namespace JobMatchBackend.Migrations
                 });
 
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Job", b =>
-                {
-                    b.Property<int>("IdJob")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id_job");
+    {
+        b.Property<int>("IdJob")
+            .ValueGeneratedOnAdd()
+            .HasColumnType("int")
+            .HasColumnName("id_job");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdJob"));
+        SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdJob"));
 
-                    b.Property<Guid?>("CompanyId")
-                        .HasColumnType("uniqueidentifier");
+        b.Property<Guid?>("CompanyId")
+            .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+        b.Property<DateTime>("CreatedAt")
+            .HasColumnType("datetime2")
+            .HasColumnName("created_at");
 
-                    b.Property<string>("Deliverables")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("deliverables");
+        b.Property<string>("Deliverables")
+            .HasColumnType("nvarchar(max)")
+            .HasColumnName("deliverables");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("description");
+        b.Property<string>("Description")
+            .IsRequired()
+            .HasColumnType("nvarchar(max)")
+            .HasColumnName("description");
 
-                    b.Property<DateOnly?>("EndDate")
-                        .HasColumnType("date")
-                        .HasColumnName("end_date");
+        b.Property<DateOnly?>("EndDate")
+            .HasColumnType("date")
+            .HasColumnName("end_date");
 
-                    b.Property<TimeOnly>("EndTime")
-                        .HasColumnType("time")
-                        .HasColumnName("end_time");
+        b.Property<TimeOnly>("EndTime")
+            .HasColumnType("time");
 
-                    b.Property<int>("IdCompany")
-                        .HasColumnType("int")
-                        .HasColumnName("id_company");
+        b.Property<Guid>("IdCompany")
+            .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("Payment")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("payment");
+        b.Property<decimal>("Payment")
+            .HasPrecision(18, 2)
+            .HasColumnType("decimal(18,2)")
+            .HasColumnName("payment");
 
-                    b.Property<string>("PaymentType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("payment_type");
+        b.Property<string>("PaymentType")
+            .IsRequired()
+            .HasColumnType("nvarchar(max)")
+            .HasColumnName("payment_type");
 
-                    b.Property<DateOnly?>("StartDate")
-                        .HasColumnType("date")
-                        .HasColumnName("start_date");
+        b.Property<DateOnly?>("StartDate")
+            .HasColumnType("date")
+            .HasColumnName("start_date");
 
-                    b.Property<TimeOnly>("StartTime")
-                        .HasColumnType("time")
-                        .HasColumnName("start_time");
+        b.Property<TimeOnly>("StartTime")
+            .HasColumnType("time")
+            .HasColumnName("start_time");
 
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("status");
+        b.Property<string>("Status")
+            .IsRequired()
+            .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("title");
+        b.Property<string>("Title")
+            .IsRequired()
+            .HasColumnType("nvarchar(max)")
+            .HasColumnName("title");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("type");
+        b.Property<string>("Type")
+            .IsRequired()
+            .HasColumnType("nvarchar(max)")
+            .HasColumnName("type");
 
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
+        b.Property<DateTime?>("UpdatedAt")
+            .HasColumnType("datetime2")
+            .HasColumnName("updated_at");
 
-                    b.Property<DateOnly>("WorkDate")
-                        .HasColumnType("date")
-                        .HasColumnName("work_date");
+        b.Property<DateOnly>("WorkDate")
+            .HasColumnType("date")
+            .HasColumnName("work_date");
 
-                    b.HasKey("IdJob");
+        b.HasKey("IdJob");
 
-                    b.HasIndex("CompanyId");
+        b.HasIndex("CompanyId");
 
-                    b.ToTable("jobs", (string)null);
-                });
+        b.ToTable("jobs", (string)null);
+    });
 
             modelBuilder.Entity("JobMatchBackend.Models.Entities.User", b =>
                 {

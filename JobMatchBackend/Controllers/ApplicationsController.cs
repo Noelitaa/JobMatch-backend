@@ -68,8 +68,6 @@ public class ApplicationsController : ControllerBase
 
     private Guid GetCurrentUserId()
     {
-        // Cuando se active [Authorize], reemplazar con:
-        // return Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        return Guid.Empty;
+        return Guid.Parse("D3888166-1643-435E-BC10-347D8DEB285C");
     }
 }

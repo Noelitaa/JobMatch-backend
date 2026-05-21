@@ -38,8 +38,10 @@ builder.Services.AddAuthentication(options =>
 // Repositories
 builder.Services.AddScoped<IApplicationRepository, ApplicationRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IJobRepository, JobRepository>();
+
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IContractRepository, ContractRepository>();
+builder.Services.AddScoped<IJobRepository, JobRepository>();
 
 // Services
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
