@@ -4,6 +4,7 @@ using JobMatchBackend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobMatchBackend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260521012352_FixJobsShadowColumn")]
+    partial class FixJobsShadowColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,9 +66,7 @@ namespace JobMatchBackend.Migrations
                     b.Property<string>("StudentUniversity")
                         .HasColumnType("nvarchar(max)");
 
-                    b.ToTable((string)null);
-
-                    b.ToView("vw_ContractData", (string)null);
+                    b.ToTable("ContractData");
                 });
 
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Application", b =>
@@ -176,258 +177,67 @@ namespace JobMatchBackend.Migrations
                     b.ToTable("contracts", (string)null);
                 });
 
-            modelBuilder.Entity("JobMatchBackend.Models.Entities.FcmToken", b =>
-                {
-                    b.Property<int>("IdToken")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdToken"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DeviceInfo")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("IdUser")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("IdToken");
-
-                    b.HasIndex("IdUser");
-
-                    b.ToTable("fcm_tokens", (string)null);
-                });
-
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Job", b =>
                 {
                     b.Property<int>("IdJob")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id_job");
+                        .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdJob"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Deliverables")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("deliverables");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("description");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateOnly?>("EndDate")
-                        .HasColumnType("date")
-                        .HasColumnName("end_date");
+                        .HasColumnType("date");
 
                     b.Property<TimeOnly>("EndTime")
-                        .HasColumnType("time")
-                        .HasColumnName("end_time");
+                        .HasColumnType("time");
 
                     b.Property<Guid>("IdCompany")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("id_company");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Payment")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("payment");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("PaymentType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("payment_type");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateOnly?>("StartDate")
-                        .HasColumnType("date")
-                        .HasColumnName("start_date");
+                        .HasColumnType("date");
 
                     b.Property<TimeOnly>("StartTime")
-                        .HasColumnType("time")
-                        .HasColumnName("start_time");
+                        .HasColumnType("time");
 
                     b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("status");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("title");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Type")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("datetime2");
 
                     b.Property<DateOnly>("WorkDate")
-                        .HasColumnType("date")
-                        .HasColumnName("work_date");
+                        .HasColumnType("date");
 
                     b.HasKey("IdJob");
 
                     b.HasIndex("IdCompany");
 
                     b.ToTable("jobs", (string)null);
-                });
-
-            modelBuilder.Entity("JobMatchBackend.Models.Entities.ModerationLog", b =>
-                {
-                    b.Property<int>("IdLog")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdLog"));
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("AdminUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Reason")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("TargetId")
-                        .HasColumnType("int");
-
-                    b.HasKey("IdLog");
-
-                    b.HasIndex("AdminUserId");
-
-                    b.ToTable("moderation_logs", (string)null);
-                });
-
-            modelBuilder.Entity("JobMatchBackend.Models.Entities.Notification", b =>
-                {
-                    b.Property<int>("IdNotification")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdNotification"));
-
-                    b.Property<string>("Body")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Data")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("IdUser")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsRead")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("IdNotification");
-
-                    b.HasIndex("IdUser");
-
-                    b.ToTable("notifications", (string)null);
-                });
-
-            modelBuilder.Entity("JobMatchBackend.Models.Entities.Payment", b =>
-                {
-                    b.Property<int>("IdPayment")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdPayment"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("IdContract")
-                        .HasColumnType("int");
-
-                    b.Property<DateOnly>("PaymentDate")
-                        .HasColumnType("date");
-
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ReceiptUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("IdPayment");
-
-                    b.HasIndex("IdContract");
-
-                    b.ToTable("payments", (string)null);
-                });
-
-            modelBuilder.Entity("JobMatchBackend.Models.Entities.Rating", b =>
-                {
-                    b.Property<int>("IdRating")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdRating"));
-
-                    b.Property<string>("Comment")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("IdContract")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("IdRated")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("IdRater")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Stars")
-                        .HasColumnType("int");
-
-                    b.HasKey("IdRating");
-
-                    b.HasIndex("IdRated");
-
-                    b.HasIndex("IdRater");
-
-                    b.HasIndex("IdContract", "IdRater")
-                        .IsUnique();
-
-                    b.ToTable("ratings", (string)null);
                 });
 
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Skill", b =>
@@ -589,17 +399,6 @@ namespace JobMatchBackend.Migrations
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("JobMatchBackend.Models.Entities.FcmToken", b =>
-                {
-                    b.HasOne("JobMatchBackend.Models.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("IdUser")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Job", b =>
                 {
                     b.HasOne("JobMatchBackend.Models.Entities.User", "Company")
@@ -609,66 +408,6 @@ namespace JobMatchBackend.Migrations
                         .IsRequired();
 
                     b.Navigation("Company");
-                });
-
-            modelBuilder.Entity("JobMatchBackend.Models.Entities.ModerationLog", b =>
-                {
-                    b.HasOne("JobMatchBackend.Models.Entities.User", "AdminUser")
-                        .WithMany()
-                        .HasForeignKey("AdminUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("AdminUser");
-                });
-
-            modelBuilder.Entity("JobMatchBackend.Models.Entities.Notification", b =>
-                {
-                    b.HasOne("JobMatchBackend.Models.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("IdUser")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("JobMatchBackend.Models.Entities.Payment", b =>
-                {
-                    b.HasOne("JobMatchBackend.Models.Entities.Contract", "Contract")
-                        .WithMany()
-                        .HasForeignKey("IdContract")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Contract");
-                });
-
-            modelBuilder.Entity("JobMatchBackend.Models.Entities.Rating", b =>
-                {
-                    b.HasOne("JobMatchBackend.Models.Entities.Contract", "Contract")
-                        .WithMany()
-                        .HasForeignKey("IdContract")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("JobMatchBackend.Models.Entities.User", "Rated")
-                        .WithMany()
-                        .HasForeignKey("IdRated")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("JobMatchBackend.Models.Entities.User", "Rater")
-                        .WithMany()
-                        .HasForeignKey("IdRater")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Contract");
-
-                    b.Navigation("Rated");
-
-                    b.Navigation("Rater");
                 });
 
             modelBuilder.Entity("JobMatchBackend.Models.Entities.StudentSkill", b =>
