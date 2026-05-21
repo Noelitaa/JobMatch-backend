@@ -1,4 +1,3 @@
-// Services/IApplicationService.cs
 using JobMatchBackend.DTOs.Request;
 using JobMatchBackend.DTOs.Response;
 
