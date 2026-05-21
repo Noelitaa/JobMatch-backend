@@ -11,12 +11,6 @@ namespace JobMatchBackend.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "Type",
-                table: "Jobs",
-                type: "nvarchar(max)",
-                nullable: true);
-
             migrationBuilder.CreateTable(
                 name: "Contracts",
                 columns: table => new
@@ -89,10 +83,6 @@ namespace JobMatchBackend.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Contracts");
-
-            migrationBuilder.DropColumn(
-                name: "Type",
-                table: "Jobs");
         }
     }
 }
