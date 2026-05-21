@@ -42,6 +42,9 @@ public class AppDbContext : DbContext
                 .HasDatabaseName("IX_Application_Job_Student");
         });
 
+        modelBuilder.Entity<Job>()
+        .HasKey(j => j.IdJob);
+
         modelBuilder.Entity<Application>()
             .HasKey(a => a.IdApplication);
 
