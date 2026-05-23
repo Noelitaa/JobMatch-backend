@@ -23,4 +23,17 @@ public static class CompanyMapper
             ActiveJobsCount = activeJobsCount
         };
     }
+
+    public static CompanySummaryResponse ToSummaryResponse(User company)
+    {
+        return new CompanySummaryResponse
+        {
+            Id = company.Id,
+            CompanyName = company.CompanyName,
+            Email = company.Email,
+            Phone = company.Phone,
+            Description = company.Description,
+            AvatarUrl = company.AvatarUrl
+        };
+    }
 }
