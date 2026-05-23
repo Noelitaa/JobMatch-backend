@@ -11,58 +11,85 @@ namespace JobMatchBackend.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "Deliverables",
-                table: "Jobs",
-                type: "nvarchar(max)",
-                nullable: true);
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (
+                    SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME = 'Jobs' AND COLUMN_NAME = 'Deliverables'
+                )
+                BEGIN
+                    ALTER TABLE [Jobs] ADD [Deliverables] nvarchar(max) NULL;
+                END
+            ");
 
-            migrationBuilder.AddColumn<DateOnly>(
-                name: "EndDate",
-                table: "Jobs",
-                type: "date",
-                nullable: true);
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (
+                    SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME = 'Jobs' AND COLUMN_NAME = 'EndDate'
+                )
+                BEGIN
+                    ALTER TABLE [Jobs] ADD [EndDate] date NULL;
+                END
+            ");
 
-            migrationBuilder.AddColumn<TimeOnly>(
-                name: "EndTime",
-                table: "Jobs",
-                type: "time",
-                nullable: false,
-                defaultValue: new TimeOnly(0, 0, 0));
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (
+                    SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME = 'Jobs' AND COLUMN_NAME = 'EndTime'
+                )
+                BEGIN
+                    ALTER TABLE [Jobs] ADD [EndTime] time NOT NULL DEFAULT '00:00:00';
+                END
+            ");
 
-            migrationBuilder.AddColumn<decimal>(
-                name: "Payment",
-                table: "Jobs",
-                type: "decimal(18,2)",
-                nullable: false,
-                defaultValue: 0m);
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (
+                    SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME = 'Jobs' AND COLUMN_NAME = 'Payment'
+                )
+                BEGIN
+                    ALTER TABLE [Jobs] ADD [Payment] decimal(18,2) NOT NULL DEFAULT 0;
+                END
+            ");
 
-            migrationBuilder.AddColumn<string>(
-                name: "PaymentType",
-                table: "Jobs",
-                type: "nvarchar(max)",
-                nullable: false,
-                defaultValue: "");
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (
+                    SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME = 'Jobs' AND COLUMN_NAME = 'PaymentType'
+                )
+                BEGIN
+                    ALTER TABLE [Jobs] ADD [PaymentType] nvarchar(max) NOT NULL DEFAULT '';
+                END
+            ");
 
-            migrationBuilder.AddColumn<DateOnly>(
-                name: "StartDate",
-                table: "Jobs",
-                type: "date",
-                nullable: true);
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (
+                    SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME = 'Jobs' AND COLUMN_NAME = 'StartDate'
+                )
+                BEGIN
+                    ALTER TABLE [Jobs] ADD [StartDate] date NULL;
+                END
+            ");
 
-            migrationBuilder.AddColumn<TimeOnly>(
-                name: "StartTime",
-                table: "Jobs",
-                type: "time",
-                nullable: false,
-                defaultValue: new TimeOnly(0, 0, 0));
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (
+                    SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME = 'Jobs' AND COLUMN_NAME = 'StartTime'
+                )
+                BEGIN
+                    ALTER TABLE [Jobs] ADD [StartTime] time NOT NULL DEFAULT '00:00:00';
+                END
+            ");
 
-            migrationBuilder.AddColumn<DateOnly>(
-                name: "WorkDate",
-                table: "Jobs",
-                type: "date",
-                nullable: false,
-                defaultValue: new DateOnly(1, 1, 1));
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (
+                    SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME = 'Jobs' AND COLUMN_NAME = 'WorkDate'
+                )
+                BEGIN
+                    ALTER TABLE [Jobs] ADD [WorkDate] date NOT NULL DEFAULT '0001-01-01';
+                END
+            ");
         }
 
         /// <inheritdoc />

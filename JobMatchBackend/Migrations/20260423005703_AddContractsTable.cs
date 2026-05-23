@@ -11,77 +11,62 @@ namespace JobMatchBackend.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "Type",
-                table: "Jobs",
-                type: "nvarchar(max)",
-                nullable: true);
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (
+                    SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME = 'Jobs' AND COLUMN_NAME = 'Type'
+                )
+                BEGIN
+                    ALTER TABLE [Jobs] ADD [Type] nvarchar(max) NULL;
+                END
+            ");
 
-            migrationBuilder.CreateTable(
-                name: "Contracts",
-                columns: table => new
-                {
-                    IdContract = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    IdApplication = table.Column<int>(type: "int", nullable: false),
-                    IdJob = table.Column<int>(type: "int", nullable: false),
-                    IdStudent = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IdCompany = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ContractData = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    AcceptedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Contracts", x => x.IdContract);
-                    table.ForeignKey(
-                        name: "FK_Contracts_Applications_IdApplication",
-                        column: x => x.IdApplication,
-                        principalTable: "Applications",
-                        principalColumn: "IdApplication",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Contracts_Jobs_IdJob",
-                        column: x => x.IdJob,
-                        principalTable: "Jobs",
-                        principalColumn: "IdJob",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Contracts_User_IdCompany",
-                        column: x => x.IdCompany,
-                        principalTable: "User",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Contracts_User_IdStudent",
-                        column: x => x.IdStudent,
-                        principalTable: "User",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Applications')
+                BEGIN
+                    CREATE TABLE [Applications] (
+                        [IdApplication] int IDENTITY(1,1) NOT NULL,
+                        [IdJob] int NOT NULL,
+                        [IdStudent] uniqueidentifier NOT NULL,
+                        [Status] nvarchar(max) NULL,
+                        [CreatedAt] datetime2 NOT NULL DEFAULT GETUTCDATE(),
+                        [UpdatedAt] datetime2 NULL,
+                        [JobIdJob] int NULL,
+                        [StudentId] uniqueidentifier NULL,
+                        CONSTRAINT [PK_Applications] PRIMARY KEY ([IdApplication])
+                    );
+                    CREATE UNIQUE INDEX [IX_Application_Job_Student] ON [Applications] ([IdJob], [IdStudent]);
+                    CREATE INDEX [IX_applications_JobIdJob] ON [Applications] ([JobIdJob]);
+                    CREATE INDEX [IX_applications_StudentId] ON [Applications] ([StudentId]);
+                END
+            ");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Contracts_IdApplication",
-                table: "Contracts",
-                column: "IdApplication",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Contracts_IdCompany",
-                table: "Contracts",
-                column: "IdCompany");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Contracts_IdJob",
-                table: "Contracts",
-                column: "IdJob");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Contracts_IdStudent",
-                table: "Contracts",
-                column: "IdStudent");
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Contracts')
+                BEGIN
+                    CREATE TABLE [Contracts] (
+                        [IdContract] int IDENTITY(1,1) NOT NULL,
+                        [IdApplication] int NOT NULL,
+                        [IdJob] int NOT NULL,
+                        [IdStudent] uniqueidentifier NOT NULL,
+                        [IdCompany] uniqueidentifier NOT NULL,
+                        [Status] nvarchar(max) NULL,
+                        [ContractData] nvarchar(max) NULL,
+                        [CreatedAt] datetime2 NOT NULL DEFAULT GETUTCDATE(),
+                        [UpdatedAt] datetime2 NULL,
+                        [AcceptedAt] datetime2 NULL,
+                        CONSTRAINT [PK_Contracts] PRIMARY KEY ([IdContract]),
+                        CONSTRAINT [FK_Contracts_Applications_IdApplication] FOREIGN KEY ([IdApplication]) REFERENCES [Applications] ([IdApplication]) ON DELETE CASCADE,
+                        CONSTRAINT [FK_Contracts_Jobs_IdJob] FOREIGN KEY ([IdJob]) REFERENCES [jobs] ([IdJob]),
+                        CONSTRAINT [FK_Contracts_User_IdCompany] FOREIGN KEY ([IdCompany]) REFERENCES [users] ([Id]),
+                        CONSTRAINT [FK_Contracts_User_IdStudent] FOREIGN KEY ([IdStudent]) REFERENCES [users] ([Id])
+                    );
+                    CREATE UNIQUE INDEX [IX_Contracts_IdApplication] ON [Contracts] ([IdApplication]);
+                    CREATE INDEX [IX_Contracts_IdCompany] ON [Contracts] ([IdCompany]);
+                    CREATE INDEX [IX_Contracts_IdJob] ON [Contracts] ([IdJob]);
+                    CREATE INDEX [IX_Contracts_IdStudent] ON [Contracts] ([IdStudent]);
+                END
+            ");
         }
 
         /// <inheritdoc />

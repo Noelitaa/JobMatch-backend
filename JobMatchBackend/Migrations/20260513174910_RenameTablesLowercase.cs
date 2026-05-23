@@ -13,6 +13,34 @@ namespace JobMatchBackend.Migrations
             // Drop the old pre-existing student_skills table before renaming EF's StudentSkills
             migrationBuilder.Sql("DROP TABLE IF EXISTS student_skills;");
 
+            // Drop Contracts FKs that reference Jobs, User, Applications (renamed below)
+            migrationBuilder.Sql(@"
+                IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Contracts_Jobs_IdJob')
+                    ALTER TABLE [Contracts] DROP CONSTRAINT [FK_Contracts_Jobs_IdJob];
+            ");
+            migrationBuilder.Sql(@"
+                IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Contracts_User_IdCompany')
+                    ALTER TABLE [Contracts] DROP CONSTRAINT [FK_Contracts_User_IdCompany];
+            ");
+            migrationBuilder.Sql(@"
+                IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Contracts_User_IdStudent')
+                    ALTER TABLE [Contracts] DROP CONSTRAINT [FK_Contracts_User_IdStudent];
+            ");
+            migrationBuilder.Sql(@"
+                IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Contracts_Applications_IdApplication')
+                    ALTER TABLE [Contracts] DROP CONSTRAINT [FK_Contracts_Applications_IdApplication];
+            ");
+
+            // Drop Applications shadow FKs that block PK drops on Jobs and User
+            migrationBuilder.Sql(@"
+                IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Applications_Jobs_JobIdJob')
+                    ALTER TABLE [Applications] DROP CONSTRAINT [FK_Applications_Jobs_JobIdJob];
+            ");
+            migrationBuilder.Sql(@"
+                IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Applications_User_StudentId')
+                    ALTER TABLE [Applications] DROP CONSTRAINT [FK_Applications_User_StudentId];
+            ");
+
             // Drop FKs that exist on tables being renamed
             migrationBuilder.Sql(@"
                 IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Jobs_User_CompanyId')
@@ -142,6 +170,32 @@ namespace JobMatchBackend.Migrations
                     ALTER TABLE [student_skills]
                         ADD CONSTRAINT [FK_student_skills_users_StudentId]
                         FOREIGN KEY ([StudentId]) REFERENCES [users] ([Id]) ON DELETE CASCADE;
+            ");
+
+            // Re-add Contracts FKs using names FixApplicationsShadowColumns expects to drop
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Contracts_applications_IdApplication')
+                    ALTER TABLE [Contracts]
+                        ADD CONSTRAINT [FK_Contracts_applications_IdApplication]
+                        FOREIGN KEY ([IdApplication]) REFERENCES [Applications] ([IdApplication]) ON DELETE CASCADE;
+            ");
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Contracts_jobs_IdJob')
+                    ALTER TABLE [Contracts]
+                        ADD CONSTRAINT [FK_Contracts_jobs_IdJob]
+                        FOREIGN KEY ([IdJob]) REFERENCES [jobs] ([IdJob]);
+            ");
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Contracts_users_IdCompany')
+                    ALTER TABLE [Contracts]
+                        ADD CONSTRAINT [FK_Contracts_users_IdCompany]
+                        FOREIGN KEY ([IdCompany]) REFERENCES [users] ([Id]);
+            ");
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Contracts_users_IdStudent')
+                    ALTER TABLE [Contracts]
+                        ADD CONSTRAINT [FK_Contracts_users_IdStudent]
+                        FOREIGN KEY ([IdStudent]) REFERENCES [users] ([Id]);
             ");
         }
 
