@@ -1,6 +1,7 @@
 using JobMatchBackend.Services;
 using Microsoft.AspNetCore.Mvc;
 using JobMatchBackend.DTOs.Request;
+using Microsoft.AspNetCore.Authorization;
 
 namespace JobMatchBackend.Controllers;
 
@@ -43,15 +44,27 @@ public class JobsController : ControllerBase
         }
     }
 
-
+    [Authorize]
     [HttpDelete("{jobId}")]
     public async Task<IActionResult> DeleteJob(int jobId)
     {
-        var deleted = await _jobService.DeleteJobAsync(jobId);
-        if (!deleted)
-            return NotFound(new { message = "Job no encontrado" });
-
-        return Ok(new { message = "Job eliminado correctamente" });
+        try
+        {
+            await _jobService.DeleteJobAsync(jobId);
+            return Ok(new { message = "Job deleted successfully" });
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { message = "Job not found" });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { message = "Internal server error" });
+        }
     }
 
     [HttpPost]

@@ -8,6 +8,6 @@ public interface IJobRepository
     Task<Job?> GetByIdAsync(int id);
     Task<bool> IsCompanyOwnerAsync(int jobId, Guid companyId);
     Task<List<Job>> GetAllAsync();
-    Task<bool> DeleteAsync(int id);
+    Task DeleteAsync(int id);
     Task<Job?> GetByIdWithCompanyAsync(int jobId);
 }

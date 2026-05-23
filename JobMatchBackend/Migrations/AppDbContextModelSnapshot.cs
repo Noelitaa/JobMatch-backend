@@ -211,8 +211,7 @@ namespace JobMatchBackend.Migrations
                 {
                     b.Property<int>("IdJob")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id_job");
+                        .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdJob"));
 
@@ -242,7 +241,6 @@ namespace JobMatchBackend.Migrations
                         .HasColumnName("id_company");
 
                     b.Property<decimal>("Payment")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("payment");
 
@@ -269,7 +267,8 @@ namespace JobMatchBackend.Migrations
                         .HasColumnName("title");
 
                     b.Property<string>("Type")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("type");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2")
