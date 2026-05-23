@@ -16,6 +16,10 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<User>().ToTable("users");
+        modelBuilder.Entity<Job>().ToTable("jobs");
+        modelBuilder.Entity<Application>().ToTable("applications");
         
         // Configurar claves primarias
         modelBuilder.Entity<Job>()

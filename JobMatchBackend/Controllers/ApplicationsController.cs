@@ -2,12 +2,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using JobMatchBackend.Services;
 using JobMatchBackend.DTOs.Request;
+using System.Security.Claims;
 
 namespace JobMatchBackend.Controllers;
 
 [ApiController]
 [Route("")]
-//[Authorize]
 public class ApplicationsController : ControllerBase
 {
     private readonly IApplicationService _applicationService;
@@ -18,6 +18,7 @@ public class ApplicationsController : ControllerBase
     }
 
     // GET: /applications/{applicationId}
+    [Authorize]
     [HttpGet("applications/{applicationId}")]
     public async Task<IActionResult> GetApplicationDetails(int applicationId)
     {
@@ -93,13 +94,16 @@ public class ApplicationsController : ControllerBase
 
     private Guid GetCurrentUserId()
     {
-        return Guid.Parse("9F4AF0CA-4509-42C1-9594-BB205862F7BA");
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userId, out var parsedUserId))
+            throw new UnauthorizedAccessException("Invalid authenticated user");
+
+        return parsedUserId;
     }
 
     private string GetCurrentUserRole()
     {
-        // Como tienes [Authorize] comentado, retorna un rol por defecto para pruebas
-        // Cuando implementes autenticación, usa el claim real
-        return "Admin";  // Temporal para pruebas
+        return User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
     }
 }
