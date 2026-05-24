@@ -100,6 +100,7 @@ public class ApplicationsController : ControllerBase
             throw new UnauthorizedAccessException("Invalid authenticated user");
 
         return parsedUserId;
+        return Guid.Parse("D3888166-1643-435E-BC10-347D8DEB285C");
     }
 
     private string GetCurrentUserRole()

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobMatchBackend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260418035604_AddJobsAndApplications")]
-    partial class AddJobsAndApplications
+    [Migration("20260423005703_AddContractsTable")]
+    partial class AddContractsTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -67,6 +67,55 @@ namespace JobMatchBackend.Migrations
                     b.ToTable("Applications");
                 });
 
+            modelBuilder.Entity("JobMatchBackend.Models.Entities.Contract", b =>
+                {
+                    b.Property<int>("IdContract")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdContract"));
+
+                    b.Property<DateTime?>("AcceptedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ContractData")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("IdApplication")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("IdCompany")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("IdJob")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("IdStudent")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("IdContract");
+
+                    b.HasIndex("IdApplication")
+                        .IsUnique();
+
+                    b.HasIndex("IdCompany");
+
+                    b.HasIndex("IdJob");
+
+                    b.HasIndex("IdStudent");
+
+                    b.ToTable("Contracts");
+                });
+
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Job", b =>
                 {
                     b.Property<int>("IdJob")
@@ -81,37 +130,14 @@ namespace JobMatchBackend.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Deliverables")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateOnly?>("EndDate")
-                        .HasColumnType("date");
-
-                    b.Property<TimeOnly>("EndTime")
-                        .HasColumnType("time");
-
                     b.Property<Guid>("IdCompany")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("Payment")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("PaymentType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateOnly?>("StartDate")
-                        .HasColumnType("date");
-
-                    b.Property<TimeOnly>("StartTime")
-                        .HasColumnType("time");
-
                     b.Property<string>("Status")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
@@ -119,14 +145,10 @@ namespace JobMatchBackend.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Type")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<DateOnly>("WorkDate")
-                        .HasColumnType("date");
 
                     b.HasKey("IdJob");
 
@@ -214,6 +236,41 @@ namespace JobMatchBackend.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("JobMatchBackend.Models.Entities.Contract", b =>
+                {
+                    b.HasOne("JobMatchBackend.Models.Entities.Application", "Application")
+                        .WithOne("Contract")
+                        .HasForeignKey("JobMatchBackend.Models.Entities.Contract", "IdApplication")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("JobMatchBackend.Models.Entities.User", "Company")
+                        .WithMany("CompanyContracts")
+                        .HasForeignKey("IdCompany")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("JobMatchBackend.Models.Entities.Job", "Job")
+                        .WithMany("Contracts")
+                        .HasForeignKey("IdJob")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("JobMatchBackend.Models.Entities.User", "Student")
+                        .WithMany("StudentContracts")
+                        .HasForeignKey("IdStudent")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Application");
+
+                    b.Navigation("Company");
+
+                    b.Navigation("Job");
+
+                    b.Navigation("Student");
+                });
+
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Job", b =>
                 {
                     b.HasOne("JobMatchBackend.Models.Entities.User", "Company")
@@ -223,9 +280,23 @@ namespace JobMatchBackend.Migrations
                     b.Navigation("Company");
                 });
 
+            modelBuilder.Entity("JobMatchBackend.Models.Entities.Application", b =>
+                {
+                    b.Navigation("Contract");
+                });
+
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Job", b =>
                 {
                     b.Navigation("Applications");
+
+                    b.Navigation("Contracts");
+                });
+
+            modelBuilder.Entity("JobMatchBackend.Models.Entities.User", b =>
+                {
+                    b.Navigation("CompanyContracts");
+
+                    b.Navigation("StudentContracts");
                 });
 #pragma warning restore 612, 618
         }

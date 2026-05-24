@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobMatchBackend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260418035604_AddJobsAndApplications")]
-    partial class AddJobsAndApplications
+    [Migration("20260513174910_RenameTablesLowercase")]
+    partial class RenameTablesLowercase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -64,7 +64,32 @@ namespace JobMatchBackend.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Application_Job_Student");
 
-                    b.ToTable("Applications");
+                    b.ToTable("applications", (string)null);
+                });
+
+            modelBuilder.Entity("JobMatchBackend.Models.Entities.Availability", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("int");
+
+                    b.Property<TimeOnly>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("time");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("availabilities", (string)null);
                 });
 
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Job", b =>
@@ -111,7 +136,6 @@ namespace JobMatchBackend.Migrations
                         .HasColumnType("time");
 
                     b.Property<string>("Status")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
@@ -132,7 +156,37 @@ namespace JobMatchBackend.Migrations
 
                     b.HasIndex("CompanyId");
 
-                    b.ToTable("Jobs");
+                    b.ToTable("jobs", (string)null);
+                });
+
+            modelBuilder.Entity("JobMatchBackend.Models.Entities.Skill", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("skills", (string)null);
+                });
+
+            modelBuilder.Entity("JobMatchBackend.Models.Entities.StudentSkill", b =>
+                {
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SkillId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("StudentId", "SkillId");
+
+                    b.HasIndex("SkillId");
+
+                    b.ToTable("student_skills", (string)null);
                 });
 
             modelBuilder.Entity("JobMatchBackend.Models.Entities.User", b =>
@@ -196,7 +250,7 @@ namespace JobMatchBackend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("User");
+                    b.ToTable("users", (string)null);
                 });
 
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Application", b =>
@@ -214,6 +268,17 @@ namespace JobMatchBackend.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("JobMatchBackend.Models.Entities.Availability", b =>
+                {
+                    b.HasOne("JobMatchBackend.Models.Entities.User", "Student")
+                        .WithMany("Availabilities")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Student");
+                });
+
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Job", b =>
                 {
                     b.HasOne("JobMatchBackend.Models.Entities.User", "Company")
@@ -223,9 +288,40 @@ namespace JobMatchBackend.Migrations
                     b.Navigation("Company");
                 });
 
+            modelBuilder.Entity("JobMatchBackend.Models.Entities.StudentSkill", b =>
+                {
+                    b.HasOne("JobMatchBackend.Models.Entities.Skill", "Skill")
+                        .WithMany("StudentSkills")
+                        .HasForeignKey("SkillId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("JobMatchBackend.Models.Entities.User", "Student")
+                        .WithMany("StudentSkills")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Skill");
+
+                    b.Navigation("Student");
+                });
+
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Job", b =>
                 {
                     b.Navigation("Applications");
+                });
+
+            modelBuilder.Entity("JobMatchBackend.Models.Entities.Skill", b =>
+                {
+                    b.Navigation("StudentSkills");
+                });
+
+            modelBuilder.Entity("JobMatchBackend.Models.Entities.User", b =>
+                {
+                    b.Navigation("Availabilities");
+
+                    b.Navigation("StudentSkills");
                 });
 #pragma warning restore 612, 618
         }
