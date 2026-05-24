@@ -99,7 +99,7 @@ namespace JobMatchBackend.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Application_Job_Student");
 
-                    b.ToTable("Applications", (string)null);
+                    b.ToTable("applications", (string)null);
                 });
 
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Availability", b =>
@@ -124,7 +124,7 @@ namespace JobMatchBackend.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("Availabilities", (string)null);
+                    b.ToTable("availabilities", (string)null);
                 });
 
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Contract", b =>
@@ -282,7 +282,7 @@ namespace JobMatchBackend.Migrations
 
                     b.HasIndex("IdCompany");
 
-                    b.ToTable("Jobs", (string)null);
+                    b.ToTable("jobs", (string)null);
                 });
 
             modelBuilder.Entity("JobMatchBackend.Models.Entities.ModerationLog", b =>
@@ -441,7 +441,7 @@ namespace JobMatchBackend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Skills", (string)null);
+                    b.ToTable("skills", (string)null);
                 });
 
             modelBuilder.Entity("JobMatchBackend.Models.Entities.StudentSkill", b =>
@@ -456,7 +456,7 @@ namespace JobMatchBackend.Migrations
 
                     b.HasIndex("SkillId");
 
-                    b.ToTable("StudentSkills", (string)null);
+                    b.ToTable("student_skills", (string)null);
                 });
 
             modelBuilder.Entity("JobMatchBackend.Models.Entities.User", b =>
@@ -520,7 +520,7 @@ namespace JobMatchBackend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("User", (string)null);
+                    b.ToTable("users", (string)null);
                 });
 
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Application", b =>

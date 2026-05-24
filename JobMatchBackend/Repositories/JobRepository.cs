@@ -38,20 +38,23 @@ public class JobRepository : IJobRepository
         return job;
     }
 
-    public async Task<Job?> GetByIdAsync(int jobId)
+    public async Task<Job?> GetByIdAsync(int id)
     {
-        return await _dbContext.Jobs.FirstOrDefaultAsync(j => j.IdJob == jobId);
+        return await _dbContext.Jobs
+            .Include(j => j.Applications)
+            .FirstOrDefaultAsync(j => j.IdJob == id);
     }
+
+    private const string AcceptedStatus = "accepted";
 
     public async Task<bool> HasAcceptedApplicationsAsync(int jobId)
     {
         return await _dbContext.Applications
-            .AnyAsync(a => a.IdJob == jobId && a.Status == "accepted");
+            .AnyAsync(a => a.IdJob == jobId && a.Status == AcceptedStatus);
     }
 
     public async Task<Job> UpdateAsync(Job job)
     {
-        job.UpdatedAt = DateTime.UtcNow;
         _dbContext.Jobs.Update(job);
         await _dbContext.SaveChangesAsync();
         return job;
@@ -60,13 +63,6 @@ public class JobRepository : IJobRepository
     public async Task<List<Job>> GetAllAsync()
     {
         return await _dbContext.Jobs.ToListAsync();
-    }
-
-        public async Task<Job?> GetByIdAsync(int id)
-    {
-        return await _dbContext.Jobs
-            .Include(j => j.Applications)
-            .FirstOrDefaultAsync(j => j.IdJob == id);
     }
 
     public async Task DeleteAsync(int id)

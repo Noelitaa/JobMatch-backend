@@ -1,8 +1,7 @@
 using JobMatchBackend.DTOs.Request;
 using JobMatchBackend.Services;
-using Microsoft.AspNetCore.Mvc;
-using JobMatchBackend.DTOs.Request;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace JobMatchBackend.Controllers;
 
@@ -31,6 +30,7 @@ public class JobsController : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpPut("{jobId}")]
     public async Task<IActionResult> UpdateJob(int jobId, [FromBody] UpdateJobRequest request)
     {

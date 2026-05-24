@@ -65,7 +65,7 @@ public class JobService : IJobService
 
     public async Task<JobDetailResponse> UpdateJobAsync(int jobId, UpdateJobRequest request)
     {
-        var job = await _jobRepository.GetByIdAsync(jobId);
+        var job = await _jobRepository.GetByIdWithCompanyAsync(jobId);
         if (job == null)
             throw new KeyNotFoundException("Job not found");
 
@@ -83,6 +83,8 @@ public class JobService : IJobService
         if (request.StartDate != null) job.StartDate = request.StartDate;
         if (request.EndDate != null) job.EndDate = request.EndDate;
         if (request.Deliverables != null) job.Deliverables = string.Join(",", request.Deliverables);
+
+        job.UpdatedAt = DateTime.UtcNow;
 
         var updated = await _jobRepository.UpdateAsync(job);
 
@@ -103,7 +105,16 @@ public class JobService : IJobService
             EndDate = updated.EndDate,
             Deliverables = updated.Deliverables,
             CreatedAt = updated.CreatedAt,
-            UpdatedAt = updated.UpdatedAt
+            UpdatedAt = updated.UpdatedAt,
+            Company = new CompanySummaryResponse
+            {
+                Id = updated.Company?.Id ?? Guid.Empty,
+                CompanyName = updated.Company?.CompanyName,
+                Email = updated.Company?.Email ?? string.Empty,
+                Phone = updated.Company?.Phone,
+                Description = updated.Company?.Description,
+                AvatarUrl = updated.Company?.AvatarUrl
+            }
         };
     }
 
