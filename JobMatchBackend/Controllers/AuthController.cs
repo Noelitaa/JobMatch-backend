@@ -31,5 +31,9 @@ public class AuthController : ControllerBase
         {
             return Unauthorized(new { message = "Credenciales inválidas" });
         }
+        catch (InvalidOperationException ex) when (ex.Message == "Account inactive or deleted")
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
     }
 }

@@ -19,6 +19,6 @@ public class StudentRepository : IStudentRepository
             .Include(u => u.Availabilities)
             .Include(u => u.StudentSkills)
                 .ThenInclude(ss => ss.Skill)
-            .FirstOrDefaultAsync(u => u.Id == studentId && u.Role == "Student");
+            .FirstOrDefaultAsync(u => u.Id == studentId && u.Role == "Student" && u.IsActive);
     }
 }

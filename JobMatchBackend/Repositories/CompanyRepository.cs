@@ -17,12 +17,12 @@ public class CompanyRepository : ICompanyRepository
     public async Task<User?> GetCompanyByIdAsync(Guid companyId)
     {
         return await _dbContext.User
-            .FirstOrDefaultAsync(u => u.Id == companyId && u.Role == "Company");
+            .FirstOrDefaultAsync(u => u.Id == companyId && u.Role == "Company" && u.IsActive);
     }
 
     public async Task<int> GetActiveJobsCountAsync(Guid companyId)
     {
         return await _dbContext.Jobs
-            .CountAsync(j => j.IdCompany == companyId && j.Status == "published");
+            .CountAsync(j => j.IdCompany == companyId && j.Status == "published" && j.Company != null && j.Company.IsActive);
     }
 }
