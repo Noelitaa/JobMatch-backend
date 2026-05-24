@@ -21,14 +21,12 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Job>().ToTable("jobs");
         modelBuilder.Entity<Application>().ToTable("applications");
         
-        // Configurar claves primarias
         modelBuilder.Entity<Job>()
             .HasKey(j => j.IdJob);
             
         modelBuilder.Entity<Application>()
             .HasKey(a => a.IdApplication);
         
-        // Índice único para evitar doble postulación
         modelBuilder.Entity<Application>()
             .HasIndex(a => new { a.IdJob, a.IdStudent })
             .IsUnique()
