@@ -78,8 +78,14 @@ public class ApplicationService : IApplicationService
             response.Contract = new ContractResponse
             {
                 IdContract = contract.IdContract,
+                IdApplication = contract.IdApplication,
+                IdJob = contract.IdJob,
+                IdStudent = contract.IdStudent,
+                IdCompany = contract.IdCompany,
                 Status = contract.Status ?? "pending",
                 CreatedAt = contract.CreatedAt,
+                UpdatedAt = contract.UpdatedAt,
+                AcceptedAt = contract.AcceptedAt,
                 ContractData = contract.ContractData
             };
             response.Message += " and contract generated";
