@@ -45,6 +45,7 @@ public class ApplicationsController : ControllerBase
     }
 
     // GET: /jobs/{jobId}/applications
+    [Authorize]
     [HttpGet("jobs/{jobId}/applications")]
     public async Task<IActionResult> GetApplicationsByJob(int jobId)
     {
@@ -65,6 +66,7 @@ public class ApplicationsController : ControllerBase
     }
 
     // PUT: /applications/{applicationId}
+    [Authorize]
     [HttpPut("applications/{applicationId}")]
     public async Task<IActionResult> UpdateApplicationStatus(int applicationId, [FromBody] UpdateApplicationRequest request)
     {
@@ -100,7 +102,6 @@ public class ApplicationsController : ControllerBase
             throw new UnauthorizedAccessException("Invalid authenticated user");
 
         return parsedUserId;
-        return Guid.Parse("D3888166-1643-435E-BC10-347D8DEB285C");
     }
 
     private string GetCurrentUserRole()

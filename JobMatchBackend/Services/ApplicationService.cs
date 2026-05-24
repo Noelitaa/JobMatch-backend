@@ -24,7 +24,6 @@ public class ApplicationService : IApplicationService
 
     public async Task<IEnumerable<ApplicationResponse>> GetApplicationsByJobAsync(int jobId, Guid companyId)
     {
-        var isOwner = await _applicationRepository.IsCompanyOwnerAsync(jobId, companyId);
         var isOwner = await _jobRepository.IsCompanyOwnerAsync(jobId, companyId);
         if (!isOwner)
             throw new UnauthorizedAccessException("Company does not own this job opening");
@@ -53,7 +52,6 @@ public class ApplicationService : IApplicationService
         if (application == null)
             throw new KeyNotFoundException("Application not found");
 
-        var isOwner = await _applicationRepository.IsCompanyOwnerAsync(application.IdJob, companyId);
         var isOwner = await _jobRepository.IsCompanyOwnerAsync(application.IdJob, companyId);
         if (!isOwner)
             throw new UnauthorizedAccessException("Company does not own this job opening");
@@ -159,7 +157,15 @@ public class ApplicationService : IApplicationService
             ApplicationId = application.IdApplication,
             Status = application.Status ?? "pending",
             JobId = application.IdJob,
+            JobTitle = application.Job?.Title ?? string.Empty,
+            JobType = application.Job?.Type,
+            CompanyId = application.Job?.IdCompany ?? Guid.Empty,
+            CompanyName = application.Job?.Company?.CompanyName,
             StudentId = application.IdStudent,
+            StudentName = application.Student?.FullName,
+            StudentEmail = application.Student?.Email,
+            StudentUniversity = application.Student?.University,
+            StudentCareer = application.Student?.Career,
             CreatedAt = application.CreatedAt
         };
     }
