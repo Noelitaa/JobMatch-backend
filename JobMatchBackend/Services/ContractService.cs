@@ -23,10 +23,11 @@ public class ContractService : IContractService
             throw new UnauthorizedAccessException("Student is not the signer of this contract");
 
         if (!string.Equals(contract.Status, "pending", StringComparison.OrdinalIgnoreCase))
-            throw new InvalidOperationException($"Contract is already {contract.Status}. Only pending contracts can be accepted.");
+            throw new InvalidOperationException($"Contract is already {contract.Status ?? "null"}. Only pending contracts can be accepted.");
 
         contract.Status = "active";
         contract.AcceptedAt = DateTime.UtcNow;
+        contract.UpdatedAt = DateTime.UtcNow;
 
         if (contract.Job == null)
             throw new InvalidOperationException("Contract does not have an associated job.");

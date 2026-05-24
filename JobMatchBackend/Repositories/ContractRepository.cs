@@ -29,8 +29,6 @@ public class ContractRepository : IContractRepository
 
     public async Task UpdateAsync(Contract contract)
     {
-        contract.UpdatedAt = DateTime.UtcNow;
-        _dbContext.Contracts.Update(contract);
         await _dbContext.SaveChangesAsync();
     }
 }
