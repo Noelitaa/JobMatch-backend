@@ -112,4 +112,16 @@ public class JobService : IJobService
         var jobs = await _jobRepository.GetAllAsync();
         return jobs.Select(JobMapper.ToResponse).ToList();
     }
+
+    public async Task DeleteJobAsync(int id)
+    {
+        var job = await _jobRepository.GetByIdAsync(id);
+        if (job == null)
+            throw new KeyNotFoundException($"Job with id {id} not found");
+
+        if (job.Applications != null && job.Applications.Any())
+            throw new InvalidOperationException("Cannot delete a job that has existing applications.");
+
+        await _jobRepository.DeleteAsync(id);
+    }
 }

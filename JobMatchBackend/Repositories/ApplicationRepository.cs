@@ -71,39 +71,47 @@ public class ApplicationRepository : IApplicationRepository
         await _dbContext.SaveChangesAsync();
     }
 
-public async Task<ContractDataDto?> GetContractDataAsync(int applicationId)
-{
-    try
+    // De feature/issue-23-delete-jobs
+    public async Task<bool> IsCompanyOwnerAsync(int jobId, Guid companyId)
     {
-        var query = $@"
-            SELECT 
-                a.IdApplication,
-                a.IdJob,
-                a.IdStudent,
-                j.Title as JobTitle,
-                j.Type as JobType,
-                u.CompanyName,
-                u.Email as CompanyEmail,
-                u.FullName as CompanyOwnerName,
-                s.FullName as StudentName,
-                s.Email as StudentEmail,
-                s.University as StudentUniversity,
-                s.Career as StudentCareer
-            FROM Applications a
-            INNER JOIN Jobs j ON a.IdJob = j.IdJob
-            INNER JOIN [User] u ON j.IdCompany = u.Id
-            INNER JOIN [User] s ON a.IdStudent = s.Id
-            WHERE a.IdApplication = {applicationId}";
+        var job = await _dbContext.Jobs.FirstOrDefaultAsync(j => j.IdJob == jobId);
+        return job != null && job.IdCompany == companyId;
+    }
 
-        var result = await _dbContext.ContractData
-            .FromSqlRaw(query)
-            .FirstOrDefaultAsync();
-        
-        return result;
-    }
-    catch (Exception ex)
+    // De Develop
+    public async Task<ContractDataDto?> GetContractDataAsync(int applicationId)
     {
-        throw new InvalidOperationException($"Error en GetContractDataAsync: {ex.Message}");
+        try
+        {
+            var query = $@"
+                SELECT 
+                    a.IdApplication,
+                    a.IdJob,
+                    a.IdStudent,
+                    j.Title as JobTitle,
+                    j.Type as JobType,
+                    u.CompanyName,
+                    u.Email as CompanyEmail,
+                    u.FullName as CompanyOwnerName,
+                    s.FullName as StudentName,
+                    s.Email as StudentEmail,
+                    s.University as StudentUniversity,
+                    s.Career as StudentCareer
+                FROM Applications a
+                INNER JOIN Jobs j ON a.IdJob = j.IdJob
+                INNER JOIN [User] u ON j.IdCompany = u.Id
+                INNER JOIN [User] s ON a.IdStudent = s.Id
+                WHERE a.IdApplication = {applicationId}";
+
+            var result = await _dbContext.ContractData
+                .FromSqlRaw(query)
+                .FirstOrDefaultAsync();
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Error en GetContractDataAsync: {ex.Message}");
+        }
     }
-}
 }

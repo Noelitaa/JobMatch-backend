@@ -20,11 +20,6 @@ public class JobRepository : IJobRepository
         return job;
     }
 
-    public async Task<Job?> GetByIdAsync(int id)
-    {
-        return await _dbContext.Jobs
-            .FirstOrDefaultAsync(j => j.IdJob == id);
-    }
 
     public async Task<bool> IsCompanyOwnerAsync(int jobId, Guid companyId)
     {
@@ -65,5 +60,21 @@ public class JobRepository : IJobRepository
     public async Task<List<Job>> GetAllAsync()
     {
         return await _dbContext.Jobs.ToListAsync();
+    }
+
+        public async Task<Job?> GetByIdAsync(int id)
+    {
+        return await _dbContext.Jobs
+            .Include(j => j.Applications)
+            .FirstOrDefaultAsync(j => j.IdJob == id);
+    }
+
+    public async Task DeleteAsync(int id)
+    {
+        var job = await _dbContext.Jobs.FindAsync(id);
+        if (job == null) return;
+
+        _dbContext.Jobs.Remove(job);
+        await _dbContext.SaveChangesAsync();
     }
 }

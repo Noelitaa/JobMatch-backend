@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using JobMatchBackend.Services;
 using JobMatchBackend.DTOs.Request;
+using System.Security.Claims;
 
 namespace JobMatchBackend.Controllers;
 
