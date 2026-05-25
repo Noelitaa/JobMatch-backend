@@ -38,4 +38,22 @@ public class StudentsController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
+
+    [HttpGet("{studentId}/skills")]
+    public async Task<IActionResult> GetStudentSkills(Guid studentId)
+    {
+        try
+        {
+            var skills = await _studentService.GetStudentSkillsAsync(studentId);
+            return Ok(skills);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { message = "Student not found" });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
 }

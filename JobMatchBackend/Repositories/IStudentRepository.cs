@@ -5,4 +5,5 @@ namespace JobMatchBackend.Repositories;
 public interface IStudentRepository
 {
     Task<User?> GetByIdAsync(Guid studentId);
+    Task<List<Skill>> GetSkillsByStudentIdAsync(Guid studentId);
 }

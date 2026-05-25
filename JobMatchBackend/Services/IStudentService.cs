@@ -5,4 +5,5 @@ namespace JobMatchBackend.Services;
 public interface IStudentService
 {
     Task<StudentProfileResponse> GetStudentByIdAsync(Guid studentId);
+    Task<List<string>> GetStudentSkillsAsync(Guid studentId);
 }

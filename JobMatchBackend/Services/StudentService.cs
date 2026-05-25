@@ -21,4 +21,10 @@ public class StudentService : IStudentService
 
         return StudentMapper.ToResponse(student);
     }
+
+    public async Task<List<string>> GetStudentSkillsAsync(Guid studentId)
+    {
+        var skills = await _studentRepository.GetSkillsByStudentIdAsync(studentId);
+        return skills.Select(s => s.Name).ToList();
+    }
 }

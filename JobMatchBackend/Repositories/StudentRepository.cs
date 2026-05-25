@@ -21,4 +21,19 @@ public class StudentRepository : IStudentRepository
                 .ThenInclude(ss => ss.Skill)
             .FirstOrDefaultAsync(u => u.Id == studentId && u.Role == "Student");
     }
+
+    public async Task<List<Skill>> GetSkillsByStudentIdAsync(Guid studentId)
+    {
+        var exists = await _dbContext.User
+            .AnyAsync(u => u.Id == studentId && u.Role == "Student");
+
+        if (!exists)
+            throw new KeyNotFoundException("Student not found");
+
+        return await _dbContext.StudentSkills
+            .Where(ss => ss.StudentId == studentId)
+            .Include(ss => ss.Skill)
+            .Select(ss => ss.Skill!)
+            .ToListAsync();
+    }
 }
