@@ -1,3 +1,4 @@
+using JobMatchBackend.DTOs.Request;
 using JobMatchBackend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -50,6 +51,32 @@ public class StudentsController : ControllerBase
         catch (KeyNotFoundException)
         {
             return NotFound(new { message = "Student not found" });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpPost("{studentId}/skills")]
+    public async Task<IActionResult> AddSkillToStudent(Guid studentId, [FromBody] AddSkillRequest request)
+    {
+        var callerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (callerId != studentId.ToString())
+            return Forbid();
+
+        try
+        {
+            await _studentService.AddSkillToStudentAsync(studentId, request.SkillName);
+            return StatusCode(201, new { message = "Skill added successfully" });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
         catch (Exception)
         {

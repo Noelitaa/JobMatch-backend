@@ -6,4 +6,5 @@ public interface IStudentService
 {
     Task<StudentProfileResponse> GetStudentByIdAsync(Guid studentId);
     Task<List<string>> GetStudentSkillsAsync(Guid studentId);
+    Task AddSkillToStudentAsync(Guid studentId, string skillName);
 }
