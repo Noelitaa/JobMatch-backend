@@ -28,6 +28,9 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        
+        modelBuilder.Entity<User>().ToTable("users");
+
 
         // ── Table name mappings ──────────────────────────────────────────
         modelBuilder.Entity<User>().ToTable("users");
@@ -116,6 +119,7 @@ modelBuilder.Entity<Job>()
         // ── Application ──────────────────────────────────────────────────
         modelBuilder.Entity<Application>()
             .HasKey(a => a.IdApplication);
+        
 
         modelBuilder.Entity<Application>()
             .HasIndex(a => new { a.IdJob, a.IdStudent })
