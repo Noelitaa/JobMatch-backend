@@ -99,12 +99,12 @@ public class ApplicationService : IApplicationService
         var data = await _applicationRepository.GetContractDataAsync(application.IdApplication);
 
         if (data == null)
-            throw new InvalidOperationException($"No se pudieron obtener los datos para la aplicación {application.IdApplication}");
+            throw new InvalidOperationException($"Could not retrieve contract data for application {application.IdApplication}");
 
         var job = await _jobRepository.GetByIdAsync(application.IdJob);
 
         if (job == null)
-            throw new InvalidOperationException($"No se encontró el trabajo con ID {application.IdJob}");
+            throw new InvalidOperationException($"Job with ID {application.IdJob} not found");
 
         var contractData = new
         {
