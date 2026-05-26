@@ -20,13 +20,3 @@ public class JobDetailResponse
     public DateTime? UpdatedAt { get; set; }
     public CompanySummaryResponse Company { get; set; } = new();
 }
-
-public class CompanySummaryResponse
-{
-    public Guid Id { get; set; }
-    public string? CompanyName { get; set; }
-    public string Email { get; set; } = string.Empty;
-    public string? Phone { get; set; }
-    public string? Description { get; set; }
-    public string? AvatarUrl { get; set; }
-}
