@@ -8,3 +8,5 @@ obj/
 appsettings.json
 JobMatchBackend/appsettings.Development.json
 JobMatchBackend/appsettings.json
+JobMatchBackend/appsettings.json
+JobMatchBackend/appsettings.Development.json
