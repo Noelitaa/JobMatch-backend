@@ -18,16 +18,13 @@ public class UsersController : ControllerBase
         _userService = userService;
     }
 
-    [HttpDelete("{userId}")]
-    public async Task<IActionResult> DeleteUser(Guid userId, [FromBody] DeleteUserRequest request)
+    [HttpDelete("me")]
+    public async Task<IActionResult> DeleteCurrentUser([FromBody] DeleteUserRequest request)
     {
-        var authenticatedUserId = GetCurrentUserId();
-        if (authenticatedUserId != userId)
-            return StatusCode(403, new { message = "Authenticated user does not match the requested user" });
-
         try
         {
-            var message = await _userService.DeleteUserAsync(userId, request);
+            var authenticatedUserId = GetCurrentUserId();
+            var message = await _userService.SoftDeleteUserAsync(authenticatedUserId, request);
             return Ok(new { message });
         }
         catch (KeyNotFoundException)
@@ -36,7 +33,11 @@ public class UsersController : ControllerBase
         }
         catch (UnauthorizedAccessException ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return Unauthorized(new { message = ex.Message });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { message = "Internal server error" });
         }
     }
 
