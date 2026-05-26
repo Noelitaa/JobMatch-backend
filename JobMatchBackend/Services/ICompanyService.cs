@@ -6,4 +6,7 @@ namespace JobMatchBackend.Services;
 public interface ICompanyService
 {
     Task<CompanyProfileResponse> GetCompanyProfileAsync(Guid companyId);
+    
+    Task<List<CompanySummaryResponse>> GetAllCompaniesAsync();  
+
 }
