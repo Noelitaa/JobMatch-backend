@@ -25,4 +25,12 @@ public class CompanyRepository : ICompanyRepository
         return await _dbContext.Jobs
             .CountAsync(j => j.IdCompany == companyId && j.Status == "published" && j.Company != null && j.Company.IsActive);
     }
+
+    public async Task<List<User>> GetAllAsync()
+    {
+        return await _dbContext.User
+            .Where(u => u.Role == "Company")
+            .OrderBy(u => u.CompanyName)
+            .ToListAsync();
+    }
 }
