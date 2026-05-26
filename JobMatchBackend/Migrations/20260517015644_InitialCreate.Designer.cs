@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobMatchBackend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260418035604_AddJobsAndApplications")]
-    partial class AddJobsAndApplications
+    [Migration("20260517015644_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -27,6 +27,9 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        
+        modelBuilder.Entity<User>().ToTable("users");
+
 
         // Table name mappings 
         modelBuilder.Entity<User>().ToTable("users");
@@ -46,6 +49,7 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Application>()
             .HasKey(a => a.IdApplication);
+        
 
         modelBuilder.Entity<Contract>()
             .HasKey(c => c.IdContract);
