@@ -28,18 +28,18 @@ public class StudentService : IStudentService
         return skills.Select(s => s.Name).ToList();
     }
 
-    public async Task AddSkillToStudentAsync(Guid studentId, string skillName)
+    public async Task<string> AddSkillToStudentAsync(Guid studentId, string skillName)
     {
         var student = await _studentRepository.GetByIdAsync(studentId);
         if (student == null)
             throw new KeyNotFoundException("Student not found");
 
-        var skill = await _studentRepository.GetSkillByNameAsync(skillName);
-        if (skill == null)
-            throw new KeyNotFoundException($"Skill '{skillName}' not found in catalog");
+        var skill = await _studentRepository.GetOrCreateSkillAsync(skillName);
 
         var added = await _studentRepository.AddSkillAsync(studentId, skill.Id);
         if (!added)
             throw new InvalidOperationException("Student already has this skill");
+
+        return skill.Name;
     }
 }

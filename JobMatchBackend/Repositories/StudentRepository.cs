@@ -37,10 +37,19 @@ public class StudentRepository : IStudentRepository
             .ToListAsync();
     }
 
-    public async Task<Skill?> GetSkillByNameAsync(string skillName)
+    public async Task<Skill> GetOrCreateSkillAsync(string skillName)
     {
-        return await _dbContext.Skills
+        var skill = await _dbContext.Skills
             .FirstOrDefaultAsync(s => s.Name.ToLower() == skillName.ToLower());
+
+        if (skill == null)
+        {
+            skill = new Skill { Id = Guid.NewGuid(), Name = skillName };
+            _dbContext.Skills.Add(skill);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        return skill;
     }
 
     public async Task<bool> AddSkillAsync(Guid studentId, Guid skillId)
