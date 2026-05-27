@@ -7,7 +7,7 @@ namespace JobMatchBackend.Controllers;
 
 [ApiController]
 [Route("")]
-[Authorize]
+[Authorize(Roles = "Student")]
 public class ContractsController : ControllerBase
 {
     private readonly IContractService _contractService;

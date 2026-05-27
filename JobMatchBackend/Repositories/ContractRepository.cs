@@ -29,6 +29,7 @@ public class ContractRepository : IContractRepository
 
     public async Task UpdateAsync(Contract contract)
     {
+        _dbContext.Contracts.Update(contract);
         await _dbContext.SaveChangesAsync();
     }
 }
