@@ -48,4 +48,23 @@ public class JobRepository : IJobRepository
     {
         return await _dbContext.Jobs.ToListAsync();
     }
+
+    public async Task<Job> UpdateAsync(Job job)
+    {
+        _dbContext.Jobs.Update(job);
+        await _dbContext.SaveChangesAsync();
+        return job;
+    }
+
+    public async Task<bool> HasAcceptedApplicationsAsync(int jobId)
+    {
+        return await _dbContext.Applications
+            .AnyAsync(a => a.IdJob == jobId && a.Status == "accepted");
+    }
+
+    public async Task<bool> HasActiveContractAsync(int jobId)
+    {
+        return await _dbContext.Contracts
+            .AnyAsync(c => c.IdJob == jobId && c.Status == "active");
+    }
 }

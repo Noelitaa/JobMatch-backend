@@ -68,4 +68,67 @@ public class JobService : IJobService
         var jobs = await _jobRepository.GetAllAsync();
         return jobs.Select(JobMapper.ToResponse).ToList();
     }
+
+    public async Task<JobDetailResponse> UpdateJobAsync(int jobId, Guid companyId, UpdateJobRequest request)
+    {
+        var job = await _jobRepository.GetByIdWithCompanyAsync(jobId);
+        if (job == null)
+            throw new KeyNotFoundException("Job not found");
+
+        var isOwner = await _jobRepository.IsCompanyOwnerAsync(jobId, companyId);
+        if (!isOwner)
+            throw new UnauthorizedAccessException("Company does not own this job");
+
+        var hasAcceptedApplications = await _jobRepository.HasAcceptedApplicationsAsync(jobId);
+        if (hasAcceptedApplications)
+            throw new InvalidOperationException("Cannot edit a job that has accepted students");
+
+        var hasActiveContract = await _jobRepository.HasActiveContractAsync(jobId);
+        if (hasActiveContract)
+            throw new InvalidOperationException("Cannot edit a job with an active contract");
+
+        if (request.Title != null) job.Title = request.Title;
+        if (request.Description != null) job.Description = request.Description;
+        if (request.Payment != null) job.Payment = request.Payment.Value;
+        if (request.PaymentType != null) job.PaymentType = request.PaymentType;
+        if (request.WorkDate != null) job.WorkDate = request.WorkDate.Value;
+        if (request.StartTime != null) job.StartTime = request.StartTime.Value;
+        if (request.EndTime != null) job.EndTime = request.EndTime.Value;
+        if (request.StartDate != null) job.StartDate = request.StartDate;
+        if (request.EndDate != null) job.EndDate = request.EndDate;
+        if (request.Deliverables != null) job.Deliverables = string.Join(",", request.Deliverables);
+
+        job.UpdatedAt = DateTime.UtcNow;
+
+        var updated = await _jobRepository.UpdateAsync(job);
+
+        return new JobDetailResponse
+        {
+            IdJob = updated.IdJob,
+            IdCompany = updated.IdCompany,
+            Title = updated.Title,
+            Description = updated.Description,
+            Type = updated.Type,
+            Status = updated.Status,
+            Payment = updated.Payment,
+            PaymentType = updated.PaymentType,
+            WorkDate = updated.WorkDate,
+            StartTime = updated.StartTime,
+            EndTime = updated.EndTime,
+            StartDate = updated.StartDate,
+            EndDate = updated.EndDate,
+            Deliverables = updated.Deliverables,
+            CreatedAt = updated.CreatedAt,
+            UpdatedAt = updated.UpdatedAt,
+            Company = new CompanySummaryResponse
+            {
+                Id = updated.Company?.Id ?? Guid.Empty,
+                CompanyName = updated.Company?.CompanyName,
+                Email = updated.Company?.Email ?? string.Empty,
+                Phone = updated.Company?.Phone,
+                Description = updated.Company?.Description,
+                AvatarUrl = updated.Company?.AvatarUrl
+            }
+        };
+    }
 }
