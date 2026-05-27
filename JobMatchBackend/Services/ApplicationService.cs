@@ -142,9 +142,12 @@ public class ApplicationService : IApplicationService
         return await _contractRepository.CreateAsync(contract);
     }
 
-    public async Task<CreateApplicationResponse> CreateApplicationAsync(CreateApplicationRequest request)
+    public async Task<CreateApplicationResponse> CreateApplicationAsync(Guid studentId, CreateApplicationRequest request)
     {
-        var student = await _userRepository.GetByIdAsync(request.IdStudent!.Value);
+        if (request.IdJob == null)
+            throw new ArgumentException("Job id is required");
+
+        var student = await _userRepository.GetByIdAsync(studentId);
         if (student == null)
             throw new KeyNotFoundException("Student not found");
 
@@ -152,16 +155,15 @@ public class ApplicationService : IApplicationService
         if (job == null)
             throw new KeyNotFoundException("Job offer not found");
 
-        var alreadyApplied = await _applicationRepository.ExistsAsync(request.IdStudent.Value, request.IdJob.Value);
+        var alreadyApplied = await _applicationRepository.ExistsAsync(studentId, request.IdJob.Value);
         if (alreadyApplied)
             throw new InvalidOperationException("Student has already applied to this job");
 
         var application = new Application
         {
-            IdStudent = request.IdStudent.Value,
+            IdStudent = studentId,
             IdJob = request.IdJob.Value,
-            Status = "pending",
-            CreatedAt = DateTime.UtcNow
+            Status = "pending"
         };
 
         await _applicationRepository.CreateAsync(application);

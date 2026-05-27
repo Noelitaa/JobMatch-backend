@@ -7,5 +7,5 @@ public interface IApplicationService
 {
     Task<IEnumerable<ApplicationResponse>> GetApplicationsByJobAsync(int jobId, Guid companyId);
     Task<UpdateApplicationResponse> UpdateApplicationStatusAsync(int applicationId, Guid companyId, UpdateApplicationRequest request);
-    Task<CreateApplicationResponse> CreateApplicationAsync(CreateApplicationRequest request);
+    Task<CreateApplicationResponse> CreateApplicationAsync(Guid studentId, CreateApplicationRequest request);
 }

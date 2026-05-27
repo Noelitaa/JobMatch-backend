@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using JobMatchBackend.Services;
 using JobMatchBackend.DTOs.Request;
+using System.Security.Claims;
 
 namespace JobMatchBackend.Controllers;
 
@@ -24,7 +25,8 @@ public class ApplicationsController : ControllerBase
     {
         try
         {
-            var result = await _applicationService.CreateApplicationAsync(request);
+            var studentId = GetCurrentUserId();
+            var result = await _applicationService.CreateApplicationAsync(studentId, request);
             return StatusCode(201, result);
         }
         catch (KeyNotFoundException ex)
@@ -34,6 +36,14 @@ public class ApplicationsController : ControllerBase
         catch (InvalidOperationException ex)
         {
             return Conflict(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { message = ex.Message });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { message = "Internal server error" });
         }
     }
 
@@ -89,6 +99,10 @@ public class ApplicationsController : ControllerBase
 
     private Guid GetCurrentUserId()
     {
-        return Guid.Parse("D3888166-1643-435E-BC10-347D8DEB285C");
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId) || !Guid.TryParse(userId, out var parsedUserId))
+            throw new UnauthorizedAccessException("Invalid authenticated user");
+
+        return parsedUserId;
     }
 }
