@@ -1,6 +1,6 @@
-using Microsoft.EntityFrameworkCore;
-using JobMatchBackend.Models.Entities;
 using JobMatchBackend.DTOs;
+using JobMatchBackend.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace JobMatchBackend.Data;
 
@@ -27,11 +27,7 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
-        modelBuilder.Entity<User>().ToTable("users");
 
-
-        // Table name mappings 
         modelBuilder.Entity<User>().ToTable("users");
         modelBuilder.Entity<Job>().ToTable("jobs");
         modelBuilder.Entity<Application>().ToTable("applications");
@@ -39,28 +35,26 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Skill>().ToTable("skills");
         modelBuilder.Entity<StudentSkill>().ToTable("student_skills");
         modelBuilder.Entity<Availability>().ToTable("availabilities");
+        modelBuilder.Entity<Payment>().ToTable("payments");
+        modelBuilder.Entity<Rating>().ToTable("ratings");
+        modelBuilder.Entity<Notification>().ToTable("notifications");
+        modelBuilder.Entity<FcmToken>().ToTable("fcm_tokens");
+        modelBuilder.Entity<ModerationLog>().ToTable("moderation_logs");
 
-        // Primary keys
-        modelBuilder.Entity<Job>()
-            .HasKey(j => j.IdJob);
+        modelBuilder.Entity<Job>().HasKey(j => j.IdJob);
+        modelBuilder.Entity<Job>().Property(j => j.Payment).HasColumnType("decimal(18,2)");
 
-        modelBuilder.Entity<Job>()
-            .Property(j => j.Payment).HasColumnType("decimal(18,2)");
+        modelBuilder.Entity<Application>().HasKey(a => a.IdApplication);
+        modelBuilder.Entity<Contract>().HasKey(c => c.IdContract);
+        modelBuilder.Entity<Skill>().HasKey(s => s.Id);
+        modelBuilder.Entity<Availability>().HasKey(a => a.Id);
+        modelBuilder.Entity<Payment>().HasKey(p => p.IdPayment);
+        modelBuilder.Entity<Payment>().Property(p => p.Amount).HasColumnType("decimal(18,2)");
+        modelBuilder.Entity<Rating>().HasKey(r => r.IdRating);
+        modelBuilder.Entity<Notification>().HasKey(n => n.IdNotification);
+        modelBuilder.Entity<FcmToken>().HasKey(f => f.IdToken);
+        modelBuilder.Entity<ModerationLog>().HasKey(m => m.IdLog);
 
-        modelBuilder.Entity<Application>()
-            .HasKey(a => a.IdApplication);
-        
-
-        modelBuilder.Entity<Contract>()
-            .HasKey(c => c.IdContract);
-
-        modelBuilder.Entity<Skill>()
-            .HasKey(s => s.Id);
-
-        modelBuilder.Entity<Availability>()
-            .HasKey(a => a.Id);
-
-        // Unique index: prevent duplicate applications
         modelBuilder.Entity<Application>()
             .HasIndex(a => new { a.IdJob, a.IdStudent })
             .IsUnique()
@@ -78,11 +72,8 @@ public class AppDbContext : DbContext
             .HasForeignKey(a => a.IdStudent)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // StudentSkill composite PK
-        modelBuilder.Entity<StudentSkill>()
-            .HasKey(ss => new { ss.StudentId, ss.SkillId });
+        modelBuilder.Entity<StudentSkill>().HasKey(ss => new { ss.StudentId, ss.SkillId });
 
-        // Relationships: StudentSkill
         modelBuilder.Entity<StudentSkill>()
             .HasOne(ss => ss.Student)
             .WithMany(u => u.StudentSkills)
@@ -93,7 +84,6 @@ public class AppDbContext : DbContext
             .WithMany(s => s.StudentSkills)
             .HasForeignKey(ss => ss.SkillId);
 
-        // Availability → User
         modelBuilder.Entity<Availability>()
             .HasOne(a => a.Student)
             .WithMany(u => u.Availabilities)
@@ -105,7 +95,6 @@ public class AppDbContext : DbContext
             .HasForeignKey(j => j.IdCompany)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Contract relationships
         modelBuilder.Entity<Contract>()
             .HasOne(c => c.Application)
             .WithOne(a => a.Contract)
@@ -130,68 +119,58 @@ public class AppDbContext : DbContext
             .HasForeignKey(c => c.IdCompany)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // payments
-        modelBuilder.Entity<Payment>().ToTable("payments");
-        modelBuilder.Entity<Payment>().HasKey(p => p.IdPayment);
-        modelBuilder.Entity<Payment>()
-            .Property(p => p.Amount).HasColumnType("decimal(18,2)");
         modelBuilder.Entity<Payment>()
             .HasOne(p => p.Contract)
             .WithMany()
             .HasForeignKey(p => p.IdContract)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // ratings
-        modelBuilder.Entity<Rating>().ToTable("ratings");
-        modelBuilder.Entity<Rating>().HasKey(r => r.IdRating);
         modelBuilder.Entity<Rating>()
             .HasOne(r => r.Contract)
             .WithMany()
             .HasForeignKey(r => r.IdContract)
             .OnDelete(DeleteBehavior.Restrict);
+
         modelBuilder.Entity<Rating>()
             .HasOne(r => r.Rater)
             .WithMany()
             .HasForeignKey(r => r.IdRater)
             .OnDelete(DeleteBehavior.Restrict);
+
         modelBuilder.Entity<Rating>()
             .HasOne(r => r.Rated)
             .WithMany()
             .HasForeignKey(r => r.IdRated)
             .OnDelete(DeleteBehavior.Restrict);
+
         modelBuilder.Entity<Rating>()
             .HasIndex(r => new { r.IdContract, r.IdRater })
             .IsUnique();
 
-        // notifications
-        modelBuilder.Entity<Notification>().ToTable("notifications");
-        modelBuilder.Entity<Notification>().HasKey(n => n.IdNotification);
         modelBuilder.Entity<Notification>()
-            .Property(n => n.IsRead).HasDefaultValue(false);
+            .Property(n => n.IsRead)
+            .HasDefaultValue(false);
+
         modelBuilder.Entity<Notification>()
             .HasOne(n => n.User)
             .WithMany()
             .HasForeignKey(n => n.IdUser)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // fcm_tokens
-        modelBuilder.Entity<FcmToken>().ToTable("fcm_tokens");
-        modelBuilder.Entity<FcmToken>().HasKey(f => f.IdToken);
         modelBuilder.Entity<FcmToken>()
             .HasOne(f => f.User)
             .WithMany()
             .HasForeignKey(f => f.IdUser)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // moderation_logs
-        modelBuilder.Entity<ModerationLog>().ToTable("moderation_logs");
-        modelBuilder.Entity<ModerationLog>().HasKey(m => m.IdLog);
         modelBuilder.Entity<ModerationLog>()
             .HasOne(m => m.AdminUser)
             .WithMany()
             .HasForeignKey(m => m.AdminUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        modelBuilder.Entity<ContractDataDto>().HasNoKey().ToView("vw_ContractData");
+        modelBuilder.Entity<ContractDataDto>()
+            .HasNoKey()
+            .ToView(null);
     }
 }
