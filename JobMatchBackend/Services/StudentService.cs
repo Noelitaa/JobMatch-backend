@@ -24,6 +24,10 @@ public class StudentService : IStudentService
 
     public async Task<List<string>> GetStudentSkillsAsync(Guid studentId)
     {
+        var student = await _studentRepository.GetByIdAsync(studentId);
+        if (student == null)
+            throw new KeyNotFoundException("Student not found");
+
         var skills = await _studentRepository.GetSkillsByStudentIdAsync(studentId);
         return skills.Select(s => s.Name).ToList();
     }
