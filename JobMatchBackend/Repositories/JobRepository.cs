@@ -20,12 +20,11 @@ public class JobRepository : IJobRepository
         return job;
     }
 
-
     public async Task<bool> IsCompanyOwnerAsync(int jobId, Guid companyId)
     {
         var job = await _dbContext.Jobs
             .FirstOrDefaultAsync(j => j.IdJob == jobId);
-        
+
         return job != null && job.IdCompany == companyId;
     }
 
@@ -44,18 +43,16 @@ public class JobRepository : IJobRepository
         return await _dbContext.Jobs.ToListAsync();
     }
 
-        public async Task<Job?> GetByIdAsync(int id)
+    public async Task<Job?> GetByIdAsync(int id)
     {
         return await _dbContext.Jobs
             .Include(j => j.Applications)
             .FirstOrDefaultAsync(j => j.IdJob == id);
     }
 
-    public async Task DeleteAsync(int id)
+    // FIX 2 + FIX 3: Receives the entity directly — no second query, no silent null return
+    public async Task DeleteAsync(Job job)
     {
-        var job = await _dbContext.Jobs.FindAsync(id);
-        if (job == null) return;
-
         _dbContext.Jobs.Remove(job);
         await _dbContext.SaveChangesAsync();
     }

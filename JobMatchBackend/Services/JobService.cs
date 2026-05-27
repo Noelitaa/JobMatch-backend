@@ -1,6 +1,7 @@
 using JobMatchBackend.DTOs.Request;
 using JobMatchBackend.DTOs.Response;
 using JobMatchBackend.Mappers;
+using JobMatchBackend.Models.Entities;
 using JobMatchBackend.Repositories;
 
 namespace JobMatchBackend.Services;
@@ -69,15 +70,21 @@ public class JobService : IJobService
         return jobs.Select(JobMapper.ToResponse).ToList();
     }
 
-    public async Task DeleteJobAsync(int id)
+    public async Task DeleteJobAsync(int id, Guid companyId)
     {
+        // FIX 2: GetByIdAsync already loads the entity with Applications — reuse it directly
         var job = await _jobRepository.GetByIdAsync(id);
         if (job == null)
             throw new KeyNotFoundException($"Job with id {id} not found");
 
+        // FIX 1: Verify the authenticated user owns this job before deleting
+        if (job.IdCompany != companyId)
+            throw new UnauthorizedAccessException("Only the owning company can delete this job");
+
         if (job.Applications != null && job.Applications.Any())
             throw new InvalidOperationException("Cannot delete a job that has existing applications.");
 
-        await _jobRepository.DeleteAsync(id);
+        // FIX 2: Pass the entity directly — avoids the second FindAsync inside DeleteAsync
+        await _jobRepository.DeleteAsync(job);
     }
 }

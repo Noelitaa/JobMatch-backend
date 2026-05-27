@@ -8,6 +8,7 @@ public interface IJobRepository
     Task<Job?> GetByIdAsync(int id);
     Task<bool> IsCompanyOwnerAsync(int jobId, Guid companyId);
     Task<List<Job>> GetAllAsync();
-    Task DeleteAsync(int id);
+    // FIX 2: Signature now receives the entity instead of the ID
+    Task DeleteAsync(Job job);
     Task<Job?> GetByIdWithCompanyAsync(int jobId);
 }

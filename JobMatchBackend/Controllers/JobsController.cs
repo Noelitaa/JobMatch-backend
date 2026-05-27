@@ -2,6 +2,7 @@ using JobMatchBackend.Services;
 using Microsoft.AspNetCore.Mvc;
 using JobMatchBackend.DTOs.Request;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace JobMatchBackend.Controllers;
 
@@ -50,12 +51,21 @@ public class JobsController : ControllerBase
     {
         try
         {
-            await _jobService.DeleteJobAsync(jobId);
+            // FIX 1: Read companyId from JWT and pass it to the service for ownership verification
+            var companyIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(companyIdClaim, out var companyId))
+                return Unauthorized(new { message = "Invalid or missing company identity in token" });
+
+            await _jobService.DeleteJobAsync(jobId, companyId);
             return Ok(new { message = "Job deleted successfully" });
         }
         catch (KeyNotFoundException)
         {
             return NotFound(new { message = "Job not found" });
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
         }
         catch (InvalidOperationException ex)
         {
