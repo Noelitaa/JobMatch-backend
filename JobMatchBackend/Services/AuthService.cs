@@ -11,18 +11,18 @@ using JobMatchBackend.DTOs.Request;
 
 public class AuthService : IAuthService
 {
-    private readonly IUserRepository UserRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IConfiguration _config;
 
     public AuthService(IUserRepository userRepository, IConfiguration config)
     {
-        UserRepository = userRepository;
+        _userRepository = userRepository;
         _config = config;
     }
 
     public LoginResponse Login(LoginRequest request)
     {
-        var user = UserRepository.GetByEmail(request.Email);
+        var user = _userRepository.GetByEmail(request.Email);
 
         if (user == null)
             throw new UnauthorizedAccessException("Credenciales inválidas");

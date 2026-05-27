@@ -8,6 +8,7 @@ namespace JobMatchBackend.Controllers;
 
 [ApiController]
 [Route("")]
+[Authorize]
 public class ApplicationsController : ControllerBase
 {
     private readonly IApplicationService _applicationService;
@@ -18,7 +19,6 @@ public class ApplicationsController : ControllerBase
     }
 
     // GET: /applications/{applicationId}
-    [Authorize]
     [HttpGet("applications/{applicationId}")]
     public async Task<IActionResult> GetApplicationDetails(int applicationId)
     {
@@ -45,7 +45,6 @@ public class ApplicationsController : ControllerBase
     }
 
     // GET: /jobs/{jobId}/applications
-    [Authorize]
     [HttpGet("jobs/{jobId}/applications")]
     public async Task<IActionResult> GetApplicationsByJob(int jobId)
     {
@@ -66,7 +65,6 @@ public class ApplicationsController : ControllerBase
     }
 
     // PUT: /applications/{applicationId}
-    [Authorize]
     [HttpPut("applications/{applicationId}")]
     public async Task<IActionResult> UpdateApplicationStatus(int applicationId, [FromBody] UpdateApplicationRequest request)
     {

@@ -154,14 +154,14 @@ public class ApplicationService : IApplicationService
 
         return new ApplicationDetailResponse
         {
-            ApplicationId = application.IdApplication,
+            IdApplication = application.IdApplication,
             Status = application.Status ?? "pending",
-            JobId = application.IdJob,
+            IdJob = application.IdJob,
             JobTitle = application.Job?.Title ?? string.Empty,
             JobType = application.Job?.Type,
-            CompanyId = application.Job?.IdCompany ?? Guid.Empty,
+            IdCompany = application.Job?.IdCompany ?? Guid.Empty,
             CompanyName = application.Job?.Company?.CompanyName,
-            StudentId = application.IdStudent,
+            IdStudent = application.IdStudent,
             StudentName = application.Student?.FullName,
             StudentEmail = application.Student?.Email,
             StudentUniversity = application.Student?.University,
