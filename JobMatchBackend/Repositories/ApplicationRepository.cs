@@ -1,7 +1,7 @@
-// Repositories/ApplicationRepository.cs
 using Microsoft.EntityFrameworkCore;
 using JobMatchBackend.Data;
 using JobMatchBackend.Models.Entities;
+using JobMatchBackend.DTOs;
 
 namespace JobMatchBackend.Repositories;
 
@@ -16,20 +16,52 @@ public class ApplicationRepository : IApplicationRepository
 
     public async Task<Application?> GetByIdAsync(int id)
     {
-        return await _dbContext.Applications
-            .Include(a => a.Student)
-            .Include(a => a.Job)
+        var application = await _dbContext.Applications
             .FirstOrDefaultAsync(a => a.IdApplication == id);
+
+        if (application == null)
+            return null;
+
+        if (application.IdJob > 0)
+        {
+            application.Job = await _dbContext.Jobs
+                .Include(j => j.Company)
+                .FirstOrDefaultAsync(j => j.IdJob == application.IdJob);
+        }
+
+        if (application.IdStudent != Guid.Empty)
+        {
+            application.Student = await _dbContext.User
+                .FirstOrDefaultAsync(u => u.Id == application.IdStudent);
+        }
+
+        return application;
     }
 
     public async Task<IEnumerable<Application>> GetByJobIdAsync(int jobId)
     {
-        return await _dbContext.Applications
-            .Include(a => a.Student)
-            .Include(a => a.Job)
+        var applications = await _dbContext.Applications
             .Where(a => a.IdJob == jobId)
             .OrderByDescending(a => a.CreatedAt)
             .ToListAsync();
+
+        foreach (var app in applications)
+        {
+            if (app.IdJob > 0)
+            {
+                app.Job = await _dbContext.Jobs
+                    .Include(j => j.Company)
+                    .FirstOrDefaultAsync(j => j.IdJob == app.IdJob);
+            }
+
+            if (app.IdStudent != Guid.Empty)
+            {
+                app.Student = await _dbContext.User
+                    .FirstOrDefaultAsync(u => u.Id == app.IdStudent);
+            }
+        }
+
+        return applications;
     }
 
     public async Task UpdateAsync(Application application)
@@ -56,5 +88,40 @@ public class ApplicationRepository : IApplicationRepository
         _dbContext.Applications.Add(application);
         await _dbContext.SaveChangesAsync();
         return application;
+    }
+    public async Task<ContractDataDto?> GetContractDataAsync(int applicationId)
+    {
+        try
+        {
+            var query = @"
+            SELECT 
+                a.IdApplication,
+                a.IdJob,
+                a.IdStudent,
+                j.Title as JobTitle,
+                j.Type as JobType,
+                u.CompanyName,
+                u.Email as CompanyEmail,
+                u.FullName as CompanyOwnerName,
+                s.FullName as StudentName,
+                s.Email as StudentEmail,
+                s.University as StudentUniversity,
+                s.Career as StudentCareer
+            FROM applications a
+            INNER JOIN jobs j ON a.IdJob = j.IdJob
+            INNER JOIN users u ON j.IdCompany = u.Id
+            INNER JOIN users s ON a.IdStudent = s.Id
+            WHERE a.IdApplication = {0}";
+
+            var result = await _dbContext.ContractData
+                .FromSqlRaw(query, applicationId)
+                .FirstOrDefaultAsync();
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Error in GetContractDataAsync: {ex.Message}");
+        }
     }
 }
