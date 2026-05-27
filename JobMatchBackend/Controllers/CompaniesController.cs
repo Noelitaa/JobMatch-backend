@@ -6,8 +6,7 @@ using JobMatchBackend.Services;
 namespace JobMatchBackend.Controllers;
 
 [ApiController]
-[Route("")]
-//[Authorize]  // Comentado para pruebas
+[Route("companies")]
 public class CompaniesController : ControllerBase
 {
     private readonly ICompanyService _companyService;
@@ -17,7 +16,8 @@ public class CompaniesController : ControllerBase
         _companyService = companyService;
     }
 
-    [HttpGet("companies/{companyId}")]
+    [Authorize]
+    [HttpGet("{companyId}")]
     public async Task<IActionResult> GetCompanyProfile(Guid companyId)
     {
         try
@@ -28,6 +28,20 @@ public class CompaniesController : ControllerBase
         catch (KeyNotFoundException ex)
         {
             return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAllCompanies()
+    {
+        try
+        {
+            var companies = await _companyService.GetAllCompaniesAsync();
+            return Ok(companies);
         }
         catch (Exception ex)
         {
