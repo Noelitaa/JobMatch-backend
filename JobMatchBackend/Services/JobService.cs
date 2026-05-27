@@ -1,6 +1,7 @@
 using JobMatchBackend.DTOs.Request;
 using JobMatchBackend.DTOs.Response;
 using JobMatchBackend.Mappers;
+using JobMatchBackend.Models.Entities;
 using JobMatchBackend.Repositories;
 
 namespace JobMatchBackend.Services;
@@ -33,6 +34,65 @@ public class JobService : IJobService
         if (job == null)
             throw new KeyNotFoundException("Job not found");
 
+        // FIX 4: Reuse the extracted private method instead of duplicating the mapping
+        return ToDetailResponse(job);
+    }
+
+    public async Task<JobDetailResponse> UpdateJobAsync(int jobId, Guid companyId, UpdateJobRequest request)
+    {
+        var job = await _jobRepository.GetByIdWithCompanyAsync(jobId);
+        if (job == null)
+            throw new KeyNotFoundException("Job not found");
+
+        // FIX 1: Verify that the authenticated company owns this job
+        var isOwner = await _jobRepository.IsCompanyOwnerAsync(jobId, companyId);
+        if (!isOwner)
+            throw new UnauthorizedAccessException("You do not have permission to edit this job");
+
+        var hasAccepted = await _jobRepository.HasAcceptedApplicationsAsync(jobId);
+        if (hasAccepted)
+            throw new InvalidOperationException("Cannot edit a job with accepted applicants or an active contract");
+
+        if (request.Title != null) job.Title = request.Title;
+        if (request.Description != null) job.Description = request.Description;
+        if (request.Payment != null) job.Payment = request.Payment.Value;
+        if (request.PaymentType != null) job.PaymentType = request.PaymentType;
+        if (request.WorkDate != null) job.WorkDate = request.WorkDate.Value;
+        if (request.StartTime != null) job.StartTime = request.StartTime.Value;
+        if (request.EndTime != null) job.EndTime = request.EndTime.Value;
+        if (request.StartDate != null) job.StartDate = request.StartDate;
+        if (request.EndDate != null) job.EndDate = request.EndDate;
+        if (request.Deliverables != null) job.Deliverables = string.Join(",", request.Deliverables);
+
+        job.UpdatedAt = DateTime.UtcNow;
+
+        var updated = await _jobRepository.UpdateAsync(job);
+
+        // FIX 4: Reuse the extracted private method instead of duplicating the mapping
+        return ToDetailResponse(updated);
+    }
+
+    public async Task<List<JobResponse>> GetAllJobsAsync()
+    {
+        var jobs = await _jobRepository.GetAllAsync();
+        return jobs.Select(JobMapper.ToResponse).ToList();
+    }
+
+    public async Task DeleteJobAsync(int id)
+    {
+        var job = await _jobRepository.GetByIdAsync(id);
+        if (job == null)
+            throw new KeyNotFoundException($"Job with id {id} not found");
+
+        if (job.Applications != null && job.Applications.Any())
+            throw new InvalidOperationException("Cannot delete a job that has existing applications.");
+
+        await _jobRepository.DeleteAsync(id);
+    }
+
+    // FIX 4: Single private method for building JobDetailResponse — eliminates duplication
+    private static JobDetailResponse ToDetailResponse(Job job)
+    {
         return new JobDetailResponse
         {
             IdJob = job.IdJob,
@@ -61,78 +121,5 @@ public class JobService : IJobService
                 AvatarUrl = job.Company?.AvatarUrl
             }
         };
-    }
-
-    public async Task<JobDetailResponse> UpdateJobAsync(int jobId, UpdateJobRequest request)
-    {
-        var job = await _jobRepository.GetByIdWithCompanyAsync(jobId);
-        if (job == null)
-            throw new KeyNotFoundException("Job not found");
-
-        var hasAccepted = await _jobRepository.HasAcceptedApplicationsAsync(jobId);
-        if (hasAccepted)
-            throw new InvalidOperationException("Cannot edit a job with accepted applicants or an active contract");
-
-        if (request.Title != null) job.Title = request.Title;
-        if (request.Description != null) job.Description = request.Description;
-        if (request.Payment != null) job.Payment = request.Payment.Value;
-        if (request.PaymentType != null) job.PaymentType = request.PaymentType;
-        if (request.WorkDate != null) job.WorkDate = request.WorkDate.Value;
-        if (request.StartTime != null) job.StartTime = request.StartTime.Value;
-        if (request.EndTime != null) job.EndTime = request.EndTime.Value;
-        if (request.StartDate != null) job.StartDate = request.StartDate;
-        if (request.EndDate != null) job.EndDate = request.EndDate;
-        if (request.Deliverables != null) job.Deliverables = string.Join(",", request.Deliverables);
-
-        job.UpdatedAt = DateTime.UtcNow;
-
-        var updated = await _jobRepository.UpdateAsync(job);
-
-        return new JobDetailResponse
-        {
-            IdJob = updated.IdJob,
-            IdCompany = updated.IdCompany,
-            Title = updated.Title,
-            Description = updated.Description,
-            Type = updated.Type,
-            Status = updated.Status,
-            Payment = updated.Payment,
-            PaymentType = updated.PaymentType,
-            WorkDate = updated.WorkDate,
-            StartTime = updated.StartTime,
-            EndTime = updated.EndTime,
-            StartDate = updated.StartDate,
-            EndDate = updated.EndDate,
-            Deliverables = updated.Deliverables,
-            CreatedAt = updated.CreatedAt,
-            UpdatedAt = updated.UpdatedAt,
-            Company = new CompanySummaryResponse
-            {
-                Id = updated.Company?.Id ?? Guid.Empty,
-                CompanyName = updated.Company?.CompanyName,
-                Email = updated.Company?.Email ?? string.Empty,
-                Phone = updated.Company?.Phone,
-                Description = updated.Company?.Description,
-                AvatarUrl = updated.Company?.AvatarUrl
-            }
-        };
-    }
-
-    public async Task<List<JobResponse>> GetAllJobsAsync()
-    {
-        var jobs = await _jobRepository.GetAllAsync();
-        return jobs.Select(JobMapper.ToResponse).ToList();
-    }
-
-    public async Task DeleteJobAsync(int id)
-    {
-        var job = await _jobRepository.GetByIdAsync(id);
-        if (job == null)
-            throw new KeyNotFoundException($"Job with id {id} not found");
-
-        if (job.Applications != null && job.Applications.Any())
-            throw new InvalidOperationException("Cannot delete a job that has existing applications.");
-
-        await _jobRepository.DeleteAsync(id);
     }
 }

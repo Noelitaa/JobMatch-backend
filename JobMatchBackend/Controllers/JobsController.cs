@@ -2,6 +2,7 @@ using JobMatchBackend.DTOs.Request;
 using JobMatchBackend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace JobMatchBackend.Controllers;
 
@@ -36,22 +37,38 @@ public class JobsController : ControllerBase
     {
         try
         {
-            var response = await _jobService.UpdateJobAsync(jobId, request);
+            // FIX 1: Read companyId from JWT and pass it to the service for ownership verification
+            var companyIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(companyIdClaim, out var companyId))
+                return Unauthorized(new { message = "Invalid or missing company identity in token" });
+
+            var response = await _jobService.UpdateJobAsync(jobId, companyId, request);
             return Ok(response);
         }
         catch (KeyNotFoundException)
         {
             return NotFound(new { message = "Job not found" });
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Forbid();
+        }
         catch (InvalidOperationException ex)
         {
-            return StatusCode(403, new { message = ex.Message });
+            // FIX 2: InvalidOperationException means a business rule conflict, not a permission issue
+            return Conflict(new { message = ex.Message });
         }
         catch (ArgumentException ex)
         {
             return BadRequest(new { message = ex.Message });
         }
+        // FIX 3: Catch-all for unexpected errors
+        catch (Exception)
+        {
+            return StatusCode(500, new { message = "Internal server error" });
+        }
     }
+
     [HttpGet]
     public async Task<IActionResult> GetAllJobs()
     {
