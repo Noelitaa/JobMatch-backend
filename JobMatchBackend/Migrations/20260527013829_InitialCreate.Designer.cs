@@ -12,11 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobMatchBackend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-
-    [Migration("20260524211401_InitialCreate")]
+    [Migration("20260527013829_InitialCreate")]
     partial class InitialCreate
-
-    [Migration("20260527002148_InitialLowercaseSchema")]
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -71,7 +68,7 @@ namespace JobMatchBackend.Migrations
 
                     b.ToTable((string)null);
 
-                    b.ToView(null, (string)null);
+                    b.ToView("vw_ContractData", (string)null);
                 });
 
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Application", b =>
