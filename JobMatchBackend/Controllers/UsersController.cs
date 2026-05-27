@@ -18,13 +18,13 @@ public class UsersController : ControllerBase
         _userService = userService;
     }
 
-    [HttpDelete("me")]
-    public async Task<IActionResult> DeleteCurrentUser([FromBody] DeleteUserRequest request)
+    [HttpDelete("{userId}")]
+    public async Task<IActionResult> DeleteUser(Guid userId, [FromBody] DeleteUserRequest request)
     {
         try
         {
             var authenticatedUserId = GetCurrentUserId();
-            var message = await _userService.SoftDeleteUserAsync(authenticatedUserId, request);
+            var message = await _userService.SoftDeleteUserAsync(userId, authenticatedUserId, request);
             return Ok(new { message });
         }
         catch (KeyNotFoundException)
@@ -33,7 +33,11 @@ public class UsersController : ControllerBase
         }
         catch (UnauthorizedAccessException ex)
         {
-            return Unauthorized(new { message = ex.Message });
+            return StatusCode(403, new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
         catch (Exception)
         {

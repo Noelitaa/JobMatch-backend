@@ -7,5 +7,5 @@ public interface IUserService
 {
     Task<RegisterStudentResponse> CreateStudentAsync(RegisterStudent request);
     Task<RegisterCompanyResponse> CreateCompanyAsync(RegisterCompany request);
-    Task<string> SoftDeleteUserAsync(Guid authenticatedUserId, DeleteUserRequest request);
+    Task<string> SoftDeleteUserAsync(Guid userId, Guid authenticatedUserId, DeleteUserRequest request);
 }

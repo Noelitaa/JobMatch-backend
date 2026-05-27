@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobMatchBackend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260526042645_AddDeletedAtToUser")]
+    [Migration("20260527015019_AddDeletedAtToUser")]
     partial class AddDeletedAtToUser
     {
         /// <inheritdoc />
@@ -68,7 +68,7 @@ namespace JobMatchBackend.Migrations
 
                     b.ToTable((string)null);
 
-                    b.ToView("vw_ContractData", (string)null);
+                    b.ToView(null, (string)null);
                 });
 
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Application", b =>
