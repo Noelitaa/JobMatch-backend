@@ -272,7 +272,7 @@ modelBuilder.Entity<Job>()
             .IsUnique();
 
         // ── Notification ─────────────────────────────────────────────────
-        modelBuilder.Entity<Notification>().ToTable("notifications");
+        modelBuilder.Entity<Notification>()
             .HasKey(n => n.IdNotification);
 
         modelBuilder.Entity<Notification>()

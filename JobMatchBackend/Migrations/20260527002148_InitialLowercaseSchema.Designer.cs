@@ -12,13 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JobMatchBackend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-<<<<<<<< HEAD:JobMatchBackend/Migrations/20260523212131_InitialCreate.Designer.cs
-    [Migration("20260523212131_InitialCreate")]
-    partial class InitialCreate
-========
     [Migration("20260527002148_InitialLowercaseSchema")]
     partial class InitialLowercaseSchema
->>>>>>>> Develop:JobMatchBackend/Migrations/20260527002148_InitialLowercaseSchema.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
