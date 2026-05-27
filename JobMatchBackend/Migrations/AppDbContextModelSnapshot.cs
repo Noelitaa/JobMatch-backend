@@ -65,7 +65,7 @@ namespace JobMatchBackend.Migrations
 
                     b.ToTable((string)null);
 
-                    b.ToView("vw_ContractData", (string)null);
+                    b.ToView(null, (string)null);
                 });
 
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Application", b =>

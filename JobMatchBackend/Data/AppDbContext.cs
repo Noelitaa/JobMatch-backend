@@ -1,7 +1,6 @@
-using Microsoft.EntityFrameworkCore;
-using JobMatchBackend.Models.Entities;
-using JobMatchBackend.Models;
 using JobMatchBackend.DTOs;
+using JobMatchBackend.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace JobMatchBackend.Data;
 
@@ -28,11 +27,7 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
-        modelBuilder.Entity<User>().ToTable("users");
 
-
-        // ── Table name mappings ──────────────────────────────────────────
         modelBuilder.Entity<User>().ToTable("users");
         modelBuilder.Entity<Job>().ToTable("jobs");
         modelBuilder.Entity<Application>().ToTable("applications");
@@ -40,6 +35,11 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Skill>().ToTable("skills");
         modelBuilder.Entity<StudentSkill>().ToTable("student_skills");
         modelBuilder.Entity<Availability>().ToTable("availabilities");
+        modelBuilder.Entity<Payment>().ToTable("payments");
+        modelBuilder.Entity<Rating>().ToTable("ratings");
+        modelBuilder.Entity<Notification>().ToTable("notifications");
+        modelBuilder.Entity<FcmToken>().ToTable("fcm_tokens");
+        modelBuilder.Entity<ModerationLog>().ToTable("moderation_logs");
 
         // ── User ─────────────────────────────────────────────────────────
 modelBuilder.Entity<User>()
@@ -52,6 +52,19 @@ modelBuilder.Entity<Job>()
         modelBuilder.Entity<Job>()
     .Property(j => j.Type)
     .HasColumnName("type");
+        modelBuilder.Entity<Job>().HasKey(j => j.IdJob);
+        modelBuilder.Entity<Job>().Property(j => j.Payment).HasColumnType("decimal(18,2)");
+
+        modelBuilder.Entity<Application>().HasKey(a => a.IdApplication);
+        modelBuilder.Entity<Contract>().HasKey(c => c.IdContract);
+        modelBuilder.Entity<Skill>().HasKey(s => s.Id);
+        modelBuilder.Entity<Availability>().HasKey(a => a.Id);
+        modelBuilder.Entity<Payment>().HasKey(p => p.IdPayment);
+        modelBuilder.Entity<Payment>().Property(p => p.Amount).HasColumnType("decimal(18,2)");
+        modelBuilder.Entity<Rating>().HasKey(r => r.IdRating);
+        modelBuilder.Entity<Notification>().HasKey(n => n.IdNotification);
+        modelBuilder.Entity<FcmToken>().HasKey(f => f.IdToken);
+        modelBuilder.Entity<ModerationLog>().HasKey(m => m.IdLog);
 
 modelBuilder.Entity<Job>()
     .HasOne(j => j.Company)
@@ -141,6 +154,29 @@ modelBuilder.Entity<Job>()
         // ── Contract ─────────────────────────────────────────────────────
         modelBuilder.Entity<Contract>()
             .HasKey(c => c.IdContract);
+
+        modelBuilder.Entity<StudentSkill>().HasKey(ss => new { ss.StudentId, ss.SkillId });
+
+        modelBuilder.Entity<StudentSkill>()
+            .HasOne(ss => ss.Student)
+            .WithMany(u => u.StudentSkills)
+            .HasForeignKey(ss => ss.StudentId);
+
+        modelBuilder.Entity<StudentSkill>()
+            .HasOne(ss => ss.Skill)
+            .WithMany(s => s.StudentSkills)
+            .HasForeignKey(ss => ss.SkillId);
+
+        modelBuilder.Entity<Availability>()
+            .HasOne(a => a.Student)
+            .WithMany(u => u.Availabilities)
+            .HasForeignKey(a => a.StudentId);
+
+        modelBuilder.Entity<Job>()
+            .HasOne(j => j.Company)
+            .WithMany()
+            .HasForeignKey(j => j.IdCompany)
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Contract>()
             .HasOne(c => c.Application)
@@ -237,7 +273,6 @@ modelBuilder.Entity<Job>()
 
         // ── Notification ─────────────────────────────────────────────────
         modelBuilder.Entity<Notification>().ToTable("notifications");
-        modelBuilder.Entity<Notification>()
             .HasKey(n => n.IdNotification);
 
         modelBuilder.Entity<Notification>()
@@ -272,9 +307,8 @@ modelBuilder.Entity<Job>()
             .HasForeignKey(m => m.AdminUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // ── Views ────────────────────────────────────────────────────────
         modelBuilder.Entity<ContractDataDto>()
             .HasNoKey()
-            .ToView("vw_ContractData");
+            .ToView(null);
     }
 }
