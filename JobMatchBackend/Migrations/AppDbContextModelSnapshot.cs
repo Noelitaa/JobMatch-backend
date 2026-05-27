@@ -65,7 +65,7 @@ namespace JobMatchBackend.Migrations
 
                     b.ToTable((string)null);
 
-                    b.ToView("vw_ContractData", (string)null);
+                    b.ToView(null, (string)null);
                 });
 
             modelBuilder.Entity("JobMatchBackend.Models.Entities.Application", b =>
@@ -267,9 +267,6 @@ namespace JobMatchBackend.Migrations
                         .HasColumnName("title");
 
                     b.Property<string>("Type")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("type");
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")

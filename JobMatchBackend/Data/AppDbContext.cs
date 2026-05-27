@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using JobMatchBackend.Models.Entities;
 using JobMatchBackend.Models;
 using JobMatchBackend.DTOs;
+using JobMatchBackend.Models.Entities;
 
 namespace JobMatchBackend.Data;
 
@@ -28,9 +28,6 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
-        modelBuilder.Entity<User>().ToTable("users");
-
 
         // ── Table name mappings ──────────────────────────────────────────
         modelBuilder.Entity<User>().ToTable("users");
@@ -40,86 +37,90 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Skill>().ToTable("skills");
         modelBuilder.Entity<StudentSkill>().ToTable("student_skills");
         modelBuilder.Entity<Availability>().ToTable("availabilities");
+        modelBuilder.Entity<Payment>().ToTable("payments");
+        modelBuilder.Entity<Rating>().ToTable("ratings");
+        modelBuilder.Entity<Notification>().ToTable("notifications");
+        modelBuilder.Entity<FcmToken>().ToTable("fcm_tokens");
+        modelBuilder.Entity<ModerationLog>().ToTable("moderation_logs");
 
         // ── User ─────────────────────────────────────────────────────────
-modelBuilder.Entity<User>()
-    .HasKey(u => u.Id);
+        modelBuilder.Entity<User>()
+            .HasKey(u => u.Id);
 
         // ── Job ──────────────────────────────────────────────────────────
-modelBuilder.Entity<Job>()
-    .HasKey(j => j.IdJob);
+        modelBuilder.Entity<Job>()
+            .HasKey(j => j.IdJob);
 
         modelBuilder.Entity<Job>()
-    .Property(j => j.Type)
-    .HasColumnName("type");
+            .Property(j => j.Type)
+            .HasColumnName("type");
 
-modelBuilder.Entity<Job>()
-    .HasOne(j => j.Company)
-    .WithMany()
-    .HasForeignKey(j => j.IdCompany)
-    .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Job>()
+            .Property(j => j.Payment)
+            .HasColumnName("payment")
+            .HasColumnType("decimal(18,2)");
 
-modelBuilder.Entity<Job>()
-    .Property(j => j.Payment)
-    .HasColumnName("payment")
-    .HasColumnType("decimal(18,2)");
+        modelBuilder.Entity<Job>()
+            .Property(j => j.PaymentType)
+            .HasColumnName("payment_type");
 
-modelBuilder.Entity<Job>()
-    .Property(j => j.PaymentType)
-    .HasColumnName("payment_type");
+        modelBuilder.Entity<Job>()
+            .Property(j => j.WorkDate)
+            .HasColumnName("work_date");
 
-modelBuilder.Entity<Job>()
-    .Property(j => j.WorkDate)
-    .HasColumnName("work_date");
+        modelBuilder.Entity<Job>()
+            .Property(j => j.StartTime)
+            .HasColumnName("start_time");
 
-modelBuilder.Entity<Job>()
-    .Property(j => j.StartTime)
-    .HasColumnName("start_time");
+        modelBuilder.Entity<Job>()
+            .Property(j => j.EndTime)
+            .HasColumnName("end_time");
 
-modelBuilder.Entity<Job>()
-    .Property(j => j.EndTime)
-    .HasColumnName("end_time");
+        modelBuilder.Entity<Job>()
+            .Property(j => j.StartDate)
+            .HasColumnName("start_date");
 
-modelBuilder.Entity<Job>()
-    .Property(j => j.StartDate)
-    .HasColumnName("start_date");
+        modelBuilder.Entity<Job>()
+            .Property(j => j.EndDate)
+            .HasColumnName("end_date");
 
-modelBuilder.Entity<Job>()
-    .Property(j => j.EndDate)
-    .HasColumnName("end_date");
+        modelBuilder.Entity<Job>()
+            .Property(j => j.Deliverables)
+            .HasColumnName("deliverables");
 
-modelBuilder.Entity<Job>()
-    .Property(j => j.Deliverables)
-    .HasColumnName("deliverables");
+        modelBuilder.Entity<Job>()
+            .Property(j => j.CreatedAt)
+            .HasColumnName("created_at");
 
-modelBuilder.Entity<Job>()
-    .Property(j => j.CreatedAt)
-    .HasColumnName("created_at");
+        modelBuilder.Entity<Job>()
+            .Property(j => j.UpdatedAt)
+            .HasColumnName("updated_at");
 
-modelBuilder.Entity<Job>()
-    .Property(j => j.UpdatedAt)
-    .HasColumnName("updated_at");
+        modelBuilder.Entity<Job>()
+            .Property(j => j.Title)
+            .HasColumnName("title");
 
-modelBuilder.Entity<Job>()
-    .Property(j => j.Title)
-    .HasColumnName("title");
+        modelBuilder.Entity<Job>()
+            .Property(j => j.Description)
+            .HasColumnName("description");
 
-modelBuilder.Entity<Job>()
-    .Property(j => j.Description)
-    .HasColumnName("description");
+        modelBuilder.Entity<Job>()
+            .Property(j => j.Status)
+            .HasColumnName("status");
 
-modelBuilder.Entity<Job>()
-    .Property(j => j.Status)
-    .HasColumnName("status");
+        modelBuilder.Entity<Job>()
+            .Property(j => j.IdCompany)
+            .HasColumnName("id_company");
 
-modelBuilder.Entity<Job>()
-    .Property(j => j.IdCompany)
-    .HasColumnName("id_company");
+        modelBuilder.Entity<Job>()
+            .HasOne(j => j.Company)
+            .WithMany()
+            .HasForeignKey(j => j.IdCompany)
+            .OnDelete(DeleteBehavior.Restrict);
 
         // ── Application ──────────────────────────────────────────────────
         modelBuilder.Entity<Application>()
             .HasKey(a => a.IdApplication);
-        
 
         modelBuilder.Entity<Application>()
             .HasIndex(a => new { a.IdJob, a.IdStudent })
@@ -194,7 +195,6 @@ modelBuilder.Entity<Job>()
             .HasForeignKey(a => a.StudentId);
 
         // ── Payment ──────────────────────────────────────────────────────
-        modelBuilder.Entity<Payment>().ToTable("payments");
         modelBuilder.Entity<Payment>()
             .HasKey(p => p.IdPayment);
 
@@ -209,7 +209,6 @@ modelBuilder.Entity<Job>()
             .OnDelete(DeleteBehavior.Restrict);
 
         // ── Rating ───────────────────────────────────────────────────────
-        modelBuilder.Entity<Rating>().ToTable("ratings");
         modelBuilder.Entity<Rating>()
             .HasKey(r => r.IdRating);
 
@@ -236,7 +235,6 @@ modelBuilder.Entity<Job>()
             .IsUnique();
 
         // ── Notification ─────────────────────────────────────────────────
-        modelBuilder.Entity<Notification>().ToTable("notifications");
         modelBuilder.Entity<Notification>()
             .HasKey(n => n.IdNotification);
 
@@ -251,7 +249,6 @@ modelBuilder.Entity<Job>()
             .OnDelete(DeleteBehavior.Cascade);
 
         // ── FcmToken ─────────────────────────────────────────────────────
-        modelBuilder.Entity<FcmToken>().ToTable("fcm_tokens");
         modelBuilder.Entity<FcmToken>()
             .HasKey(f => f.IdToken);
 
@@ -262,7 +259,6 @@ modelBuilder.Entity<Job>()
             .OnDelete(DeleteBehavior.Cascade);
 
         // ── ModerationLog ────────────────────────────────────────────────
-        modelBuilder.Entity<ModerationLog>().ToTable("moderation_logs");
         modelBuilder.Entity<ModerationLog>()
             .HasKey(m => m.IdLog);
 
