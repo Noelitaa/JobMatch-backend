@@ -100,6 +100,8 @@ public class AppDbContext : DbContext
             .HasForeignKey(c => c.IdCompany)
             .OnDelete(DeleteBehavior.Restrict);
 
-        modelBuilder.Entity<ContractDataDto>().HasNoKey();
+        modelBuilder.Entity<ContractDataDto>()
+            .HasNoKey()
+            .ToView(null);
     }
 }
