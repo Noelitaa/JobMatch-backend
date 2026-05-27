@@ -80,6 +80,9 @@ public class UserService : IUserService
         if (user == null)
             throw new KeyNotFoundException("User not found");
 
+        if (!user.IsActive)
+            throw new InvalidOperationException("Account already deleted");
+
         var passwordHasher = new PasswordHasher<User>();
         var passwordResult = passwordHasher.VerifyHashedPassword(
             user,

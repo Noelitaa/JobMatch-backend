@@ -29,7 +29,7 @@ public class CompanyRepository : ICompanyRepository
     public async Task<List<User>> GetAllAsync()
     {
         return await _dbContext.User
-            .Where(u => u.Role == "Company")
+            .Where(u => u.Role == "Company" && u.IsActive)
             .OrderBy(u => u.CompanyName)
             .ToListAsync();
     }
