@@ -6,6 +6,7 @@ public interface IStudentRepository
 {
     Task<User?> GetByIdAsync(Guid studentId);
     Task<List<Skill>> GetSkillsByStudentIdAsync(Guid studentId);
-    Task<Skill> GetOrCreateSkillAsync(string skillName);
-    Task<bool> AddSkillAsync(Guid studentId, Guid skillId);
+    Task<Skill?> GetSkillByNameAsync(string skillName);
+    Task<Skill> CreateSkillAsync(Skill skill);
+    Task AddSkillAsync(Guid studentId, Guid skillId);
 }

@@ -24,12 +24,6 @@ public class StudentRepository : IStudentRepository
 
     public async Task<List<Skill>> GetSkillsByStudentIdAsync(Guid studentId)
     {
-        var exists = await _dbContext.User
-            .AnyAsync(u => u.Id == studentId && u.Role == "Student");
-
-        if (!exists)
-            throw new KeyNotFoundException("Student not found");
-
         return await _dbContext.StudentSkills
             .Where(ss => ss.StudentId == studentId)
             .Include(ss => ss.Skill)
@@ -37,29 +31,21 @@ public class StudentRepository : IStudentRepository
             .ToListAsync();
     }
 
-    public async Task<Skill> GetOrCreateSkillAsync(string skillName)
+    public async Task<Skill?> GetSkillByNameAsync(string skillName)
     {
-        var skill = await _dbContext.Skills
+        return await _dbContext.Skills
             .FirstOrDefaultAsync(s => s.Name.ToLower() == skillName.ToLower());
+    }
 
-        if (skill == null)
-        {
-            skill = new Skill { Id = Guid.NewGuid(), Name = skillName };
-            _dbContext.Skills.Add(skill);
-            await _dbContext.SaveChangesAsync();
-        }
-
+    public async Task<Skill> CreateSkillAsync(Skill skill)
+    {
+        _dbContext.Skills.Add(skill);
+        await _dbContext.SaveChangesAsync();
         return skill;
     }
 
-    public async Task<bool> AddSkillAsync(Guid studentId, Guid skillId)
+    public async Task AddSkillAsync(Guid studentId, Guid skillId)
     {
-        var alreadyExists = await _dbContext.StudentSkills
-            .AnyAsync(ss => ss.StudentId == studentId && ss.SkillId == skillId);
-
-        if (alreadyExists)
-            return false;
-
         _dbContext.StudentSkills.Add(new StudentSkill
         {
             StudentId = studentId,
@@ -67,6 +53,5 @@ public class StudentRepository : IStudentRepository
         });
 
         await _dbContext.SaveChangesAsync();
-        return true;
     }
 }
