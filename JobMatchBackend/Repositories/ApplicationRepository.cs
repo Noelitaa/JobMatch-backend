@@ -71,42 +71,54 @@ public class ApplicationRepository : IApplicationRepository
         await _dbContext.SaveChangesAsync();
     }
 
-    // De feature/issue-23-delete-jobs
-    public async Task<bool> IsCompanyOwnerAsync(int jobId, Guid companyId)
+    public async Task<Application?> GetApplicationWithDetailsAsync(int applicationId)
     {
-        var job = await _dbContext.Jobs.FirstOrDefaultAsync(j => j.IdJob == jobId);
-        return job != null && job.IdCompany == companyId;
+        return await _dbContext.Applications
+            .Include(a => a.Student)
+            .Include(a => a.Job)
+                .ThenInclude(j => j!.Company)
+            .FirstOrDefaultAsync(a => a.IdApplication == applicationId);
     }
 
-    // De Develop
+    public async Task<bool> ExistsAsync(Guid studentId, int jobId)
+    {
+        return await _dbContext.Applications
+            .AnyAsync(a => a.IdStudent == studentId && a.IdJob == jobId);
+    }
+
+    public async Task<Application> CreateAsync(Application application)
+    {
+        _dbContext.Applications.Add(application);
+        await _dbContext.SaveChangesAsync();
+        return application;
+    }
+
     public async Task<ContractDataDto?> GetContractDataAsync(int applicationId)
     {
         try
         {
-            var query = $@"
-                SELECT 
-                    a.IdApplication,
-                    a.IdJob,
-                    a.IdStudent,
-                    j.Title as JobTitle,
-                    j.Type as JobType,
-                    u.CompanyName,
-                    u.Email as CompanyEmail,
-                    u.FullName as CompanyOwnerName,
-                    s.FullName as StudentName,
-                    s.Email as StudentEmail,
-                    s.University as StudentUniversity,
-                    s.Career as StudentCareer
-                FROM Applications a
-                INNER JOIN Jobs j ON a.IdJob = j.IdJob
-                INNER JOIN [User] u ON j.IdCompany = u.Id
-                INNER JOIN [User] s ON a.IdStudent = s.Id
-                WHERE a.IdApplication = {applicationId}";
-
             var result = await _dbContext.ContractData
-                .FromSqlRaw(query)
+                .FromSqlInterpolated($@"
+                    SELECT 
+                        a.IdApplication,
+                        a.IdJob,
+                        a.IdStudent,
+                        j.Title as JobTitle,
+                        j.Type as JobType,
+                        u.CompanyName,
+                        u.Email as CompanyEmail,
+                        u.FullName as CompanyOwnerName,
+                        s.FullName as StudentName,
+                        s.Email as StudentEmail,
+                        s.University as StudentUniversity,
+                        s.Career as StudentCareer
+                    FROM Applications a
+                    INNER JOIN Jobs j ON a.IdJob = j.IdJob
+                    INNER JOIN [User] u ON j.IdCompany = u.Id
+                    INNER JOIN [User] s ON a.IdStudent = s.Id
+                    WHERE a.IdApplication = {applicationId}")
                 .FirstOrDefaultAsync();
-
+            
             return result;
         }
         catch (Exception ex)

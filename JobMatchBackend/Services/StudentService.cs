@@ -24,11 +24,15 @@ public class StudentService : IStudentService
 
     public async Task<List<string>> GetStudentSkillsAsync(Guid studentId)
     {
+        var student = await _studentRepository.GetByIdAsync(studentId);
+        if (student == null)
+            throw new KeyNotFoundException("Student not found");
+
         var skills = await _studentRepository.GetSkillsByStudentIdAsync(studentId);
         return skills.Select(s => s.Name).ToList();
     }
 
-    public async Task AddSkillToStudentAsync(Guid studentId, string skillName)
+    public async Task<string> AddSkillToStudentAsync(Guid studentId, string skillName)
     {
         var student = await _studentRepository.GetByIdAsync(studentId);
         if (student == null)
@@ -36,10 +40,13 @@ public class StudentService : IStudentService
 
         var skill = await _studentRepository.GetSkillByNameAsync(skillName);
         if (skill == null)
-            throw new KeyNotFoundException($"Skill '{skillName}' not found in catalog");
+            skill = await _studentRepository.CreateSkillAsync(new Models.Entities.Skill { Id = Guid.NewGuid(), Name = skillName });
 
-        var added = await _studentRepository.AddSkillAsync(studentId, skill.Id);
-        if (!added)
+        var alreadyHasSkill = student.StudentSkills.Any(ss => ss.SkillId == skill.Id);
+        if (alreadyHasSkill)
             throw new InvalidOperationException("Student already has this skill");
+
+        await _studentRepository.AddSkillAsync(studentId, skill.Id);
+        return skill.Name;
     }
 }

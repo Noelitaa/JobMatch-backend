@@ -20,7 +20,6 @@ public class JobRepository : IJobRepository
         return job;
     }
 
-
     public async Task<bool> IsCompanyOwnerAsync(int jobId, Guid companyId)
     {
         var job = await _dbContext.Jobs
@@ -35,6 +34,9 @@ public class JobRepository : IJobRepository
         if (job == null) return null;
 
         job.Company = await _dbContext.User.FirstOrDefaultAsync(u => u.Id == job.IdCompany);
+        if (job.Company == null || !job.Company.IsActive)
+            return null;
+
         return job;
     }
 
@@ -62,7 +64,10 @@ public class JobRepository : IJobRepository
 
     public async Task<List<Job>> GetAllAsync()
     {
-        return await _dbContext.Jobs.ToListAsync();
+        return await _dbContext.Jobs
+            .Include(j => j.Company)
+            .Where(j => j.Company != null && j.Company.IsActive)
+            .ToListAsync();
     }
 
     public async Task DeleteAsync(int id)
