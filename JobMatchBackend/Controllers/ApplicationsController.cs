@@ -2,12 +2,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using JobMatchBackend.Services;
 using JobMatchBackend.DTOs.Request;
+using System.Security.Claims;
 
 namespace JobMatchBackend.Controllers;
 
 [ApiController]
 [Route("")]
-//[Authorize]
+[Authorize]
 public class ApplicationsController : ControllerBase
 {
     private readonly IApplicationService _applicationService;
@@ -15,6 +16,32 @@ public class ApplicationsController : ControllerBase
     public ApplicationsController(IApplicationService applicationService)
     {
         _applicationService = applicationService;
+    }
+
+    // GET: /applications/{applicationId}
+    [HttpGet("applications/{applicationId}")]
+    public async Task<IActionResult> GetApplicationDetails(int applicationId)
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            var userRole = GetCurrentUserRole();
+            
+            var result = await _applicationService.GetApplicationDetailsAsync(applicationId, userId, userRole);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { message = "Application not found" });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { message = ex.Message });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { message = "Internal server error" });
+        }
     }
 
     // GET: /jobs/{jobId}/applications
@@ -67,6 +94,16 @@ public class ApplicationsController : ControllerBase
 
     private Guid GetCurrentUserId()
     {
-        return Guid.Parse("D3888166-1643-435E-BC10-347D8DEB285C");
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userId, out var parsedUserId))
+            throw new UnauthorizedAccessException("Invalid authenticated user");
+
+        return parsedUserId;
+    }
+
+    private string GetCurrentUserRole()
+    {
+        return User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
     }
 }
