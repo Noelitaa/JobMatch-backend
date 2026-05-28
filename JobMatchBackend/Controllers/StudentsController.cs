@@ -1,4 +1,5 @@
 using JobMatchBackend.DTOs.Request;
+using JobMatchBackend.DTOs.Response;
 using JobMatchBackend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -59,6 +60,12 @@ public class StudentsController : ControllerBase
     }
 
     [HttpPost("{studentId}/skills")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> AddSkillToStudent(Guid studentId, [FromBody] AddSkillRequest request)
     {
         var callerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -67,8 +74,8 @@ public class StudentsController : ControllerBase
 
         try
         {
-            await _studentService.AddSkillToStudentAsync(studentId, request.SkillName);
-            return StatusCode(201, new { message = "Skill added successfully" });
+            var skillName = await _studentService.AddSkillToStudentAsync(studentId, request.SkillName);
+            return StatusCode(201, new AddSkillResponse { SkillName = skillName });
         }
         catch (KeyNotFoundException ex)
         {
