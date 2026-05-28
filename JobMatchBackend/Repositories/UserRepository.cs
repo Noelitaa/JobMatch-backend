@@ -32,8 +32,16 @@ public class UserRepository : IUserRepository
         return _dbContext.User.FirstOrDefault(u => u.Email == email);
     }
 
-    public async Task<User?> GetByIdAsync(Guid id)
+
+    public async Task<User?> GetByIdAsync(Guid userId)
     {
-        return await _dbContext.User.FirstOrDefaultAsync(u => u.Id == id);
+        return await _dbContext.User
+            .FirstOrDefaultAsync(u => u.Id == userId);
+    }
+
+    public async Task UpdateAsync(User user)
+    {
+        _dbContext.User.Update(user);
+        await _dbContext.SaveChangesAsync();
     }
 }

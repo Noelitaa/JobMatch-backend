@@ -7,5 +7,7 @@ public interface IUserRepository
     Task<User> AddAsync(User user);
     Task<User> AddCompanyAsync(User user);
     User? GetByEmail(string email);
-    Task<User?> GetByIdAsync(Guid id);
+
+    Task<User?> GetByIdAsync(Guid userId);
+    Task UpdateAsync(User user);
 }

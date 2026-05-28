@@ -18,7 +18,6 @@ public class ApplicationsController : ControllerBase
         _applicationService = applicationService;
     }
 
-
     // POST: /applications
     [HttpPost("applications")]
     public async Task<IActionResult> CreateApplication([FromBody] CreateApplicationRequest request)
@@ -47,7 +46,31 @@ public class ApplicationsController : ControllerBase
         }
     }
 
+    // GET: /applications/{applicationId}
+    [HttpGet("applications/{applicationId}")]
+    public async Task<IActionResult> GetApplicationDetails(int applicationId)
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            var userRole = GetCurrentUserRole();
 
+            var result = await _applicationService.GetApplicationDetailsAsync(applicationId, userId, userRole);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { message = "Application not found" });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { message = ex.Message });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
 
     // GET: /jobs/{jobId}/applications
     [HttpGet("jobs/{jobId}/applications")]
@@ -104,5 +127,10 @@ public class ApplicationsController : ControllerBase
             throw new UnauthorizedAccessException("Invalid authenticated user");
 
         return parsedUserId;
+    }
+
+    private string GetCurrentUserRole()
+    {
+        return User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
     }
 }

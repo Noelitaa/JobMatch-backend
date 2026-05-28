@@ -31,5 +31,9 @@ public class AuthController : ControllerBase
         {
             return Unauthorized(new { message = "Credenciales inválidas" });
         }
+        catch (InvalidOperationException ex)
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
     }
 }
