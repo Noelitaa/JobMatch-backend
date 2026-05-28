@@ -1,4 +1,4 @@
-// Repositories/ContractRepository.cs
+using Microsoft.EntityFrameworkCore;
 using JobMatchBackend.Data;
 using JobMatchBackend.Models.Entities;
 
@@ -18,5 +18,18 @@ public class ContractRepository : IContractRepository
         _dbContext.Contracts.Add(contract);
         await _dbContext.SaveChangesAsync();
         return contract;
+    }
+
+    public async Task<Contract?> GetContractWithDetailsAsync(int contractId)
+    {
+        return await _dbContext.Contracts
+            .Include(c => c.Job)
+            .FirstOrDefaultAsync(c => c.IdContract == contractId);
+    }
+
+    public async Task UpdateAsync(Contract contract)
+    {
+        _dbContext.Contracts.Update(contract);
+        await _dbContext.SaveChangesAsync();
     }
 }
