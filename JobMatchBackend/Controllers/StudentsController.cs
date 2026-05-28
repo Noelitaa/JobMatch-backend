@@ -90,4 +90,35 @@ public class StudentsController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
+
+    [HttpDelete("{studentId}/skills/{skillId}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RemoveSkillFromStudent(Guid studentId, Guid skillId)
+    {
+        try
+        {
+            await _studentService.GetStudentByIdAsync(studentId);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+
+        var callerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (callerId != studentId.ToString())
+            return Forbid();
+
+        try
+        {
+            await _studentService.RemoveSkillFromStudentAsync(studentId, skillId);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+    }
 }
