@@ -44,6 +44,8 @@ builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IContractRepository, ContractRepository>();
 builder.Services.AddScoped<IJobRepository, JobRepository>();
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<ISkillRepository, SkillRepository>();
 
 // Services
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
@@ -52,7 +54,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJobService, JobService>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
-// builder.Services.AddScoped<ISkillService, SkillService>(); // TODO: implementar SkillService
+builder.Services.AddScoped<ISkillService, SkillService>();
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();

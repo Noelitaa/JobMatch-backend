@@ -256,6 +256,10 @@ paths:
                 type: array
                 items:
                   type: string
+        "401":
+          description: Unauthorized - missing or invalid token
+        "404":
+          description: Student not found
         "500":
           description: Internal server error
     post:
@@ -276,7 +280,19 @@ paths:
         required: true
       responses:
         "201":
-          description: Skill added
+          description: Skill added successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AddSkillResponse"
+        "400":
+          description: Student already has this skill
+        "401":
+          description: Unauthorized - missing or invalid token
+        "403":
+          description: Forbidden - caller does not match student ID
+        "404":
+          description: Student not found
         "500":
           description: Internal server error
   /students/{studentId}/skills/{skillId}:
@@ -961,6 +977,11 @@ components:
     AddSkillRequest:
       required:
         - skillName
+      type: object
+      properties:
+        skillName:
+          type: string
+    AddSkillResponse:
       type: object
       properties:
         skillName:
