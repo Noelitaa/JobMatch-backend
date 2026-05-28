@@ -55,4 +55,12 @@ public class JobRepository : IJobRepository
             .Where(j => j.Company != null && j.Company.IsActive)
             .ToListAsync();
     }
+
+    public async Task UpdateAsync(Job job)
+    {
+        job.UpdatedAt = DateTime.UtcNow;
+        _dbContext.Jobs.Update(job);
+        await _dbContext.SaveChangesAsync();
+    }
+}
 }

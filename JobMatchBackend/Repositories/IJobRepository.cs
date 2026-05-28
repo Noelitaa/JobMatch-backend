@@ -9,4 +9,5 @@ public interface IJobRepository
     Task<bool> IsCompanyOwnerAsync(int jobId, Guid companyId);
     Task<List<Job>> GetAllAsync();
     Task<Job?> GetByIdWithCompanyAsync(int jobId);
+    Task UpdateAsync(Job job);
 }

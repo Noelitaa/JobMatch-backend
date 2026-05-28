@@ -85,8 +85,14 @@ public class ApplicationService : IApplicationService
             response.Contract = new ContractResponse
             {
                 IdContract = contract.IdContract,
+                IdApplication = contract.IdApplication,
+                IdJob = contract.IdJob,
+                IdStudent = contract.IdStudent,
+                IdCompany = contract.IdCompany,
                 Status = contract.Status ?? "pending",
                 CreatedAt = contract.CreatedAt,
+                UpdatedAt = contract.UpdatedAt,
+                AcceptedAt = contract.AcceptedAt,
                 ContractData = contract.ContractData
             };
             response.Message += " and contract generated";
@@ -100,11 +106,15 @@ public class ApplicationService : IApplicationService
         var data = await _applicationRepository.GetContractDataAsync(application.IdApplication);
 
         if (data == null)
-            throw new InvalidOperationException($"Could not fetch contract data for application {application.IdApplication}");
+
+            throw new InvalidOperationException($"Could not retrieve contract data for application {application.IdApplication}");
+
 
         var job = await _jobRepository.GetByIdAsync(application.IdJob);
         if (job == null)
-            throw new InvalidOperationException($"Job with ID {application.IdJob} was not found");
+
+            throw new InvalidOperationException($"Job with ID {application.IdJob} not found");
+
 
         var contractData = new
         {
