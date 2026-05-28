@@ -27,6 +27,9 @@ public class AuthService : IAuthService
         if (user == null)
             throw new UnauthorizedAccessException("Credenciales inválidas");
 
+        if (!user.IsActive)
+            throw new InvalidOperationException("Account inactive or deleted");
+
         var hasher = new PasswordHasher<User>();
 
         var result = hasher.VerifyHashedPassword(
