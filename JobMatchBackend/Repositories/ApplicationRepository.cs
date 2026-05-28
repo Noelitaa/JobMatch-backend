@@ -80,6 +80,19 @@ public class ApplicationRepository : IApplicationRepository
             .FirstOrDefaultAsync(a => a.IdApplication == applicationId);
     }
 
+    public async Task<bool> ExistsAsync(Guid studentId, int jobId)
+    {
+        return await _dbContext.Applications
+            .AnyAsync(a => a.IdStudent == studentId && a.IdJob == jobId);
+    }
+
+    public async Task<Application> CreateAsync(Application application)
+    {
+        _dbContext.Applications.Add(application);
+        await _dbContext.SaveChangesAsync();
+        return application;
+    }
+
     public async Task<ContractDataDto?> GetContractDataAsync(int applicationId)
     {
         try
