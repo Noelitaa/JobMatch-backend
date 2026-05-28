@@ -136,4 +136,37 @@ public class ApplicationService : IApplicationService
 
         return await _contractRepository.CreateAsync(contract);
     }
+
+    public async Task<ApplicationDetailResponse> GetApplicationDetailsAsync(int applicationId, Guid userId, string userRole)
+    {
+        var application = await _applicationRepository.GetApplicationWithDetailsAsync(applicationId);
+
+        if (application == null)
+            throw new KeyNotFoundException("Application not found");
+
+        var hasAccess =
+            userRole == "Admin" ||
+            (userRole == "Student" && application.IdStudent == userId) ||
+            (userRole == "Company" && application.Job?.IdCompany == userId);
+
+        if (!hasAccess)
+            throw new UnauthorizedAccessException("You don't have permission to view this application");
+
+        return new ApplicationDetailResponse
+        {
+            IdApplication = application.IdApplication,
+            Status = application.Status ?? "pending",
+            IdJob = application.IdJob,
+            JobTitle = application.Job?.Title ?? string.Empty,
+            JobType = application.Job?.Type,
+            IdCompany = application.Job?.IdCompany ?? Guid.Empty,
+            CompanyName = application.Job?.Company?.CompanyName,
+            IdStudent = application.IdStudent,
+            StudentName = application.Student?.FullName,
+            StudentEmail = application.Student?.Email,
+            StudentUniversity = application.Student?.University,
+            StudentCareer = application.Student?.Career,
+            CreatedAt = application.CreatedAt
+        };
+    }
 }

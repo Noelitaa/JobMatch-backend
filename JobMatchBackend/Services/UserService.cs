@@ -71,4 +71,34 @@ public class UserService : IUserService
 
     }
 
+    public async Task<string> SoftDeleteUserAsync(Guid userId, Guid authenticatedUserId, DeleteUserRequest request)
+    {
+        if (authenticatedUserId != userId)
+            throw new UnauthorizedAccessException("Authenticated user does not match the requested user");
+
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+            throw new KeyNotFoundException("User not found");
+
+        if (!user.IsActive)
+            throw new InvalidOperationException("Account already deleted");
+
+        var passwordHasher = new PasswordHasher<User>();
+        var passwordResult = passwordHasher.VerifyHashedPassword(
+            user,
+            user.PasswordHash,
+            request.Password
+        );
+
+        if (passwordResult == PasswordVerificationResult.Failed)
+            throw new InvalidOperationException("Incorrect password");
+
+        var now = DateTime.UtcNow;
+        user.IsActive = false;
+        user.DeletedAt = now;
+        user.UpdatedAt = now;
+        await _userRepository.UpdateAsync(user);
+
+        return "Account successfully deleted (soft delete)";
+    }
 }
