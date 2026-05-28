@@ -57,6 +57,7 @@ builder.Services.AddScoped<IJobService, JobService>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<ISkillService, SkillService>();
+builder.Services.AddScoped<IContractService, ContractService>();
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();

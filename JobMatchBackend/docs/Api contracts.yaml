@@ -589,13 +589,8 @@ paths:
       tags:
         - Contracts
       summary: List contracts by user
-      description: Returns contracts filtered by status (active or completed).
+      description: Returns contracts for the authenticated user filtered by optional status (active or completed).
       parameters:
-        - name: userId
-          in: query
-          required: true
-          schema:
-            type: string
         - name: status
           in: query
           required: false
@@ -606,15 +601,15 @@ paths:
               - completed
       responses:
         "200":
-          description: List of contracts
+          description: List of contracts for the authenticated user
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: "#/components/schemas/ContractSummary"
-        "500":
-          description: Internal server error
+        "400":
+          description: Invalid status value - must be 'active' or 'completed'
   /contracts/{contractId}:
     get:
       tags:
@@ -625,7 +620,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            type: integer
       responses:
         "200":
           description: Contract found
@@ -633,10 +628,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ContractDetail"
+        "401":
+          description: Unauthorized - missing or invalid token
+        "403":
+          description: Forbidden - caller is not the student or company of this contract
         "404":
           description: Contract not found
-        "500":
-          description: Internal server error
   /contracts/{contractId}/accept:
     put:
       tags:
