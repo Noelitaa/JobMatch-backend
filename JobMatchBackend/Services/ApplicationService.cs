@@ -69,6 +69,7 @@ public class ApplicationService : IApplicationService
             throw new ArgumentException("Invalid status. Use 'accepted' or 'rejected'");
 
         application.Status = request.Status;
+        application.UpdatedAt = DateTime.UtcNow;
         await _applicationRepository.UpdateAsync(application);
 
         var response = new UpdateApplicationResponse
@@ -150,6 +151,9 @@ public class ApplicationService : IApplicationService
         var student = await _userRepository.GetByIdAsync(studentId);
         if (student == null)
             throw new KeyNotFoundException("Student not found");
+
+        if (student.Role != "Student")
+            throw new UnauthorizedAccessException("Only students can apply for job offers");
 
         var job = await _jobRepository.GetByIdWithCompanyAsync(request.IdJob!.Value);
         if (job == null)

@@ -28,6 +28,10 @@ public class ApplicationsController : ControllerBase
             var result = await _applicationService.CreateApplicationAsync(studentId, request);
             return StatusCode(201, result);
         }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
         catch (KeyNotFoundException ex)
         {
             return NotFound(new { message = ex.Message });
