@@ -25,6 +25,7 @@ public class JobRepository : IJobRepository
     {
         return await _dbContext.Jobs
             .Include(j => j.Company)
+            .Include(j => j.Applications)   // FIX: required for conflict check in DeleteJobAsync
             .FirstOrDefaultAsync(j => j.IdJob == id && j.Company != null && j.Company.IsActive);
     }
 
@@ -60,12 +61,12 @@ public class JobRepository : IJobRepository
         _dbContext.Jobs.Remove(job);
         await _dbContext.SaveChangesAsync();
     }
-}
+    
     public async Task UpdateAsync(Job job)
     {
         job.UpdatedAt = DateTime.UtcNow;
         _dbContext.Jobs.Update(job);
         await _dbContext.SaveChangesAsync();
     }
-}
+
 }
