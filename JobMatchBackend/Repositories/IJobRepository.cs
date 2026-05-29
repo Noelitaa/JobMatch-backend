@@ -11,4 +11,5 @@ public interface IJobRepository
     // FIX 2: Signature now receives the entity instead of the ID
     Task DeleteAsync(Job job);
     Task<Job?> GetByIdWithCompanyAsync(int jobId);
+    Task UpdateAsync(Job job);
 }
