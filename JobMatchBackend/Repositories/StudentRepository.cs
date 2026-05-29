@@ -44,6 +44,12 @@ public class StudentRepository : IStudentRepository
         return skill;
     }
 
+    public async Task<Skill?> GetSkillByIdAsync(Guid skillId)
+    {
+        return await _dbContext.Skills
+            .FirstOrDefaultAsync(s => s.Id == skillId);
+    }
+
     public async Task AddSkillAsync(Guid studentId, Guid skillId)
     {
         _dbContext.StudentSkills.Add(new StudentSkill
@@ -53,5 +59,17 @@ public class StudentRepository : IStudentRepository
         });
 
         await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task RemoveSkillAsync(Guid studentId, Guid skillId)
+    {
+        var studentSkill = await _dbContext.StudentSkills
+            .FirstOrDefaultAsync(ss => ss.StudentId == studentId && ss.SkillId == skillId);
+
+        if (studentSkill != null)
+        {
+            _dbContext.StudentSkills.Remove(studentSkill);
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }

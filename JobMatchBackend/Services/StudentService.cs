@@ -49,4 +49,17 @@ public class StudentService : IStudentService
         await _studentRepository.AddSkillAsync(studentId, skill.Id);
         return skill.Name;
     }
+
+    public async Task RemoveSkillFromStudentAsync(Guid studentId, Guid skillId)
+    {
+        var student = await _studentRepository.GetByIdAsync(studentId);
+        if (student == null)
+            throw new KeyNotFoundException("Student not found");
+
+        var hasSkill = student.StudentSkills.Any(ss => ss.SkillId == skillId);
+        if (!hasSkill)
+            throw new KeyNotFoundException("Skill not found for this student");
+
+        await _studentRepository.RemoveSkillAsync(studentId, skillId);
+    }
 }
