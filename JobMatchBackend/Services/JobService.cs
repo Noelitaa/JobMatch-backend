@@ -75,8 +75,7 @@ public class JobService : IJobService
         if (job == null)
             throw new KeyNotFoundException("Job not found");
 
-        var isOwner = await _jobRepository.IsCompanyOwnerAsync(jobId, companyId);
-        if (!isOwner)
+        if (job.IdCompany != companyId)
             throw new UnauthorizedAccessException("Company does not own this job");
 
         var hasAcceptedApplications = await _jobRepository.HasAcceptedApplicationsAsync(jobId);
@@ -87,8 +86,8 @@ public class JobService : IJobService
         if (hasActiveContract)
             throw new InvalidOperationException("Cannot edit a job with an active contract");
 
-        if (request.Title != null) job.Title = request.Title;
-        if (request.Description != null) job.Description = request.Description;
+        if (!string.IsNullOrWhiteSpace(request.Title)) job.Title = request.Title;
+        if (!string.IsNullOrWhiteSpace(request.Description)) job.Description = request.Description;
         if (request.Payment != null) job.Payment = request.Payment.Value;
         if (request.PaymentType != null) job.PaymentType = request.PaymentType;
         if (request.WorkDate != null) job.WorkDate = request.WorkDate.Value;

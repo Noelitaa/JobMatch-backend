@@ -59,6 +59,10 @@ public class JobsController : ControllerBase
         {
             return NotFound(new { message = "Job not found" });
         }
+        catch (UnauthorizedAccessException ex) when (ex.Message == "Invalid authenticated user")
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
         catch (UnauthorizedAccessException ex)
         {
             return StatusCode(403, new { message = ex.Message });
