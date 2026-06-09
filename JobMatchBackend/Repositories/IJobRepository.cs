@@ -9,5 +9,7 @@ public interface IJobRepository
     Task<bool> IsCompanyOwnerAsync(int jobId, Guid companyId);
     Task<List<Job>> GetAllAsync();
     Task<Job?> GetByIdWithCompanyAsync(int jobId);
-    Task UpdateAsync(Job job);
+    Task<Job> UpdateAsync(Job job);
+    Task<bool> HasAcceptedApplicationsAsync(int jobId);
+    Task<bool> HasActiveContractAsync(int jobId);
 }
