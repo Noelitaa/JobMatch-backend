@@ -162,9 +162,15 @@ paths:
         required: true
       responses:
         "200":
-          description: Account deleted
+          description: Account successfully deleted
+        "400":
+          description: Incorrect password or account already deleted
         "401":
-          description: Incorrect password
+          description: Missing or invalid JWT token
+        "403":
+          description: Authenticated user does not match the requested user ID
+        "404":
+          description: User does not exist
         "500":
           description: Internal server error
   /students/{studentId}:
@@ -256,6 +262,10 @@ paths:
                 type: array
                 items:
                   type: string
+        "401":
+          description: Unauthorized - missing or invalid token
+        "404":
+          description: Student not found
         "500":
           description: Internal server error
     post:
@@ -276,7 +286,19 @@ paths:
         required: true
       responses:
         "201":
-          description: Skill added
+          description: Skill added successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AddSkillResponse"
+        "400":
+          description: Student already has this skill
+        "401":
+          description: Unauthorized - missing or invalid token
+        "403":
+          description: Forbidden - caller does not match student ID
+        "404":
+          description: Student not found
         "500":
           description: Internal server error
   /students/{studentId}/skills/{skillId}:
@@ -296,10 +318,14 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          description: Skill removed
-        "500":
-          description: Internal server error
+        "204":
+          description: Skill removed successfully
+        "401":
+          description: Unauthorized - missing or invalid token
+        "403":
+          description: Forbidden - caller does not match student ID
+        "404":
+          description: Student or skill not found
   /companies/{companyId}:
     get:
       tags:
@@ -961,6 +987,11 @@ components:
     AddSkillRequest:
       required:
         - skillName
+      type: object
+      properties:
+        skillName:
+          type: string
+    AddSkillResponse:
       type: object
       properties:
         skillName:

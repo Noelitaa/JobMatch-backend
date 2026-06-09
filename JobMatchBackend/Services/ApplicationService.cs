@@ -78,8 +78,14 @@ public class ApplicationService : IApplicationService
             response.Contract = new ContractResponse
             {
                 IdContract = contract.IdContract,
+                IdApplication = contract.IdApplication,
+                IdJob = contract.IdJob,
+                IdStudent = contract.IdStudent,
+                IdCompany = contract.IdCompany,
                 Status = contract.Status ?? "pending",
                 CreatedAt = contract.CreatedAt,
+                UpdatedAt = contract.UpdatedAt,
+                AcceptedAt = contract.AcceptedAt,
                 ContractData = contract.ContractData
             };
             response.Message += " and contract generated";
@@ -93,12 +99,12 @@ public class ApplicationService : IApplicationService
         var data = await _applicationRepository.GetContractDataAsync(application.IdApplication);
 
         if (data == null)
-            throw new InvalidOperationException($"No se pudieron obtener los datos para la aplicación {application.IdApplication}");
+            throw new InvalidOperationException($"Could not retrieve contract data for application {application.IdApplication}");
 
         var job = await _jobRepository.GetByIdAsync(application.IdJob);
 
         if (job == null)
-            throw new InvalidOperationException($"No se encontró el trabajo con ID {application.IdJob}");
+            throw new InvalidOperationException($"Job with ID {application.IdJob} not found");
 
         var contractData = new
         {
@@ -135,5 +141,38 @@ public class ApplicationService : IApplicationService
         };
 
         return await _contractRepository.CreateAsync(contract);
+    }
+
+    public async Task<ApplicationDetailResponse> GetApplicationDetailsAsync(int applicationId, Guid userId, string userRole)
+    {
+        var application = await _applicationRepository.GetApplicationWithDetailsAsync(applicationId);
+
+        if (application == null)
+            throw new KeyNotFoundException("Application not found");
+
+        var hasAccess =
+            userRole == "Admin" ||
+            (userRole == "Student" && application.IdStudent == userId) ||
+            (userRole == "Company" && application.Job?.IdCompany == userId);
+
+        if (!hasAccess)
+            throw new UnauthorizedAccessException("You don't have permission to view this application");
+
+        return new ApplicationDetailResponse
+        {
+            IdApplication = application.IdApplication,
+            Status = application.Status ?? "pending",
+            IdJob = application.IdJob,
+            JobTitle = application.Job?.Title ?? string.Empty,
+            JobType = application.Job?.Type,
+            IdCompany = application.Job?.IdCompany ?? Guid.Empty,
+            CompanyName = application.Job?.Company?.CompanyName,
+            IdStudent = application.IdStudent,
+            StudentName = application.Student?.FullName,
+            StudentEmail = application.Student?.Email,
+            StudentUniversity = application.Student?.University,
+            StudentCareer = application.Student?.Career,
+            CreatedAt = application.CreatedAt
+        };
     }
 }

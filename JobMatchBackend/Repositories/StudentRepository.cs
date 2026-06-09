@@ -19,17 +19,11 @@ public class StudentRepository : IStudentRepository
             .Include(u => u.Availabilities)
             .Include(u => u.StudentSkills)
                 .ThenInclude(ss => ss.Skill)
-            .FirstOrDefaultAsync(u => u.Id == studentId && u.Role == "Student");
+            .FirstOrDefaultAsync(u => u.Id == studentId && u.Role == "Student" && u.IsActive);
     }
 
     public async Task<List<Skill>> GetSkillsByStudentIdAsync(Guid studentId)
     {
-        var exists = await _dbContext.User
-            .AnyAsync(u => u.Id == studentId && u.Role == "Student");
-
-        if (!exists)
-            throw new KeyNotFoundException("Student not found");
-
         return await _dbContext.StudentSkills
             .Where(ss => ss.StudentId == studentId)
             .Include(ss => ss.Skill)
@@ -43,14 +37,21 @@ public class StudentRepository : IStudentRepository
             .FirstOrDefaultAsync(s => s.Name.ToLower() == skillName.ToLower());
     }
 
-    public async Task<bool> AddSkillAsync(Guid studentId, Guid skillId)
+    public async Task<Skill> CreateSkillAsync(Skill skill)
     {
-        var alreadyExists = await _dbContext.StudentSkills
-            .AnyAsync(ss => ss.StudentId == studentId && ss.SkillId == skillId);
+        _dbContext.Skills.Add(skill);
+        await _dbContext.SaveChangesAsync();
+        return skill;
+    }
 
-        if (alreadyExists)
-            return false;
+    public async Task<Skill?> GetSkillByIdAsync(Guid skillId)
+    {
+        return await _dbContext.Skills
+            .FirstOrDefaultAsync(s => s.Id == skillId);
+    }
 
+    public async Task AddSkillAsync(Guid studentId, Guid skillId)
+    {
         _dbContext.StudentSkills.Add(new StudentSkill
         {
             StudentId = studentId,
@@ -58,6 +59,17 @@ public class StudentRepository : IStudentRepository
         });
 
         await _dbContext.SaveChangesAsync();
-        return true;
+    }
+
+    public async Task RemoveSkillAsync(Guid studentId, Guid skillId)
+    {
+        var studentSkill = await _dbContext.StudentSkills
+            .FirstOrDefaultAsync(ss => ss.StudentId == studentId && ss.SkillId == skillId);
+
+        if (studentSkill != null)
+        {
+            _dbContext.StudentSkills.Remove(studentSkill);
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }

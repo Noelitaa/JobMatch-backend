@@ -23,7 +23,8 @@ public class JobRepository : IJobRepository
     public async Task<Job?> GetByIdAsync(int id)
     {
         return await _dbContext.Jobs
-            .FirstOrDefaultAsync(j => j.IdJob == id);
+            .Include(j => j.Company)
+            .FirstOrDefaultAsync(j => j.IdJob == id && j.Company != null && j.Company.IsActive);
     }
 
     public async Task<bool> IsCompanyOwnerAsync(int jobId, Guid companyId)
@@ -41,16 +42,23 @@ public class JobRepository : IJobRepository
             return null;
 
         job.Company = await _dbContext.User.FirstOrDefaultAsync(u => u.Id == job.IdCompany);
+        if (job.Company == null || !job.Company.IsActive)
+            return null;
+
         return job;
     }
 
     public async Task<List<Job>> GetAllAsync()
     {
-        return await _dbContext.Jobs.ToListAsync();
+        return await _dbContext.Jobs
+            .Include(j => j.Company)
+            .Where(j => j.Company != null && j.Company.IsActive)
+            .ToListAsync();
     }
 
     public async Task<Job> UpdateAsync(Job job)
     {
+        job.UpdatedAt = DateTime.UtcNow;
         _dbContext.Jobs.Update(job);
         await _dbContext.SaveChangesAsync();
         return job;
