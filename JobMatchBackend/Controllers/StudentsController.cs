@@ -22,10 +22,6 @@ public class StudentsController : ControllerBase
     [HttpGet("{studentId}")]
     public async Task<IActionResult> GetStudentById(Guid studentId)
     {
-        var callerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (callerId != studentId.ToString())
-            return Forbid();
-
         try
         {
             var response = await _studentService.GetStudentByIdAsync(studentId);
