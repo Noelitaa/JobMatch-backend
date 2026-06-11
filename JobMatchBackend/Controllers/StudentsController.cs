@@ -121,4 +121,36 @@ public class StudentsController : ControllerBase
             return NotFound(new { message = ex.Message });
         }
     }
+
+    [HttpPut("{studentId}/availability")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> UpdateWeeklyAvailability(Guid studentId, [FromBody] UpdateWeeklyAvailabilityRequest request)
+    {
+        var callerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (callerId != studentId.ToString())
+            return Forbid();
+
+        try
+        {
+            await _studentService.UpdateWeeklyAvailabilityAsync(studentId, request);
+            return Ok(new { message = "Availability updated" });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
 }
