@@ -11,6 +11,5 @@ public interface IStudentRepository
     Task<Skill> CreateSkillAsync(Skill skill);
     Task AddSkillAsync(Guid studentId, Guid skillId);
     Task RemoveSkillAsync(Guid studentId, Guid skillId);
-    Task<List<Availability>> GetAvailabilitiesByStudentIdAsync(Guid studentId);
-    Task AddAvailabilitiesAsync(List<Availability> availabilities);
+    Task ReplaceAvailabilitiesAsync(List<Availability> currentAvailabilities, List<Availability> newAvailabilities);
 }

@@ -73,16 +73,10 @@ public class StudentRepository : IStudentRepository
         }
     }
 
-    public async Task<List<Availability>> GetAvailabilitiesByStudentIdAsync(Guid studentId)
+    public async Task ReplaceAvailabilitiesAsync(List<Availability> currentAvailabilities, List<Availability> newAvailabilities)
     {
-        return await _dbContext.Availabilities
-            .Where(a => a.StudentId == studentId)
-            .ToListAsync();
-    }
-
-    public async Task AddAvailabilitiesAsync(List<Availability> availabilities)
-    {
-        _dbContext.Availabilities.AddRange(availabilities);
+        _dbContext.Availabilities.RemoveRange(currentAvailabilities);
+        _dbContext.Availabilities.AddRange(newAvailabilities);
         await _dbContext.SaveChangesAsync();
     }
 }

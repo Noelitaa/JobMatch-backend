@@ -74,7 +74,9 @@ public class StudentService : IStudentService
         if (request.TimeBlocks.Count == 0)
             throw new InvalidOperationException("At least one time block is required");
 
-        var newAvailabilities = request.TimeBlocks.Select(block =>
+        var newAvailabilities = new List<Availability>();
+
+        foreach (var block in request.TimeBlocks)
         {
             if (block.Day < 0 || block.Day > 6)
                 throw new InvalidOperationException("Day must be between 0 and 6");
@@ -82,22 +84,19 @@ public class StudentService : IStudentService
             if (block.StartTime >= block.EndTime)
                 throw new InvalidOperationException("Start time must be before end time");
 
-            return new Availability
+            newAvailabilities.Add(new Availability
             {
                 Id = Guid.NewGuid(),
                 StudentId = studentId,
                 DayOfWeek = block.Day,
                 StartTime = block.StartTime,
                 EndTime = block.EndTime
-            };
-        }).ToList();
+            });
+        }
 
         ValidateNoOverlaps(newAvailabilities);
 
-        var currentAvailabilities = await _studentRepository.GetAvailabilitiesByStudentIdAsync(studentId);
-        ValidateNoOverlaps(currentAvailabilities.Concat(newAvailabilities).ToList());
-
-        await _studentRepository.AddAvailabilitiesAsync(newAvailabilities);
+        await _studentRepository.ReplaceAvailabilitiesAsync(student.Availabilities.ToList(), newAvailabilities);
     }
 
     private static void ValidateNoOverlaps(List<Availability> availabilities)
