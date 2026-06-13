@@ -120,10 +120,10 @@ public class ApplicationRepository : IApplicationRepository
                         s.Email as StudentEmail,
                         s.University as StudentUniversity,
                         s.Career as StudentCareer
-                    FROM Applications a
-                    INNER JOIN Jobs j ON a.IdJob = j.IdJob
-                    INNER JOIN [User] u ON j.IdCompany = u.Id
-                    INNER JOIN [User] s ON a.IdStudent = s.Id
+                    FROM applications a
+                    INNER JOIN jobs j ON a.IdJob = j.IdJob
+                    INNER JOIN users u ON j.IdCompany = u.Id
+                    INNER JOIN users s ON a.IdStudent = s.Id
                     WHERE a.IdApplication = {applicationId}")
                 .FirstOrDefaultAsync();
             

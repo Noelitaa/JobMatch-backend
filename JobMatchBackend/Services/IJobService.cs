@@ -10,4 +10,5 @@ public interface IJobService
     // FIX 1: companyId added to enforce ownership verification at the service level
     Task DeleteJobAsync(int id, Guid companyId);
     Task<JobDetailResponse> GetJobByIdAsync(int jobId);
+    Task<JobDetailResponse> UpdateJobAsync(int jobId, Guid companyId, UpdateJobRequest request);
 }

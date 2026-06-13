@@ -20,7 +20,6 @@ public class JobRepository : IJobRepository
         return job;
     }
 
-    // De Develop: más eficiente, filtra IsActive en una sola query
     public async Task<Job?> GetByIdAsync(int id)
     {
         return await _dbContext.Jobs
@@ -61,12 +60,23 @@ public class JobRepository : IJobRepository
         _dbContext.Jobs.Remove(job);
         await _dbContext.SaveChangesAsync();
     }
-    
-    public async Task UpdateAsync(Job job)
+
+    public async Task<Job> UpdateAsync(Job job)
     {
-        job.UpdatedAt = DateTime.UtcNow;
         _dbContext.Jobs.Update(job);
         await _dbContext.SaveChangesAsync();
+        return job;
     }
 
+    public async Task<bool> HasAcceptedApplicationsAsync(int jobId)
+    {
+        return await _dbContext.Applications
+            .AnyAsync(a => a.IdJob == jobId && a.Status == "accepted");
+    }
+
+    public async Task<bool> HasActiveContractAsync(int jobId)
+    {
+        return await _dbContext.Contracts
+            .AnyAsync(c => c.IdJob == jobId && c.Status == "active");
+    }
 }

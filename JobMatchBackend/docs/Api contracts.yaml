@@ -318,10 +318,14 @@ paths:
           schema:
             type: string
       responses:
-        "200":
-          description: Skill removed
-        "500":
-          description: Internal server error
+        "204":
+          description: Skill removed successfully
+        "401":
+          description: Unauthorized - missing or invalid token
+        "403":
+          description: Forbidden - caller does not match student ID
+        "404":
+          description: Student or skill not found
   /companies/{companyId}:
     get:
       tags:

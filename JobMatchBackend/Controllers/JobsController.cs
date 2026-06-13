@@ -1,7 +1,7 @@
-using JobMatchBackend.Services;
-using Microsoft.AspNetCore.Mvc;
 using JobMatchBackend.DTOs.Request;
+using JobMatchBackend.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace JobMatchBackend.Controllers;
@@ -77,6 +77,38 @@ public class JobsController : ControllerBase
         }
     }
 
+    [Authorize]
+    [HttpPut("{jobId}")]
+    public async Task<IActionResult> UpdateJob(int jobId, [FromBody] UpdateJobRequest request)
+    {
+        try
+        {
+            var companyId = GetCurrentUserId();
+            var response = await _jobService.UpdateJobAsync(jobId, companyId, request);
+            return Ok(response);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { message = "Job not found" });
+        }
+        catch (UnauthorizedAccessException ex) when (ex.Message == "Invalid authenticated user")
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreateJob([FromBody] CreateJobRequest request)
     {
@@ -89,5 +121,13 @@ public class JobsController : ControllerBase
         {
             return BadRequest(new { message = ex.Message });
         }
+    }
+
+    private Guid GetCurrentUserId()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userId, out var parsedUserId))
+            throw new UnauthorizedAccessException("Invalid authenticated user");
+        return parsedUserId;
     }
 }
