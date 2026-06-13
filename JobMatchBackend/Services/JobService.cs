@@ -51,7 +51,11 @@ public class JobService : IJobService
 
         var hasAccepted = await _jobRepository.HasAcceptedApplicationsAsync(jobId);
         if (hasAccepted)
-            throw new InvalidOperationException("Cannot edit a job with accepted applicants or an active contract");
+            throw new InvalidOperationException("Cannot edit a job that has accepted applicants");
+
+        var hasActiveContract = await _jobRepository.HasActiveContractAsync(jobId);
+        if (hasActiveContract)
+            throw new InvalidOperationException("Cannot edit a job with an active contract");
 
         if (request.Title != null) job.Title = request.Title;
         if (request.Description != null) job.Description = request.Description;
@@ -78,16 +82,19 @@ public class JobService : IJobService
         return jobs.Select(JobMapper.ToResponse).ToList();
     }
 
-    public async Task DeleteJobAsync(int id)
+    public async Task DeleteJobAsync(int id, Guid companyId)
     {
         var job = await _jobRepository.GetByIdAsync(id);
         if (job == null)
             throw new KeyNotFoundException($"Job with id {id} not found");
 
+        if (job.IdCompany != companyId)
+            throw new UnauthorizedAccessException("Only the owning company can delete this job");
+
         if (job.Applications != null && job.Applications.Any())
             throw new InvalidOperationException("Cannot delete a job that has existing applications.");
 
-        await _jobRepository.DeleteAsync(id);
+        await _jobRepository.DeleteAsync(job);
     }
 
     // FIX 4: Single private method for building JobDetailResponse — eliminates duplication

@@ -37,11 +37,7 @@ public class JobsController : ControllerBase
     {
         try
         {
-            // FIX 1: Read companyId from JWT and pass it to the service for ownership verification
-            var companyIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(companyIdClaim, out var companyId))
-                return Unauthorized(new { message = "Invalid or missing company identity in token" });
-
+            var companyId = GetCurrentUserId();
             var response = await _jobService.UpdateJobAsync(jobId, companyId, request);
             return Ok(response);
         }
@@ -49,20 +45,18 @@ public class JobsController : ControllerBase
         {
             return NotFound(new { message = "Job not found" });
         }
+        catch (UnauthorizedAccessException ex) when (ex.Message == "Invalid authenticated user")
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
         catch (UnauthorizedAccessException ex)
         {
-            return Forbid();
+            return StatusCode(403, new { message = ex.Message });
         }
         catch (InvalidOperationException ex)
         {
-            // FIX 2: InvalidOperationException means a business rule conflict, not a permission issue
-            return Conflict(new { message = ex.Message });
-        }
-        catch (ArgumentException ex)
-        {
             return BadRequest(new { message = ex.Message });
         }
-        // FIX 3: Catch-all for unexpected errors
         catch (Exception)
         {
             return StatusCode(500, new { message = "Internal server error" });
@@ -83,29 +77,6 @@ public class JobsController : ControllerBase
         }
     }
 
-    [Authorize]
-    [HttpDelete("{jobId}")]
-    public async Task<IActionResult> DeleteJob(int jobId)
-    {
-        try
-        {
-            await _jobService.DeleteJobAsync(jobId);
-            return Ok(new { message = "Job deleted successfully" });
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound(new { message = "Job not found" });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(new { message = ex.Message });
-        }
-        catch (Exception)
-        {
-            return StatusCode(500, new { message = "Internal server error" });
-        }
-    }
-
     [HttpPost]
     public async Task<IActionResult> CreateJob([FromBody] CreateJobRequest request)
     {
@@ -118,5 +89,13 @@ public class JobsController : ControllerBase
         {
             return BadRequest(new { message = ex.Message });
         }
+    }
+
+    private Guid GetCurrentUserId()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userId, out var parsedUserId))
+            throw new UnauthorizedAccessException("Invalid authenticated user");
+        return parsedUserId;
     }
 }

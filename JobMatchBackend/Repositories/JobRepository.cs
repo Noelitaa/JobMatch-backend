@@ -24,7 +24,7 @@ public class JobRepository : IJobRepository
     {
         var job = await _dbContext.Jobs
             .FirstOrDefaultAsync(j => j.IdJob == jobId);
-        
+
         return job != null && job.IdCompany == companyId;
     }
 
@@ -70,18 +70,15 @@ public class JobRepository : IJobRepository
             .ToListAsync();
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(Job job)
     {
-        var job = await _dbContext.Jobs.FindAsync(id);
-        if (job == null) return;
-
         _dbContext.Jobs.Remove(job);
         await _dbContext.SaveChangesAsync();
     }
-    public async Task UpdateAsync(Job job)
+
+    public async Task<bool> HasActiveContractAsync(int jobId)
     {
-        job.UpdatedAt = DateTime.UtcNow;
-        _dbContext.Jobs.Update(job);
-        await _dbContext.SaveChangesAsync();
+        return await _dbContext.Contracts
+            .AnyAsync(c => c.IdJob == jobId && c.Status == "active");
     }
 }
