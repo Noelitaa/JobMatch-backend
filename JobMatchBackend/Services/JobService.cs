@@ -16,11 +16,42 @@ public class JobService : IJobService
 
     public async Task<JobResponse> CreateJobAsync(CreateJobRequest request)
     {
-        if (DateTime.TryParse(request.Date + " " + request.StartTime, out var jobDateTime))
-        {
-            if (jobDateTime <= DateTime.Now)
-                throw new ArgumentException("La fecha y hora del trabajo deben ser en el futuro.");
-        }
+        var errors = new List<string>();
+
+        if (string.IsNullOrWhiteSpace(request.Title))
+            errors.Add("El campo 'title' es obligatorio.");
+
+        if (string.IsNullOrWhiteSpace(request.CompanyId) || !Guid.TryParse(request.CompanyId, out _))
+            errors.Add("El campo 'companyId' es obligatorio y debe ser un GUID válido.");
+
+        if (request.Payment <= 0)
+            errors.Add("El campo 'payment' debe ser mayor a 0.");
+
+        if (string.IsNullOrWhiteSpace(request.PaymentType) ||
+            (request.PaymentType != "one_time" && request.PaymentType != "monthly"))
+            errors.Add("El campo 'paymentType' debe ser 'one_time' o 'monthly'.");
+
+        if (!string.Equals(request.Type, "autonomous", StringComparison.OrdinalIgnoreCase))
+            errors.Add("El campo 'type' debe ser 'autonomous'.");
+
+        if (request.StartDate == null)
+            errors.Add("El campo 'startDate' es obligatorio.");
+
+        if (request.EndDate == null)
+            errors.Add("El campo 'endDate' es obligatorio.");
+
+        if (request.Deliverables == null || request.Deliverables.Count == 0)
+            errors.Add("El campo 'deliverables' es obligatorio y debe contener al menos un elemento.");
+
+        if (errors.Count > 0)
+            throw new ArgumentException(string.Join(" ", errors));
+
+        // StartDate and EndDate are guaranteed non-null past validation
+        if (request.StartDate!.Value > request.EndDate!.Value)
+            throw new ArgumentException("'startDate' debe ser anterior o igual a 'endDate'.");
+
+        if (request.EndDate.Value < DateOnly.FromDateTime(DateTime.Now))
+            throw new ArgumentException("'endDate' debe ser en el futuro.");
 
         var job = JobMapper.ToEntity(request);
         var created = await _jobRepository.CreateAsync(job);
