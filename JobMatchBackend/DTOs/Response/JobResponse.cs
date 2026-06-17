@@ -9,8 +9,16 @@ public class JobResponse
     public string Status { get; set; } = string.Empty;
     public decimal Payment { get; set; }
     public string PaymentType { get; set; } = string.Empty;
+
+    // Fixed-time job fields (null for autonomous jobs)
+    public DateOnly? WorkDate { get; set; }
+    public TimeOnly? StartTime { get; set; }
+    public TimeOnly? EndTime { get; set; }
+
+    // Autonomous job fields (null for fixed-time jobs)
     public DateOnly? StartDate { get; set; }
     public DateOnly? EndDate { get; set; }
     public string? Deliverables { get; set; }
+
     public DateTime CreatedAt { get; set; }
 }
