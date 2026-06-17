@@ -72,4 +72,11 @@ public class StudentRepository : IStudentRepository
             await _dbContext.SaveChangesAsync();
         }
     }
+
+    public async Task ReplaceAvailabilitiesAsync(List<Availability> currentAvailabilities, List<Availability> newAvailabilities)
+    {
+        _dbContext.Availabilities.RemoveRange(currentAvailabilities);
+        _dbContext.Availabilities.AddRange(newAvailabilities);
+        await _dbContext.SaveChangesAsync();
+    }
 }
