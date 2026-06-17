@@ -21,7 +21,7 @@ public static class JobMapper
             StartDate = dto.StartDate,
             EndDate = dto.EndDate,
             Deliverables = dto.Deliverables != null ? string.Join(",", dto.Deliverables) : null,
-            Type = "fixed",
+            Type = "fixed-time",
             Status = "open"
         };
     }
