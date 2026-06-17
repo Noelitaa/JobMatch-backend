@@ -22,6 +22,15 @@ public class StudentService : IStudentService
         return StudentMapper.ToResponse(student);
     }
 
+    public async Task<AvailabilityResponse> GetStudentAvailabilityAsync(Guid studentId)
+    {
+        var student = await _studentRepository.GetByIdAsync(studentId);
+        if (student == null)
+            throw new KeyNotFoundException("Student not found");
+
+        return StudentMapper.ToAvailabilityResponse(student);
+    }
+
     public async Task<List<string>> GetStudentSkillsAsync(Guid studentId)
     {
         var student = await _studentRepository.GetByIdAsync(studentId);

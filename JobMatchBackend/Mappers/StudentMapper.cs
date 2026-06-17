@@ -27,17 +27,22 @@ public static class StudentMapper
             Skills = user.StudentSkills?
                 .Select(ss => ss.Skill!.Name)
                 .ToList() ?? new List<string>(),
-            Availability = new AvailabilityResponse
-            {
-                Sunday    = GetSlotsForDay(user.Availabilities, 0),
-                Monday    = GetSlotsForDay(user.Availabilities, 1),
-                Tuesday   = GetSlotsForDay(user.Availabilities, 2),
-                Wednesday = GetSlotsForDay(user.Availabilities, 3),
-                Thursday  = GetSlotsForDay(user.Availabilities, 4),
-                Friday    = GetSlotsForDay(user.Availabilities, 5),
-                Saturday  = GetSlotsForDay(user.Availabilities, 6)
-            },
+            Availability = ToAvailabilityResponse(user),
             AverageRating = 0.0f
+        };
+    }
+
+    public static AvailabilityResponse ToAvailabilityResponse(User user)
+    {
+        return new AvailabilityResponse
+        {
+            Sunday    = GetSlotsForDay(user.Availabilities, 0),
+            Monday    = GetSlotsForDay(user.Availabilities, 1),
+            Tuesday   = GetSlotsForDay(user.Availabilities, 2),
+            Wednesday = GetSlotsForDay(user.Availabilities, 3),
+            Thursday  = GetSlotsForDay(user.Availabilities, 4),
+            Friday    = GetSlotsForDay(user.Availabilities, 5),
+            Saturday  = GetSlotsForDay(user.Availabilities, 6)
         };
     }
 
