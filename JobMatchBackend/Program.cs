@@ -45,6 +45,7 @@ builder.Services.AddScoped<IJobRepository, JobRepository>();
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<ISkillRepository, SkillRepository>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 
 // Services
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
@@ -55,6 +56,7 @@ builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IContractService, ContractService>();
 builder.Services.AddScoped<ISkillService, SkillService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
