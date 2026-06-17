@@ -34,7 +34,6 @@ public class JobService : IJobService
         if (job == null)
             throw new KeyNotFoundException("Job not found");
 
-        // FIX 4: Reuse the extracted private method instead of duplicating the mapping
         return ToDetailResponse(job);
     }
 
@@ -44,9 +43,8 @@ public class JobService : IJobService
         if (job == null)
             throw new KeyNotFoundException("Job not found");
 
-        // FIX 1: Verify that the authenticated company owns this job
-        var isOwner = await _jobRepository.IsCompanyOwnerAsync(jobId, companyId);
-        if (!isOwner)
+        // Verify ownership using the entity already loaded above (no extra query needed)
+        if (job.IdCompany != companyId)
             throw new UnauthorizedAccessException("You do not have permission to edit this job");
 
         var hasAccepted = await _jobRepository.HasAcceptedApplicationsAsync(jobId);
@@ -57,7 +55,7 @@ public class JobService : IJobService
         if (hasActiveContract)
             throw new InvalidOperationException("Cannot edit a job with an active contract");
 
-        if (request.Title != null) job.Title = request.Title;
+        if (!string.IsNullOrWhiteSpace(request.Title)) job.Title = request.Title;
         if (request.Description != null) job.Description = request.Description;
         if (request.Payment != null) job.Payment = request.Payment.Value;
         if (request.PaymentType != null) job.PaymentType = request.PaymentType;
@@ -72,7 +70,6 @@ public class JobService : IJobService
 
         var updated = await _jobRepository.UpdateAsync(job);
 
-        // FIX 4: Reuse the extracted private method instead of duplicating the mapping
         return ToDetailResponse(updated);
     }
 
@@ -82,22 +79,7 @@ public class JobService : IJobService
         return jobs.Select(JobMapper.ToResponse).ToList();
     }
 
-    public async Task DeleteJobAsync(int id, Guid companyId)
-    {
-        var job = await _jobRepository.GetByIdAsync(id);
-        if (job == null)
-            throw new KeyNotFoundException($"Job with id {id} not found");
-
-        if (job.IdCompany != companyId)
-            throw new UnauthorizedAccessException("Only the owning company can delete this job");
-
-        if (job.Applications != null && job.Applications.Any())
-            throw new InvalidOperationException("Cannot delete a job that has existing applications.");
-
-        await _jobRepository.DeleteAsync(job);
-    }
-
-    // FIX 4: Single private method for building JobDetailResponse — eliminates duplication
+    // Single private method for building JobDetailResponse, avoids duplicating the mapping
     private static JobDetailResponse ToDetailResponse(Job job)
     {
         return new JobDetailResponse

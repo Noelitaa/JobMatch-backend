@@ -43,8 +43,8 @@ public class JobRepository : IJobRepository
     public async Task<Job?> GetByIdAsync(int id)
     {
         return await _dbContext.Jobs
-            .Include(j => j.Applications)
-            .FirstOrDefaultAsync(j => j.IdJob == id);
+            .Include(j => j.Company)
+            .FirstOrDefaultAsync(j => j.IdJob == id && j.Company != null && j.Company.IsActive);
     }
 
     private const string AcceptedStatus = "accepted";
