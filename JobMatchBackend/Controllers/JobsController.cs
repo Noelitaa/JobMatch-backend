@@ -75,6 +75,37 @@ public class JobsController : ControllerBase
         {
             return BadRequest(new { message = ex.Message });
         }
+    
+    [Authorize]
+    [HttpDelete("{jobId}")]
+    public async Task<IActionResult> CancelJob(int jobId)
+    {
+        try
+        {
+            var companyId = GetCurrentUserId();
+            await _jobService.CancelJobAsync(jobId, companyId);
+            return Ok(new { message = "Job cancelled successfully" });
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { message = "Job not found" });
+        }
+        catch (UnauthorizedAccessException ex) when (ex.Message == "Invalid authenticated user")
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { message = "Internal server error" });
+        }
     }
 
     [HttpPost]

@@ -66,7 +66,7 @@ public class JobRepository : IJobRepository
     {
         return await _dbContext.Jobs
             .Include(j => j.Company)
-            .Where(j => j.Company != null && j.Company.IsActive)
+            .Where(j => j.Company != null && j.Company.IsActive && j.Status != "cancelled")
             .ToListAsync();
     }
 
@@ -80,5 +80,20 @@ public class JobRepository : IJobRepository
     {
         return await _dbContext.Contracts
             .AnyAsync(c => c.IdJob == jobId && c.Status == "active");
+    }
+
+    public async Task<Job> CancelAsync(Job job)
+    {
+        _dbContext.Jobs.Update(job);
+        await _dbContext.SaveChangesAsync();
+        return job;
+    }
+
+    public async Task<List<Guid>> GetApplicantIdsByJobIdAsync(int jobId)
+    {
+        return await _dbContext.Applications
+            .Where(a => a.IdJob == jobId && a.Status != "rejected")
+            .Select(a => a.IdStudent)
+            .ToListAsync();
     }
 }
