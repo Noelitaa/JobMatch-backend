@@ -24,6 +24,9 @@ public class ContractRepository : IContractRepository
     {
         return await _dbContext.Contracts
             .Include(c => c.Job)
+                .ThenInclude(j => j!.Company)
+            .Include(c => c.Student)
+            .Include(c => c.Company)
             .FirstOrDefaultAsync(c => c.IdContract == contractId);
     }
 
