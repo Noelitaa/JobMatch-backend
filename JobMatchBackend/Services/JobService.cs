@@ -19,10 +19,13 @@ public class JobService : IJobService
 
     public async Task<JobResponse> CreateJobAsync(CreateJobRequest request)
     {
+        var isAutonomous = string.Equals(request.Type, "autonomous", StringComparison.OrdinalIgnoreCase);
+
         var errors = new List<string>();
         TimeOnly startTime = TimeOnly.MinValue;
         TimeOnly endTime = TimeOnly.MinValue;
 
+        // --- Common validation (applies to every job type) ---
         if (string.IsNullOrWhiteSpace(request.Title))
             errors.Add("El campo 'title' es obligatorio.");
 
@@ -36,29 +39,54 @@ public class JobService : IJobService
             (request.PaymentType != "one_time" && request.PaymentType != "monthly"))
             errors.Add("El campo 'paymentType' debe ser 'one_time' o 'monthly'.");
 
-        if (!string.Equals(request.Type, "fixed-time", StringComparison.OrdinalIgnoreCase))
-            errors.Add("El campo 'type' debe ser 'fixed-time'.");
+        if (isAutonomous)
+        {
+            // --- Autonomous-specific validation ---
+            if (request.StartDate == null)
+                errors.Add("El campo 'startDate' es obligatorio.");
 
-        if (string.IsNullOrWhiteSpace(request.Date) || !DateOnly.TryParse(request.Date, out _))
-            errors.Add("El campo 'date' es obligatorio y debe ser una fecha válida.");
+            if (request.EndDate == null)
+                errors.Add("El campo 'endDate' es obligatorio.");
 
-        if (string.IsNullOrWhiteSpace(request.StartTime) || !TimeOnly.TryParse(request.StartTime, out startTime))
-            errors.Add("El campo 'startTime' es obligatorio y debe ser una hora válida.");
+            if (request.Deliverables == null || request.Deliverables.Count == 0)
+                errors.Add("El campo 'deliverables' es obligatorio y debe contener al menos un elemento.");
+        }
+        else
+        {
+            // --- Fixed-time-specific validation ---
+            if (string.IsNullOrWhiteSpace(request.Date) || !DateOnly.TryParse(request.Date, out _))
+                errors.Add("El campo 'date' es obligatorio y debe ser una fecha válida.");
 
-        if (string.IsNullOrWhiteSpace(request.EndTime) || !TimeOnly.TryParse(request.EndTime, out endTime))
-            errors.Add("El campo 'endTime' es obligatorio y debe ser una hora válida.");
+            if (string.IsNullOrWhiteSpace(request.StartTime) || !TimeOnly.TryParse(request.StartTime, out startTime))
+                errors.Add("El campo 'startTime' es obligatorio y debe ser una hora válida.");
+
+            if (string.IsNullOrWhiteSpace(request.EndTime) || !TimeOnly.TryParse(request.EndTime, out endTime))
+                errors.Add("El campo 'endTime' es obligatorio y debe ser una hora válida.");
+        }
 
         if (errors.Count > 0)
             throw new ArgumentException(string.Join(" ", errors));
 
-        if (DateTime.TryParse(request.Date + " " + request.StartTime, out var jobDateTime))
+        if (isAutonomous)
         {
-            if (jobDateTime <= DateTime.Now)
-                throw new ArgumentException("La fecha y hora del trabajo deben ser en el futuro.");
-        }
+            // StartDate and EndDate are guaranteed non-null past validation
+            if (request.StartDate!.Value > request.EndDate!.Value)
+                throw new ArgumentException("'startDate' debe ser anterior o igual a 'endDate'.");
 
-        if (startTime >= endTime)
-            throw new ArgumentException("'startTime' debe ser anterior a 'endTime'.");
+            if (request.EndDate.Value < DateOnly.FromDateTime(DateTime.Now))
+                throw new ArgumentException("'endDate' debe ser en el futuro.");
+        }
+        else
+        {
+            if (DateTime.TryParse(request.Date + " " + request.StartTime, out var jobDateTime))
+            {
+                if (jobDateTime <= DateTime.Now)
+                    throw new ArgumentException("La fecha y hora del trabajo deben ser en el futuro.");
+            }
+
+            if (startTime >= endTime)
+                throw new ArgumentException("'startTime' debe ser anterior a 'endTime'.");
+        }
 
         var job = JobMapper.ToEntity(request);
         var created = await _jobRepository.CreateAsync(job);

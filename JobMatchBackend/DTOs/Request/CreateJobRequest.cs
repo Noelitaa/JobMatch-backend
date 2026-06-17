@@ -5,13 +5,20 @@ public class CreateJobRequest
     public string CompanyId { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+
+    // Default kept as "fixed-time" for backward compatibility with existing callers.
     public string Type { get; set; } = "fixed-time";
+
+    // Fixed-time job fields (required when Type == "fixed-time")
     public string Date { get; set; } = string.Empty;
     public string StartTime { get; set; } = string.Empty;
     public string EndTime { get; set; } = string.Empty;
+
+    // Autonomous job fields (required when Type == "autonomous")
     public DateOnly? StartDate { get; set; }
     public DateOnly? EndDate { get; set; }
     public List<string>? Deliverables { get; set; }
+
     public string PaymentType { get; set; } = string.Empty;
     public decimal Payment { get; set; }
     public List<string>? SkillsRequired { get; set; }
