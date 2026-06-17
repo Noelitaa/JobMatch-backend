@@ -75,7 +75,7 @@ public class JobsController : ControllerBase
         {
             return BadRequest(new { message = ex.Message });
         }
-    
+    }
     [Authorize]
     [HttpDelete("{jobId}")]
     public async Task<IActionResult> CancelJob(int jobId)

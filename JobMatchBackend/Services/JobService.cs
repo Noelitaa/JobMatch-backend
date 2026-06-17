@@ -19,10 +19,73 @@ public class JobService : IJobService
 
     public async Task<JobResponse> CreateJobAsync(CreateJobRequest request)
     {
-        if (DateTime.TryParse(request.Date + " " + request.StartTime, out var jobDateTime))
+        var isAutonomous = string.Equals(request.Type, "autonomous", StringComparison.OrdinalIgnoreCase);
+
+        var errors = new List<string>();
+        TimeOnly startTime = TimeOnly.MinValue;
+        TimeOnly endTime = TimeOnly.MinValue;
+
+        // --- Common validation (applies to every job type) ---
+        if (string.IsNullOrWhiteSpace(request.Title))
+            errors.Add("El campo 'title' es obligatorio.");
+
+        if (string.IsNullOrWhiteSpace(request.CompanyId) || !Guid.TryParse(request.CompanyId, out _))
+            errors.Add("El campo 'companyId' es obligatorio y debe ser un GUID válido.");
+
+        if (request.Payment <= 0)
+            errors.Add("El campo 'payment' debe ser mayor a 0.");
+
+        if (string.IsNullOrWhiteSpace(request.PaymentType) ||
+            (request.PaymentType != "one_time" && request.PaymentType != "monthly"))
+            errors.Add("El campo 'paymentType' debe ser 'one_time' o 'monthly'.");
+
+        if (isAutonomous)
         {
-            if (jobDateTime <= DateTime.Now)
-                throw new ArgumentException("La fecha y hora del trabajo deben ser en el futuro.");
+            // --- Autonomous-specific validation ---
+            if (request.StartDate == null)
+                errors.Add("El campo 'startDate' es obligatorio.");
+
+            if (request.EndDate == null)
+                errors.Add("El campo 'endDate' es obligatorio.");
+
+            if (request.Deliverables == null || request.Deliverables.Count == 0)
+                errors.Add("El campo 'deliverables' es obligatorio y debe contener al menos un elemento.");
+        }
+        else
+        {
+            // --- Fixed-time-specific validation ---
+            if (string.IsNullOrWhiteSpace(request.Date) || !DateOnly.TryParse(request.Date, out _))
+                errors.Add("El campo 'date' es obligatorio y debe ser una fecha válida.");
+
+            if (string.IsNullOrWhiteSpace(request.StartTime) || !TimeOnly.TryParse(request.StartTime, out startTime))
+                errors.Add("El campo 'startTime' es obligatorio y debe ser una hora válida.");
+
+            if (string.IsNullOrWhiteSpace(request.EndTime) || !TimeOnly.TryParse(request.EndTime, out endTime))
+                errors.Add("El campo 'endTime' es obligatorio y debe ser una hora válida.");
+        }
+
+        if (errors.Count > 0)
+            throw new ArgumentException(string.Join(" ", errors));
+
+        if (isAutonomous)
+        {
+            // StartDate and EndDate are guaranteed non-null past validation
+            if (request.StartDate!.Value > request.EndDate!.Value)
+                throw new ArgumentException("'startDate' debe ser anterior o igual a 'endDate'.");
+
+            if (request.EndDate.Value < DateOnly.FromDateTime(DateTime.Now))
+                throw new ArgumentException("'endDate' debe ser en el futuro.");
+        }
+        else
+        {
+            if (DateTime.TryParse(request.Date + " " + request.StartTime, out var jobDateTime))
+            {
+                if (jobDateTime <= DateTime.Now)
+                    throw new ArgumentException("La fecha y hora del trabajo deben ser en el futuro.");
+            }
+
+            if (startTime >= endTime)
+                throw new ArgumentException("'startTime' debe ser anterior a 'endTime'.");
         }
 
         var job = JobMapper.ToEntity(request);
@@ -36,8 +99,13 @@ public class JobService : IJobService
         if (job == null)
             throw new KeyNotFoundException("Job not found");
 
-        // FIX 4: Reuse the extracted private method instead of duplicating the mapping
         return ToDetailResponse(job);
+    }
+
+    public async Task<List<JobResponse>> GetAllJobsAsync()
+    {
+        var jobs = await _jobRepository.GetAllAsync();
+        return jobs.Select(JobMapper.ToResponse).ToList();
     }
 
     public async Task<JobDetailResponse> UpdateJobAsync(int jobId, Guid companyId, UpdateJobRequest request)
@@ -74,14 +142,7 @@ public class JobService : IJobService
 
         var updated = await _jobRepository.UpdateAsync(job);
 
-        // FIX 4: Reuse the extracted private method instead of duplicating the mapping
         return ToDetailResponse(updated);
-    }
-
-    public async Task<List<JobResponse>> GetAllJobsAsync()
-    {
-        var jobs = await _jobRepository.GetAllAsync();
-        return jobs.Select(JobMapper.ToResponse).ToList();
     }
 
     public async Task DeleteJobAsync(int id, Guid companyId)
@@ -97,107 +158,6 @@ public class JobService : IJobService
             throw new InvalidOperationException("Cannot delete a job that has existing applications.");
 
         await _jobRepository.DeleteAsync(job);
-    }
-
-    // FIX 4: Single private method for building JobDetailResponse — eliminates duplication
-    private static JobDetailResponse ToDetailResponse(Job job)
-    {
-        return new JobDetailResponse
-        {
-            IdJob = job.IdJob,
-            IdCompany = job.IdCompany,
-            Title = job.Title,
-            Description = job.Description,
-            Type = job.Type,
-            Status = job.Status,
-            Payment = job.Payment,
-            PaymentType = job.PaymentType,
-            WorkDate = job.WorkDate,
-            StartTime = job.StartTime,
-            EndTime = job.EndTime,
-            StartDate = job.StartDate,
-            EndDate = job.EndDate,
-            Deliverables = job.Deliverables,
-            CreatedAt = job.CreatedAt,
-            UpdatedAt = job.UpdatedAt,
-            Company = new CompanySummaryResponse
-            {
-                Id = job.Company?.Id ?? Guid.Empty,
-                CompanyName = job.Company?.CompanyName,
-                Email = job.Company?.Email ?? string.Empty,
-                Phone = job.Company?.Phone,
-                Description = job.Company?.Description,
-                AvatarUrl = job.Company?.AvatarUrl
-            }
-        };
-    }
-
-    public async Task<List<JobResponse>> GetAllJobsAsync()
-    {
-        var jobs = await _jobRepository.GetAllAsync();
-        return jobs.Select(JobMapper.ToResponse).ToList();
-    }
-
-    public async Task<JobDetailResponse> UpdateJobAsync(int jobId, Guid companyId, UpdateJobRequest request)
-    {
-        var job = await _jobRepository.GetByIdWithCompanyAsync(jobId);
-        if (job == null)
-            throw new KeyNotFoundException("Job not found");
-
-        if (job.IdCompany != companyId)
-            throw new UnauthorizedAccessException("Company does not own this job");
-
-        var hasAcceptedApplications = await _jobRepository.HasAcceptedApplicationsAsync(jobId);
-        if (hasAcceptedApplications)
-            throw new InvalidOperationException("Cannot edit a job that has accepted students");
-
-        var hasActiveContract = await _jobRepository.HasActiveContractAsync(jobId);
-        if (hasActiveContract)
-            throw new InvalidOperationException("Cannot edit a job with an active contract");
-
-        if (!string.IsNullOrWhiteSpace(request.Title)) job.Title = request.Title;
-        if (!string.IsNullOrWhiteSpace(request.Description)) job.Description = request.Description;
-        if (request.Payment != null) job.Payment = request.Payment.Value;
-        if (request.PaymentType != null) job.PaymentType = request.PaymentType;
-        if (request.WorkDate != null) job.WorkDate = request.WorkDate.Value;
-        if (request.StartTime != null) job.StartTime = request.StartTime.Value;
-        if (request.EndTime != null) job.EndTime = request.EndTime.Value;
-        if (request.StartDate != null) job.StartDate = request.StartDate;
-        if (request.EndDate != null) job.EndDate = request.EndDate;
-        if (request.Deliverables != null) job.Deliverables = string.Join(",", request.Deliverables);
-
-        job.UpdatedAt = DateTime.UtcNow;
-
-        var updated = await _jobRepository.UpdateAsync(job);
-
-        return new JobDetailResponse
-        {
-            IdJob = updated.IdJob,
-            IdCompany = updated.IdCompany,
-            Title = updated.Title,
-            Description = updated.Description,
-            Type = updated.Type,
-            Status = updated.Status,
-            Payment = updated.Payment,
-            PaymentType = updated.PaymentType,
-            WorkDate = updated.WorkDate,
-            StartTime = updated.StartTime,
-            EndTime = updated.EndTime,
-            StartDate = updated.StartDate,
-            EndDate = updated.EndDate,
-            Deliverables = updated.Deliverables,
-            CreatedAt = updated.CreatedAt,
-            UpdatedAt = updated.UpdatedAt,
-            Company = new CompanySummaryResponse
-            {
-                Id = updated.Company?.Id ?? Guid.Empty,
-                CompanyName = updated.Company?.CompanyName,
-                Email = updated.Company?.Email ?? string.Empty,
-                Phone = updated.Company?.Phone,
-                Description = updated.Company?.Description,
-                AvatarUrl = updated.Company?.AvatarUrl
-            }
-        };
     }
 
     public async Task CancelJobAsync(int jobId, Guid companyId)
@@ -235,5 +195,38 @@ public class JobService : IJobService
 
             await _notificationRepository.CreateManyAsync(notifications);
         }
+    }
+
+    // FIX 4: Single private method for building JobDetailResponse — eliminates duplication
+    private static JobDetailResponse ToDetailResponse(Job job)
+    {
+        return new JobDetailResponse
+        {
+            IdJob = job.IdJob,
+            IdCompany = job.IdCompany,
+            Title = job.Title,
+            Description = job.Description,
+            Type = job.Type,
+            Status = job.Status,
+            Payment = job.Payment,
+            PaymentType = job.PaymentType,
+            WorkDate = job.WorkDate,
+            StartTime = job.StartTime,
+            EndTime = job.EndTime,
+            StartDate = job.StartDate,
+            EndDate = job.EndDate,
+            Deliverables = job.Deliverables,
+            CreatedAt = job.CreatedAt,
+            UpdatedAt = job.UpdatedAt,
+            Company = new CompanySummaryResponse
+            {
+                Id = job.Company?.Id ?? Guid.Empty,
+                CompanyName = job.Company?.CompanyName,
+                Email = job.Company?.Email ?? string.Empty,
+                Phone = job.Company?.Phone,
+                Description = job.Company?.Description,
+                AvatarUrl = job.Company?.AvatarUrl
+            }
+        };
     }
 }
