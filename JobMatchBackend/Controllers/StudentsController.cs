@@ -37,6 +37,27 @@ public class StudentsController : ControllerBase
         }
     }
 
+    [HttpGet("{studentId}/availability")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetStudentAvailability(Guid studentId)
+    {
+        try
+        {
+            var availability = await _studentService.GetStudentAvailabilityAsync(studentId);
+            return Ok(availability);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { message = "Student not found" });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
     [HttpGet("{studentId}/skills")]
     public async Task<IActionResult> GetStudentSkills(Guid studentId)
     {

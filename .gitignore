@@ -10,3 +10,5 @@ JobMatchBackend/appsettings.Development.json
 JobMatchBackend/appsettings.json
 JobMatchBackend/appsettings.json
 JobMatchBackend/appsettings.Development.json
+JobMatchBackend/appsettings.Production.json
+JobMatchBackend/appsettings.Staging.json
