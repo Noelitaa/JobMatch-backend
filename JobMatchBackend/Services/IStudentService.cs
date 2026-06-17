@@ -1,4 +1,5 @@
 using JobMatchBackend.DTOs.Response.Student;
+using JobMatchBackend.DTOs.Request;
 
 namespace JobMatchBackend.Services;
 
@@ -9,4 +10,5 @@ public interface IStudentService
     Task<List<string>> GetStudentSkillsAsync(Guid studentId);
     Task<string> AddSkillToStudentAsync(Guid studentId, string skillName);
     Task RemoveSkillFromStudentAsync(Guid studentId, Guid skillId);
+    Task UpdateWeeklyAvailabilityAsync(Guid studentId, UpdateWeeklyAvailabilityRequest request);
 }
