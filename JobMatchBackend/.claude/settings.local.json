@@ -5,7 +5,8 @@
       "Bash(Select-Object Name)",
       "Bash(dotnet build *)",
       "Bash(dotnet ef *)",
-      "Bash(Remove-Item *)"
+      "Bash(Remove-Item *)",
+      "Bash(git add *)"
     ]
   }
 }
