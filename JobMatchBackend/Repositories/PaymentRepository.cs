@@ -33,4 +33,18 @@ public class PaymentRepository : IPaymentRepository
             .ThenByDescending(payment => payment.CreatedAt)
             .ToListAsync();
     }
+
+    public async Task<Contract?> GetContractByIdAsync(int contractId)
+    {
+        return await _dbContext.Contracts
+            .Include(contract => contract.Job)
+            .FirstOrDefaultAsync(contract => contract.IdContract == contractId);
+    }
+
+    public async Task<Payment> AddPaymentAsync(Payment payment)
+    {
+        _dbContext.Payments.Add(payment);
+        await _dbContext.SaveChangesAsync();
+        return payment;
+    }
 }

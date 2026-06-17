@@ -1,3 +1,4 @@
+using JobMatchBackend.DTOs.Request;
 using JobMatchBackend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -51,5 +52,32 @@ public class PaymentsController : ControllerBase
             throw new UnauthorizedAccessException("Invalid authenticated user");
 
         return parsedUserId;
+    }
+
+    [HttpPost]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> RegisterPayment([FromBody] CreatePaymentRequest request)
+    {
+        try
+        {
+            var callerId = GetCurrentUserId();
+            var response = await _paymentService.RegisterPaymentAsync(request, callerId);
+            return StatusCode(201, response);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { message = "Internal server error" });
+        }
     }
 }
