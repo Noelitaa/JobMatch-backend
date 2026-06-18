@@ -43,6 +43,72 @@ public class ContractService : IContractService
         };
     }
 
+    public async Task<List<ContractListResponse>> GetContractsByCompanyAsync(Guid companyId, string? status)
+    {
+        var contracts = await _contractRepository.GetByCompanyIdAsync(companyId, status);
+
+        return contracts.Select(c => new ContractListResponse
+        {
+            IdContract = c.IdContract,
+            IdJob = c.IdJob,
+            JobTitle = c.Job?.Title ?? string.Empty,
+            IdStudent = c.IdStudent,
+            StudentName = c.Student?.FullName ?? string.Empty,
+            Status = c.Status ?? string.Empty,
+            CreatedAt = c.CreatedAt,
+            AcceptedAt = c.AcceptedAt
+        }).ToList();
+    }
+
+    public async Task<List<ContractListResponse>> GetContractsByStudentAsync(Guid studentId, string? status)
+    {
+        var contracts = await _contractRepository.GetByStudentIdAsync(studentId, status);
+
+        return contracts.Select(c => new ContractListResponse
+        {
+            IdContract = c.IdContract,
+            IdJob = c.IdJob,
+            JobTitle = c.Job?.Title ?? string.Empty,
+            IdStudent = c.IdStudent,
+            CompanyName = c.Company?.CompanyName ?? string.Empty,
+            Status = c.Status ?? string.Empty,
+            CreatedAt = c.CreatedAt,
+            AcceptedAt = c.AcceptedAt
+        }).ToList();
+    }
+
+    public async Task<ContractDetailResponse> GetContractByIdAsync(int contractId, Guid userId, string userRole)
+    {
+        var contract = await _contractRepository.GetContractWithDetailsAsync(contractId);
+        if (contract == null)
+            throw new KeyNotFoundException("Contract not found");
+
+        var hasAccess =
+            (userRole == "Student" && contract.IdStudent == userId) ||
+            (userRole == "Company" && contract.IdCompany == userId);
+
+        if (!hasAccess)
+            throw new UnauthorizedAccessException("You don't have permission to view this contract");
+
+        return new ContractDetailResponse
+        {
+            IdContract = contract.IdContract,
+            IdApplication = contract.IdApplication,
+            IdJob = contract.IdJob,
+            JobTitle = contract.Job?.Title ?? string.Empty,
+            IdStudent = contract.IdStudent,
+            StudentName = contract.Student?.FullName ?? string.Empty,
+            StudentEmail = contract.Student?.Email ?? string.Empty,
+            IdCompany = contract.IdCompany,
+            CompanyName = contract.Company?.CompanyName ?? string.Empty,
+            Status = contract.Status ?? string.Empty,
+            ContractData = contract.ContractData,
+            CreatedAt = contract.CreatedAt,
+            UpdatedAt = contract.UpdatedAt,
+            AcceptedAt = contract.AcceptedAt
+        };
+    }
+
     private static ContractResponse ToContractResponse(Models.Entities.Contract contract)
     {
         return new ContractResponse
