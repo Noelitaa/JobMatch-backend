@@ -9,12 +9,10 @@ namespace JobMatchBackend.Services;
 public class JobService : IJobService
 {
     private readonly IJobRepository _jobRepository;
-    private readonly INotificationRepository _notificationRepository;
 
-    public JobService(IJobRepository jobRepository, INotificationRepository notificationRepository)
+    public JobService(IJobRepository jobRepository)
     {
         _jobRepository = jobRepository;
-        _notificationRepository = notificationRepository;
     }
 
     public async Task<JobResponse> CreateJobAsync(CreateJobRequest request)
@@ -144,43 +142,6 @@ public class JobService : IJobService
         return ToDetailResponse(updated);
     }
 
-    public async Task CancelJobAsync(int jobId, Guid companyId)
-    {
-        var job = await _jobRepository.GetByIdWithCompanyAsync(jobId);
-        if (job == null)
-            throw new KeyNotFoundException("Job not found");
-
-        if (job.IdCompany != companyId)
-            throw new UnauthorizedAccessException("Company does not own this job");
-
-        if (job.Status == "cancelled")
-            throw new InvalidOperationException("Job is already cancelled");
-
-        var hasActiveContract = await _jobRepository.HasActiveContractAsync(jobId);
-        if (hasActiveContract)
-            throw new InvalidOperationException("Cannot cancel a job with an active contract");
-
-        var applicantIds = await _jobRepository.GetApplicantIdsByJobIdAsync(jobId);
-
-        job.Status = "cancelled";
-        job.UpdatedAt = DateTime.UtcNow;
-        await _jobRepository.CancelAsync(job);
-
-        if (applicantIds.Count > 0)
-        {
-            var notifications = applicantIds.Select(studentId => new Notification
-            {
-                IdUser = studentId,
-                Title = "Oferta cancelada",
-                Body = $"La oferta \"{job.Title}\" ha sido cancelada por la empresa.",
-                Type = "job_cancelled",
-                Data = $"{{\"jobId\": {jobId}}}"
-            }).ToList();
-
-            await _notificationRepository.CreateManyAsync(notifications);
-        }
-    }
-
     private static JobDetailResponse ToDetailResponse(Job job)
     {
         return new JobDetailResponse
@@ -189,7 +150,7 @@ public class JobService : IJobService
             IdCompany = job.IdCompany,
             Title = job.Title,
             Description = job.Description,
-            Type = job.Type,
+            Type = job.Type ?? string.Empty,
             Status = job.Status,
             Payment = job.Payment,
             PaymentType = job.PaymentType,

@@ -71,30 +71,9 @@ public class JobRepository : IJobRepository
             .ToListAsync();
     }
 
-    public async Task DeleteAsync(Job job)
-    {
-        _dbContext.Jobs.Remove(job);
-        await _dbContext.SaveChangesAsync();
-    }
-
     public async Task<bool> HasActiveContractAsync(int jobId)
     {
         return await _dbContext.Contracts
             .AnyAsync(c => c.IdJob == jobId && c.Status == "active");
-    }
-
-    public async Task<Job> CancelAsync(Job job)
-    {
-        _dbContext.Jobs.Update(job);
-        await _dbContext.SaveChangesAsync();
-        return job;
-    }
-
-    public async Task<List<Guid>> GetApplicantIdsByJobIdAsync(int jobId)
-    {
-        return await _dbContext.Applications
-            .Where(a => a.IdJob == jobId && a.Status != "rejected")
-            .Select(a => a.IdStudent)
-            .ToListAsync();
     }
 }
