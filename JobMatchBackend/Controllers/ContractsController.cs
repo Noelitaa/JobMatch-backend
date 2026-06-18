@@ -38,6 +38,27 @@ public class ContractsController : ControllerBase
         }
     }
 
+    // GET: /contracts/student?status=pending
+    [Authorize(Roles = "Student")]
+    [HttpGet("contracts/student")]
+    public async Task<IActionResult> GetStudentContracts([FromQuery] string? status)
+    {
+        try
+        {
+            var studentId = GetCurrentUserId();
+            var contracts = await _contractService.GetContractsByStudentAsync(studentId, status);
+            return Ok(contracts);
+        }
+        catch (UnauthorizedAccessException ex) when (ex.Message == "Invalid authenticated user")
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
     // GET: /contracts/{contractId}
     [HttpGet("contracts/{contractId}")]
     public async Task<IActionResult> GetContractById(int contractId)

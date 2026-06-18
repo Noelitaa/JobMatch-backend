@@ -7,6 +7,7 @@ public class ContractListResponse
     public string JobTitle { get; set; } = string.Empty;
     public Guid IdStudent { get; set; }
     public string StudentName { get; set; } = string.Empty;
+    public string CompanyName { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime? AcceptedAt { get; set; }
