@@ -1,3 +1,4 @@
+using System.Text.Json;
 using JobMatchBackend.DTOs.Request;
 using JobMatchBackend.DTOs.Response;
 using JobMatchBackend.Mappers;
@@ -130,7 +131,9 @@ public class JobService : IJobService
             EndTime = job.EndTime,
             StartDate = job.StartDate,
             EndDate = job.EndDate,
-            Deliverables = job.Deliverables,
+            Deliverables = string.IsNullOrWhiteSpace(job.Deliverables)
+                ? null
+                : JsonSerializer.Deserialize<List<string>>(job.Deliverables),
             CreatedAt = job.CreatedAt,
             UpdatedAt = job.UpdatedAt,
             Company = new CompanySummaryResponse
@@ -177,7 +180,7 @@ public class JobService : IJobService
         if (request.EndTime != null) job.EndTime = request.EndTime.Value;
         if (request.StartDate != null) job.StartDate = request.StartDate;
         if (request.EndDate != null) job.EndDate = request.EndDate;
-        if (request.Deliverables != null) job.Deliverables = string.Join(",", request.Deliverables);
+        if (request.Deliverables != null) job.Deliverables = JsonSerializer.Serialize(request.Deliverables);
 
         job.UpdatedAt = DateTime.UtcNow;
 
@@ -198,7 +201,9 @@ public class JobService : IJobService
             EndTime = updated.EndTime,
             StartDate = updated.StartDate,
             EndDate = updated.EndDate,
-            Deliverables = updated.Deliverables,
+            Deliverables = string.IsNullOrWhiteSpace(updated.Deliverables)
+                ? null
+                : JsonSerializer.Deserialize<List<string>>(updated.Deliverables),
             CreatedAt = updated.CreatedAt,
             UpdatedAt = updated.UpdatedAt,
             Company = new CompanySummaryResponse
