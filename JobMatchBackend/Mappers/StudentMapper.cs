@@ -1,3 +1,4 @@
+using JobMatchBackend.DTOs.Response;
 using JobMatchBackend.DTOs.Response.Student;
 using JobMatchBackend.Models.Entities;
 
@@ -25,8 +26,8 @@ public static class StudentMapper
             Career = user.Career,
             StudentId = user.StudentId,
             Skills = user.StudentSkills?
-                .Select(ss => ss.Skill!.Name)
-                .ToList() ?? new List<string>(),
+                .Select(ss => new StudentSkillResponse { SkillId = ss.Skill!.Id, SkillName = ss.Skill!.Name })
+                .ToList() ?? new List<StudentSkillResponse>(),
             Availability = ToAvailabilityResponse(user),
             AverageRating = 0.0f
         };
