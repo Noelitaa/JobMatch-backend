@@ -43,6 +43,23 @@ public class ContractService : IContractService
         };
     }
 
+    public async Task<List<ContractListResponse>> GetContractsByCompanyAsync(Guid companyId, string? status)
+    {
+        var contracts = await _contractRepository.GetByCompanyIdAsync(companyId, status);
+
+        return contracts.Select(c => new ContractListResponse
+        {
+            IdContract = c.IdContract,
+            IdJob = c.IdJob,
+            JobTitle = c.Job?.Title ?? string.Empty,
+            IdStudent = c.IdStudent,
+            StudentName = c.Student?.FullName ?? string.Empty,
+            Status = c.Status ?? string.Empty,
+            CreatedAt = c.CreatedAt,
+            AcceptedAt = c.AcceptedAt
+        }).ToList();
+    }
+
     private static ContractResponse ToContractResponse(Models.Entities.Contract contract)
     {
         return new ContractResponse
