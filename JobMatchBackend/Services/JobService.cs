@@ -66,6 +66,17 @@ public class JobService : IJobService
 
             if (request.Deliverables == null || request.Deliverables.Count == 0)
                 errors.Add("The 'deliverables' field is required and must contain at least one item.");
+
+            // Ordering / future-date checks accumulate alongside the field errors above
+            // instead of being thrown separately afterward (PR review feedback).
+            if (request.StartDate != null && request.EndDate != null)
+            {
+                if (request.StartDate.Value > request.EndDate.Value)
+                    errors.Add("'startDate' must be on or before 'endDate'.");
+
+                if (request.EndDate.Value < DateOnly.FromDateTime(DateTime.UtcNow))
+                    errors.Add("'endDate' must be in the future.");
+            }
         }
         else
         {
@@ -78,31 +89,20 @@ public class JobService : IJobService
 
             if (string.IsNullOrWhiteSpace(request.EndTime) || !TimeOnly.TryParse(request.EndTime, out endTime))
                 errors.Add("The 'endTime' field is required and must be a valid time.");
+
+            // startTime/endTime ordering check now accumulates with the other errors
+            // instead of being thrown on its own after the fact (PR review feedback).
+            if (startTime != TimeOnly.MinValue && endTime != TimeOnly.MinValue && startTime >= endTime)
+                errors.Add("'startTime' must be before 'endTime'.");
+
+            // Future-datetime check accumulates too, for the same reason.
+            if (DateTime.TryParse(request.Date + " " + request.StartTime, out var jobDateTime) &&
+                jobDateTime <= DateTime.UtcNow)
+                errors.Add("The job date and time must be in the future.");
         }
 
         if (errors.Count > 0)
             throw new ArgumentException(string.Join(" ", errors));
-
-        if (isAutonomous)
-        {
-            // StartDate and EndDate are guaranteed non-null past validation
-            if (request.StartDate!.Value > request.EndDate!.Value)
-                throw new ArgumentException("'startDate' must be on or before 'endDate'.");
-
-            if (request.EndDate.Value < DateOnly.FromDateTime(DateTime.UtcNow))
-                throw new ArgumentException("'endDate' must be in the future.");
-        }
-        else
-        {
-            if (DateTime.TryParse(request.Date + " " + request.StartTime, out var jobDateTime))
-            {
-                if (jobDateTime <= DateTime.UtcNow)
-                    throw new ArgumentException("The job date and time must be in the future.");
-            }
-
-            if (startTime >= endTime)
-                throw new ArgumentException("'startTime' must be before 'endTime'.");
-        }
 
         var job = JobMapper.ToEntity(request);
         job.IdCompany = companyId; // authoritative source: JWT, never the request body
@@ -116,36 +116,7 @@ public class JobService : IJobService
         if (job == null)
             throw new KeyNotFoundException("Job not found");
 
-        return new JobDetailResponse
-        {
-            IdJob = job.IdJob,
-            IdCompany = job.IdCompany,
-            Title = job.Title,
-            Description = job.Description,
-            Type = job.Type,
-            Status = job.Status,
-            Payment = job.Payment,
-            PaymentType = job.PaymentType,
-            WorkDate = job.WorkDate,
-            StartTime = job.StartTime,
-            EndTime = job.EndTime,
-            StartDate = job.StartDate,
-            EndDate = job.EndDate,
-            Deliverables = string.IsNullOrWhiteSpace(job.Deliverables)
-                ? null
-                : JsonSerializer.Deserialize<List<string>>(job.Deliverables),
-            CreatedAt = job.CreatedAt,
-            UpdatedAt = job.UpdatedAt,
-            Company = new CompanySummaryResponse
-            {
-                Id = job.Company?.Id ?? Guid.Empty,
-                CompanyName = job.Company?.CompanyName,
-                Email = job.Company?.Email ?? string.Empty,
-                Phone = job.Company?.Phone,
-                Description = job.Company?.Description,
-                AvatarUrl = job.Company?.AvatarUrl
-            }
-        };
+        return JobMapper.ToDetailResponse(job);
     }
 
     public async Task<List<JobResponse>> GetAllJobsAsync()
@@ -186,36 +157,7 @@ public class JobService : IJobService
 
         var updated = await _jobRepository.UpdateAsync(job);
 
-        return new JobDetailResponse
-        {
-            IdJob = updated.IdJob,
-            IdCompany = updated.IdCompany,
-            Title = updated.Title,
-            Description = updated.Description,
-            Type = updated.Type,
-            Status = updated.Status,
-            Payment = updated.Payment,
-            PaymentType = updated.PaymentType,
-            WorkDate = updated.WorkDate,
-            StartTime = updated.StartTime,
-            EndTime = updated.EndTime,
-            StartDate = updated.StartDate,
-            EndDate = updated.EndDate,
-            Deliverables = string.IsNullOrWhiteSpace(updated.Deliverables)
-                ? null
-                : JsonSerializer.Deserialize<List<string>>(updated.Deliverables),
-            CreatedAt = updated.CreatedAt,
-            UpdatedAt = updated.UpdatedAt,
-            Company = new CompanySummaryResponse
-            {
-                Id = updated.Company?.Id ?? Guid.Empty,
-                CompanyName = updated.Company?.CompanyName,
-                Email = updated.Company?.Email ?? string.Empty,
-                Phone = updated.Company?.Phone,
-                Description = updated.Company?.Description,
-                AvatarUrl = updated.Company?.AvatarUrl
-            }
-        };
+        return JobMapper.ToDetailResponse(updated);
     }
 
     public async Task CancelJobAsync(int jobId, Guid companyId)

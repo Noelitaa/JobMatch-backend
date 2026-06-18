@@ -52,6 +52,50 @@ public static class JobMapper
         };
     }
 
+    // Maps a Job (with Company loaded) to the detail response used by GetJobById and
+    // UpdateJob. Centralized here so both call sites in JobService stay in sync and so
+    // the autonomous-vs-fixed-time nulling logic isn't duplicated/forgotten in either place.
+    public static JobDetailResponse ToDetailResponse(Job job)
+    {
+        var isAutonomous = string.Equals(job.Type, "autonomous", StringComparison.OrdinalIgnoreCase);
+
+        return new JobDetailResponse
+        {
+            IdJob = job.IdJob,
+            IdCompany = job.IdCompany,
+            Title = job.Title,
+            Description = job.Description,
+            Type = job.Type ?? string.Empty,
+            Status = job.Status,
+            Payment = job.Payment,
+            PaymentType = job.PaymentType,
+
+            // job.WorkDate/StartTime/EndTime are non-nullable on the entity and are never
+            // set for autonomous jobs, so without this they'd leak default values
+            // (0001-01-01 / 00:00:00) into the response. Same fix as ToResponse below.
+            WorkDate = isAutonomous ? null : job.WorkDate,
+            StartTime = isAutonomous ? null : job.StartTime,
+            EndTime = isAutonomous ? null : job.EndTime,
+
+            StartDate = job.StartDate,
+            EndDate = job.EndDate,
+            Deliverables = string.IsNullOrWhiteSpace(job.Deliverables)
+                ? null
+                : JsonSerializer.Deserialize<List<string>>(job.Deliverables),
+            CreatedAt = job.CreatedAt,
+            UpdatedAt = job.UpdatedAt,
+            Company = new CompanySummaryResponse
+            {
+                Id = job.Company?.Id ?? Guid.Empty,
+                CompanyName = job.Company?.CompanyName,
+                Email = job.Company?.Email ?? string.Empty,
+                Phone = job.Company?.Phone,
+                Description = job.Company?.Description,
+                AvatarUrl = job.Company?.AvatarUrl
+            }
+        };
+    }
+
     public static JobResponse ToResponse(Job job)
     {
         var isAutonomous = string.Equals(job.Type, "autonomous", StringComparison.OrdinalIgnoreCase);
