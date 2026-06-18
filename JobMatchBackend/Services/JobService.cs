@@ -26,7 +26,7 @@ public class JobService : IJobService
             throw new KeyNotFoundException("Company not found");
 
         if (!company.IsActive)
-            throw new ArgumentException("Company is not active.");
+            throw new UnauthorizedAccessException("Company is not active.");
 
         if (company.Role != "Company")
             throw new UnauthorizedAccessException("Authenticated user is not a company.");
@@ -88,14 +88,14 @@ public class JobService : IJobService
             if (request.StartDate!.Value > request.EndDate!.Value)
                 throw new ArgumentException("'startDate' must be on or before 'endDate'.");
 
-            if (request.EndDate.Value < DateOnly.FromDateTime(DateTime.Now))
+            if (request.EndDate.Value < DateOnly.FromDateTime(DateTime.UtcNow))
                 throw new ArgumentException("'endDate' must be in the future.");
         }
         else
         {
             if (DateTime.TryParse(request.Date + " " + request.StartTime, out var jobDateTime))
             {
-                if (jobDateTime <= DateTime.Now)
+                if (jobDateTime <= DateTime.UtcNow)
                     throw new ArgumentException("The job date and time must be in the future.");
             }
 
