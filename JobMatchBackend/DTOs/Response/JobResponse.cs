@@ -18,7 +18,7 @@ public class JobResponse
     // Autonomous job fields (null for fixed-time jobs)
     public DateOnly? StartDate { get; set; }
     public DateOnly? EndDate { get; set; }
-    public string? Deliverables { get; set; }
+    public List<string>? Deliverables { get; set; }
 
     public DateTime CreatedAt { get; set; }
 }

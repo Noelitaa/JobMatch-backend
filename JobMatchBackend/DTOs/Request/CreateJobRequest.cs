@@ -2,12 +2,12 @@ namespace JobMatchBackend.DTOs.Request;
 
 public class CreateJobRequest
 {
-    public string CompanyId { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
 
-    // Default kept as "fixed-time" for backward compatibility with existing callers.
-    public string Type { get; set; } = "fixed-time";
+    // No default: an omitted Type must trigger an explicit "type is required" error,
+    // not silently fall through to fixed-time validation.
+    public string Type { get; set; } = string.Empty;
 
     // Fixed-time job fields (required when Type == "fixed-time")
     public string Date { get; set; } = string.Empty;
