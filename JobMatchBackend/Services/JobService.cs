@@ -123,7 +123,7 @@ public class JobService : IJobService
             IdCompany = job.IdCompany,
             Title = job.Title,
             Description = job.Description,
-            Type = job.Type,
+            Type = job.Type ?? string.Empty,
             Status = job.Status,
             Payment = job.Payment,
             PaymentType = job.PaymentType,
@@ -132,9 +132,7 @@ public class JobService : IJobService
             EndTime = job.EndTime,
             StartDate = job.StartDate,
             EndDate = job.EndDate,
-            Deliverables = string.IsNullOrWhiteSpace(job.Deliverables)
-                ? null
-                : JsonSerializer.Deserialize<List<string>>(job.Deliverables),
+            Deliverables = TryParseDeliverables(job.Deliverables),
             CreatedAt = job.CreatedAt,
             UpdatedAt = job.UpdatedAt,
             Company = new CompanySummaryResponse
@@ -193,7 +191,7 @@ public class JobService : IJobService
             IdCompany = updated.IdCompany,
             Title = updated.Title,
             Description = updated.Description,
-            Type = updated.Type,
+            Type = updated.Type ?? string.Empty,
             Status = updated.Status,
             Payment = updated.Payment,
             PaymentType = updated.PaymentType,
@@ -202,9 +200,7 @@ public class JobService : IJobService
             EndTime = updated.EndTime,
             StartDate = updated.StartDate,
             EndDate = updated.EndDate,
-            Deliverables = string.IsNullOrWhiteSpace(updated.Deliverables)
-                ? null
-                : JsonSerializer.Deserialize<List<string>>(updated.Deliverables),
+            Deliverables = TryParseDeliverables(updated.Deliverables),
             CreatedAt = updated.CreatedAt,
             UpdatedAt = updated.UpdatedAt,
             Company = new CompanySummaryResponse
@@ -254,5 +250,12 @@ public class JobService : IJobService
 
             await _notificationRepository.CreateManyAsync(notifications);
         }
+    }
+
+    private static List<string>? TryParseDeliverables(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return null;
+        try { return JsonSerializer.Deserialize<List<string>>(raw); }
+        catch { return null; }
     }
 }
