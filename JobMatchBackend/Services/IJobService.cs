@@ -5,7 +5,7 @@ namespace JobMatchBackend.Services;
 
 public interface IJobService
 {
-    Task<JobResponse> CreateJobAsync(CreateJobRequest request);
+    Task<JobResponse> CreateJobAsync(Guid companyId, CreateJobRequest request);
     Task<List<JobResponse>> GetAllJobsAsync();
     Task<JobDetailResponse> GetJobByIdAsync(int jobId);
     Task<JobDetailResponse> UpdateJobAsync(int jobId, Guid companyId, UpdateJobRequest request);

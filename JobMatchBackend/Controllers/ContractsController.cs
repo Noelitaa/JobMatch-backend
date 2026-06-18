@@ -7,7 +7,7 @@ namespace JobMatchBackend.Controllers;
 
 [ApiController]
 [Route("")]
-[Authorize(Roles = "Student")]
+[Authorize]
 public class ContractsController : ControllerBase
 {
     private readonly IContractService _contractService;
@@ -17,7 +17,29 @@ public class ContractsController : ControllerBase
         _contractService = contractService;
     }
 
+    // GET: /contracts?status=active
+    [Authorize(Roles = "Company")]
+    [HttpGet("contracts")]
+    public async Task<IActionResult> GetContracts([FromQuery] string? status)
+    {
+        try
+        {
+            var companyId = GetCurrentUserId();
+            var contracts = await _contractService.GetContractsByCompanyAsync(companyId, status);
+            return Ok(contracts);
+        }
+        catch (UnauthorizedAccessException ex) when (ex.Message == "Invalid authenticated user")
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
     // PUT: /contracts/{contractId}/accept
+    [Authorize(Roles = "Student")]
     [HttpPut("contracts/{contractId}/accept")]
     public async Task<IActionResult> AcceptContract(int contractId)
     {

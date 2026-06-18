@@ -126,8 +126,8 @@ public class ApplicationService : IApplicationService
             studentUniversity = data.StudentUniversity,
             studentCareer = data.StudentCareer,
             workType = data.JobType ?? "Not specified",
-            startDate = DateTime.UtcNow.AddDays(7).ToString("yyyy-MM-dd"),
-            endDate = DateTime.UtcNow.AddMonths(3).ToString("yyyy-MM-dd"),
+            startDate = job.StartDate?.ToString("yyyy-MM-dd"),
+            endDate = job.EndDate?.ToString("yyyy-MM-dd"),
             compensation = "To be defined by agreement",
             clauses = new[]
             {
