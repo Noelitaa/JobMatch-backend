@@ -117,7 +117,7 @@ public class JobsController : ControllerBase
         {
             var companyId = GetCurrentUserId();
             var response = await _jobService.CreateJobAsync(companyId, request);
-            return StatusCode(201, new { message = "Job creado correctamente", data = response });
+            return CreatedAtAction(nameof(GetJobById), new { jobId = response.IdJob }, new { message = "Job created successfully", data = response });
         }
         catch (ArgumentException ex)
         {

@@ -25,9 +25,6 @@ public class JobService : IJobService
         if (company == null)
             throw new KeyNotFoundException("Company not found");
 
-        // NOTE: I don't have Models/Entities/User.cs, so I can't confirm the exact
-        // property names below. Adjust IsActive / Role to match the real entity
-        // (e.g. it might be `Active`, `Status == "active"`, `IsEnabled`, etc.)
         if (!company.IsActive)
             throw new ArgumentException("Company is not active.");
 
@@ -42,48 +39,44 @@ public class JobService : IJobService
         var allowedTypes = new[] { "autonomous", "fixed-time" };
         if (string.IsNullOrWhiteSpace(request.Type) ||
             !allowedTypes.Contains(request.Type, StringComparer.OrdinalIgnoreCase))
-            errors.Add("El campo 'type' es obligatorio y debe ser 'autonomous' o 'fixed-time'.");
+            errors.Add("The 'type' field is required and must be 'autonomous' or 'fixed-time'.");
 
         var isAutonomous = string.Equals(request.Type, "autonomous", StringComparison.OrdinalIgnoreCase);
 
         // --- Common validation (applies to every job type) ---
         if (string.IsNullOrWhiteSpace(request.Title))
-            errors.Add("El campo 'title' es obligatorio.");
-
-        // NOTE: companyId now comes from the authenticated JWT user (see controller),
-        // never from the request body. The old format check on request.CompanyId was
-        // removed; if CreateJobRequest still has a CompanyId property, ignore/remove it.
+            errors.Add("The 'title' field is required.");
 
         if (request.Payment <= 0)
-            errors.Add("El campo 'payment' debe ser mayor a 0.");
+            errors.Add("The 'payment' field must be greater than 0.");
 
         if (string.IsNullOrWhiteSpace(request.PaymentType) ||
             (request.PaymentType != "one_time" && request.PaymentType != "monthly"))
-            errors.Add("El campo 'paymentType' debe ser 'one_time' o 'monthly'.");
+            errors.Add("The 'paymentType' field must be 'one_time' or 'monthly'.");
 
         if (isAutonomous)
         {
             // --- Autonomous-specific validation ---
             if (request.StartDate == null)
-                errors.Add("El campo 'startDate' es obligatorio.");
+                errors.Add("The 'startDate' field is required.");
 
             if (request.EndDate == null)
-                errors.Add("El campo 'endDate' es obligatorio.");
+                errors.Add("The 'endDate' field is required.");
 
             if (request.Deliverables == null || request.Deliverables.Count == 0)
-                errors.Add("El campo 'deliverables' es obligatorio y debe contener al menos un elemento.");
+                errors.Add("The 'deliverables' field is required and must contain at least one item.");
         }
         else
         {
             // --- Fixed-time-specific validation ---
             if (string.IsNullOrWhiteSpace(request.Date) || !DateOnly.TryParse(request.Date, out _))
-                errors.Add("El campo 'date' es obligatorio y debe ser una fecha válida.");
+                errors.Add("The 'date' field is required and must be a valid date.");
 
             if (string.IsNullOrWhiteSpace(request.StartTime) || !TimeOnly.TryParse(request.StartTime, out startTime))
-                errors.Add("El campo 'startTime' es obligatorio y debe ser una hora válida.");
+                errors.Add("The 'startTime' field is required and must be a valid time.");
 
             if (string.IsNullOrWhiteSpace(request.EndTime) || !TimeOnly.TryParse(request.EndTime, out endTime))
-                errors.Add("El campo 'endTime' es obligatorio y debe ser una hora válida.");
+                errors.Add("The 'endTime' field is required and must be a valid time.");
         }
 
         if (errors.Count > 0)
@@ -93,21 +86,21 @@ public class JobService : IJobService
         {
             // StartDate and EndDate are guaranteed non-null past validation
             if (request.StartDate!.Value > request.EndDate!.Value)
-                throw new ArgumentException("'startDate' debe ser anterior o igual a 'endDate'.");
+                throw new ArgumentException("'startDate' must be on or before 'endDate'.");
 
             if (request.EndDate.Value < DateOnly.FromDateTime(DateTime.Now))
-                throw new ArgumentException("'endDate' debe ser en el futuro.");
+                throw new ArgumentException("'endDate' must be in the future.");
         }
         else
         {
             if (DateTime.TryParse(request.Date + " " + request.StartTime, out var jobDateTime))
             {
                 if (jobDateTime <= DateTime.Now)
-                    throw new ArgumentException("La fecha y hora del trabajo deben ser en el futuro.");
+                    throw new ArgumentException("The job date and time must be in the future.");
             }
 
             if (startTime >= endTime)
-                throw new ArgumentException("'startTime' debe ser anterior a 'endTime'.");
+                throw new ArgumentException("'startTime' must be before 'endTime'.");
         }
 
         var job = JobMapper.ToEntity(request);

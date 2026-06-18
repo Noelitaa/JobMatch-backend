@@ -1,3 +1,4 @@
+using System.Text.Json;
 using JobMatchBackend.DTOs.Request;
 using JobMatchBackend.DTOs.Response;
 using JobMatchBackend.Models.Entities;
@@ -14,11 +15,12 @@ public static class JobMapper
     }
 
     // Maps a fixed-time job request to the Job entity.
+    // IdCompany is intentionally left at its default; JobService sets it from the
+    // authenticated JWT claim after calling this mapper, never from the request body.
     public static Job ToFixedTimeEntity(CreateJobRequest dto)
     {
         return new Job
         {
-            IdCompany = Guid.Parse(dto.CompanyId),
             Title = dto.Title,
             Description = dto.Description,
             Payment = dto.Payment,
@@ -32,18 +34,19 @@ public static class JobMapper
     }
 
     // Maps an autonomous job request to the Job entity.
+    // IdCompany is intentionally left at its default; JobService sets it from the
+    // authenticated JWT claim after calling this mapper, never from the request body.
     public static Job ToAutonomousEntity(CreateJobRequest dto)
     {
         return new Job
         {
-            IdCompany = Guid.Parse(dto.CompanyId),
             Title = dto.Title,
             Description = dto.Description,
             Payment = dto.Payment,
             PaymentType = dto.PaymentType,
             StartDate = dto.StartDate,
             EndDate = dto.EndDate,
-            Deliverables = dto.Deliverables != null ? string.Join(",", dto.Deliverables) : null,
+            Deliverables = dto.Deliverables != null ? JsonSerializer.Serialize(dto.Deliverables) : null,
             Type = "autonomous",
             Status = "open"
         };
@@ -71,7 +74,9 @@ public static class JobMapper
 
             StartDate = job.StartDate,
             EndDate = job.EndDate,
-            Deliverables = job.Deliverables,
+            Deliverables = string.IsNullOrWhiteSpace(job.Deliverables)
+                ? null
+                : JsonSerializer.Deserialize<List<string>>(job.Deliverables),
 
             CreatedAt = job.CreatedAt
         };
