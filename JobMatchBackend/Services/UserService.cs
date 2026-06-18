@@ -23,7 +23,7 @@ public class UserService : IUserService
     public async Task<RegisterStudentResponse> CreateStudentAsync(RegisterStudent request)
     {
 
-        var existingUser = await _dbContext.User.FirstOrDefaultAsync(u => u.Email == request.Email);
+        var existingUser = await _dbContext.User.FirstOrDefaultAsync(u => u.Email == request.Email && u.IsActive);
 
         if (existingUser != null)
         {
@@ -45,14 +45,14 @@ public class UserService : IUserService
     public async Task<RegisterCompanyResponse> CreateCompanyAsync(RegisterCompany request)
     {
 
-        var existingUser = await _dbContext.User.FirstOrDefaultAsync(u => u.CompanyId == request.CompanyId);
+        var existingUser = await _dbContext.User.FirstOrDefaultAsync(u => u.CompanyId == request.CompanyId && u.IsActive);
 
         if (existingUser != null)
         {
             throw new InvalidOperationException("La cedula de identificacion de esta empresa ya se encuentra registrada.");
         }
 
-        var existingUserByEmail = await _dbContext.User.FirstOrDefaultAsync(u => u.Email == request.Email);
+        var existingUserByEmail = await _dbContext.User.FirstOrDefaultAsync(u => u.Email == request.Email && u.IsActive);
 
         if (existingUserByEmail != null)
         {
