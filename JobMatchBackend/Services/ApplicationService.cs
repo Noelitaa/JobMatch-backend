@@ -9,17 +9,23 @@ namespace JobMatchBackend.Services;
 public class ApplicationService : IApplicationService
 {
     private readonly IApplicationRepository _applicationRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IJobRepository _jobRepository;
     private readonly IContractRepository _contractRepository;
+    private readonly ILogger<ApplicationService> _logger;
 
     public ApplicationService(
         IApplicationRepository applicationRepository,
+        IUserRepository userRepository,
         IJobRepository jobRepository,
-        IContractRepository contractRepository)
+        IContractRepository contractRepository,
+        ILogger<ApplicationService> logger)
     {
         _applicationRepository = applicationRepository;
+        _userRepository = userRepository;
         _jobRepository = jobRepository;
         _contractRepository = contractRepository;
+        _logger = logger;
     }
 
     public async Task<IEnumerable<ApplicationResponse>> GetApplicationsByJobAsync(int jobId, Guid companyId)
@@ -63,6 +69,7 @@ public class ApplicationService : IApplicationService
             throw new ArgumentException("Invalid status. Use 'accepted' or 'rejected'");
 
         application.Status = request.Status;
+        application.UpdatedAt = DateTime.UtcNow;
         await _applicationRepository.UpdateAsync(application);
 
         var response = new UpdateApplicationResponse
@@ -99,12 +106,15 @@ public class ApplicationService : IApplicationService
         var data = await _applicationRepository.GetContractDataAsync(application.IdApplication);
 
         if (data == null)
+
             throw new InvalidOperationException($"Could not retrieve contract data for application {application.IdApplication}");
 
-        var job = await _jobRepository.GetByIdAsync(application.IdJob);
 
+        var job = await _jobRepository.GetByIdAsync(application.IdJob);
         if (job == null)
+
             throw new InvalidOperationException($"Job with ID {application.IdJob} not found");
+
 
         var contractData = new
         {
@@ -115,17 +125,17 @@ public class ApplicationService : IApplicationService
             studentEmail = data.StudentEmail,
             studentUniversity = data.StudentUniversity,
             studentCareer = data.StudentCareer,
-            workType = data.JobType ?? "No especificado",
-            startDate = DateTime.UtcNow.AddDays(7).ToString("yyyy-MM-dd"),
-            endDate = DateTime.UtcNow.AddMonths(3).ToString("yyyy-MM-dd"),
-            compensation = "Por definir según acuerdo",
+            workType = data.JobType ?? "Not specified",
+            startDate = job.StartDate?.ToString("yyyy-MM-dd"),
+            endDate = job.EndDate?.ToString("yyyy-MM-dd"),
+            compensation = "To be defined by agreement",
             clauses = new[]
             {
-                "El estudiante se compromete a cumplir con las tareas asignadas",
-                "La empresa proporcionará los recursos necesarios",
-                "Se respetarán los horarios acordados",
-                "Cualquier modificación debe ser acordada por escrito",
-                "El incumplimiento puede resultar en terminación del contrato"
+                "The student commits to complete assigned tasks.",
+                "The company will provide the required resources.",
+                "Agreed working schedules must be respected.",
+                "Any modification must be agreed in writing.",
+                "Non-compliance may result in contract termination."
             }
         };
 
@@ -143,6 +153,51 @@ public class ApplicationService : IApplicationService
         return await _contractRepository.CreateAsync(contract);
     }
 
+    public async Task<CreateApplicationResponse> CreateApplicationAsync(Guid studentId, CreateApplicationRequest request)
+    {
+        if (request.IdJob == null)
+            throw new ArgumentException("Job id is required");
+
+        var student = await _userRepository.GetByIdAsync(studentId);
+        if (student == null)
+            throw new KeyNotFoundException("Student not found");
+
+        if (student.Role != "Student")
+            throw new UnauthorizedAccessException("Only students can apply for job offers");
+
+        var job = await _jobRepository.GetByIdWithCompanyAsync(request.IdJob!.Value);
+        if (job == null)
+            throw new KeyNotFoundException("Job offer not found");
+
+        var alreadyApplied = await _applicationRepository.ExistsAsync(studentId, request.IdJob.Value);
+        if (alreadyApplied)
+            throw new InvalidOperationException("Student has already applied to this job");
+
+        var application = new Application
+        {
+            IdStudent = studentId,
+            IdJob = request.IdJob.Value,
+            Status = "pending"
+        };
+
+        await _applicationRepository.CreateAsync(application);
+
+        NotifyCompany(job.Company?.Email, job.Title, student.FullName);
+
+        return new CreateApplicationResponse
+        {
+            Message = "Application submitted successfully",
+            Status = application.Status
+        };
+    }
+
+    private void NotifyCompany(string? companyEmail, string jobTitle, string? studentName)
+    {
+        _logger.LogInformation(
+            "NOTIFICATION: New application received - Job: '{JobTitle}', Applicant: '{StudentName}', Company email: '{CompanyEmail}'",
+            jobTitle, studentName ?? "Unknown", companyEmail ?? "Unknown");
+    }
+    
     public async Task<ApplicationDetailResponse> GetApplicationDetailsAsync(int applicationId, Guid userId, string userRole)
     {
         var application = await _applicationRepository.GetApplicationWithDetailsAsync(applicationId);
