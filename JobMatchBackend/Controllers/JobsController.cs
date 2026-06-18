@@ -109,17 +109,35 @@ public class JobsController : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> CreateJob([FromBody] CreateJobRequest request)
     {
         try
         {
-            var response = await _jobService.CreateJobAsync(request);
+            var companyId = GetCurrentUserId();
+            var response = await _jobService.CreateJobAsync(companyId, request);
             return StatusCode(201, new { message = "Job creado correctamente", data = response });
         }
         catch (ArgumentException ex)
         {
             return BadRequest(new { message = ex.Message });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex) when (ex.Message == "Invalid authenticated user")
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { message = ex.Message });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { message = "Internal server error" });
         }
     }
 

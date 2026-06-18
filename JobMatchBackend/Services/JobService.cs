@@ -10,27 +10,49 @@ public class JobService : IJobService
 {
     private readonly IJobRepository _jobRepository;
     private readonly INotificationRepository _notificationRepository;
+    private readonly ICompanyRepository _companyRepository;
 
-    public JobService(IJobRepository jobRepository, INotificationRepository notificationRepository)
+    public JobService(IJobRepository jobRepository, INotificationRepository notificationRepository, ICompanyRepository companyRepository)
     {
         _jobRepository = jobRepository;
         _notificationRepository = notificationRepository;
+        _companyRepository = companyRepository;
     }
 
-    public async Task<JobResponse> CreateJobAsync(CreateJobRequest request)
+    public async Task<JobResponse> CreateJobAsync(Guid companyId, CreateJobRequest request)
     {
-        var isAutonomous = string.Equals(request.Type, "autonomous", StringComparison.OrdinalIgnoreCase);
+        var company = await _companyRepository.GetCompanyByIdAsync(companyId);
+        if (company == null)
+            throw new KeyNotFoundException("Company not found");
+
+        // NOTE: I don't have Models/Entities/User.cs, so I can't confirm the exact
+        // property names below. Adjust IsActive / Role to match the real entity
+        // (e.g. it might be `Active`, `Status == "active"`, `IsEnabled`, etc.)
+        if (!company.IsActive)
+            throw new ArgumentException("Company is not active.");
+
+        if (company.Role != "Company")
+            throw new UnauthorizedAccessException("Authenticated user is not a company.");
 
         var errors = new List<string>();
         TimeOnly startTime = TimeOnly.MinValue;
         TimeOnly endTime = TimeOnly.MinValue;
 
+        // --- Type validation (explicit allow-list, no implicit fallback) ---
+        var allowedTypes = new[] { "autonomous", "fixed-time" };
+        if (string.IsNullOrWhiteSpace(request.Type) ||
+            !allowedTypes.Contains(request.Type, StringComparer.OrdinalIgnoreCase))
+            errors.Add("El campo 'type' es obligatorio y debe ser 'autonomous' o 'fixed-time'.");
+
+        var isAutonomous = string.Equals(request.Type, "autonomous", StringComparison.OrdinalIgnoreCase);
+
         // --- Common validation (applies to every job type) ---
         if (string.IsNullOrWhiteSpace(request.Title))
             errors.Add("El campo 'title' es obligatorio.");
 
-        if (string.IsNullOrWhiteSpace(request.CompanyId) || !Guid.TryParse(request.CompanyId, out _))
-            errors.Add("El campo 'companyId' es obligatorio y debe ser un GUID válido.");
+        // NOTE: companyId now comes from the authenticated JWT user (see controller),
+        // never from the request body. The old format check on request.CompanyId was
+        // removed; if CreateJobRequest still has a CompanyId property, ignore/remove it.
 
         if (request.Payment <= 0)
             errors.Add("El campo 'payment' debe ser mayor a 0.");
@@ -89,6 +111,7 @@ public class JobService : IJobService
         }
 
         var job = JobMapper.ToEntity(request);
+        job.IdCompany = companyId; // authoritative source: JWT, never the request body
         var created = await _jobRepository.CreateAsync(job);
         return JobMapper.ToResponse(created);
     }
