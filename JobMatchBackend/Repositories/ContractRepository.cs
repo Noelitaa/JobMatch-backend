@@ -35,4 +35,19 @@ public class ContractRepository : IContractRepository
         _dbContext.Contracts.Update(contract);
         await _dbContext.SaveChangesAsync();
     }
+
+    public async Task<List<Contract>> GetByCompanyIdAsync(Guid companyId, string? status)
+    {
+        var query = _dbContext.Contracts
+            .Include(c => c.Job)
+            .Include(c => c.Student)
+            .Where(c => c.IdCompany == companyId);
+
+        if (!string.IsNullOrWhiteSpace(status))
+            query = query.Where(c => c.Status == status);
+
+        return await query
+            .OrderByDescending(c => c.CreatedAt)
+            .ToListAsync();
+    }
 }
