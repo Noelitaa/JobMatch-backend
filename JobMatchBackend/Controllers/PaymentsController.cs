@@ -55,6 +55,7 @@ public class PaymentsController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Company")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

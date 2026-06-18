@@ -44,6 +44,9 @@ public class PaymentService : IPaymentService
         if (!string.Equals(contract.Status, "active", StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException("Payment must be linked to an active contract");
 
+        if (contract.IdCompany != callerId)
+            throw new UnauthorizedAccessException("Only the company associated with the contract can register payments");
+
         var payment = new Payment
         {
             IdContract = contractId,
