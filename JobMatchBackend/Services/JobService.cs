@@ -36,49 +36,45 @@ public class JobService : IJobService
         TimeOnly startTime = TimeOnly.MinValue;
         TimeOnly endTime = TimeOnly.MinValue;
 
-        // --- Type validation (explicit allow-list, no implicit fallback) ---
         var allowedTypes = new[] { "autonomous", "fixed-time" };
         if (string.IsNullOrWhiteSpace(request.Type) ||
             !allowedTypes.Contains(request.Type, StringComparer.OrdinalIgnoreCase))
-            errors.Add("The 'type' field is required and must be 'autonomous' or 'fixed-time'.");
+            errors.Add("El tipo de trabajo es requerido y debe ser 'autonomous' o 'fixed-time'.");
 
         var isAutonomous = string.Equals(request.Type, "autonomous", StringComparison.OrdinalIgnoreCase);
 
-        // --- Common validation (applies to every job type) ---
         if (string.IsNullOrWhiteSpace(request.Title))
-            errors.Add("The 'title' field is required.");
+            errors.Add("El título es requerido.");
 
         if (request.Payment <= 0)
-            errors.Add("The 'payment' field must be greater than 0.");
+            errors.Add("El monto debe ser mayor a 0.");
 
         var allowedPaymentTypes = new[] { "hora", "turno", "proyecto" };
         if (string.IsNullOrWhiteSpace(request.PaymentType) ||
             !allowedPaymentTypes.Contains(request.PaymentType, StringComparer.OrdinalIgnoreCase))
-            errors.Add("The 'paymentType' field must be 'hora', 'turno', or 'proyecto'.");
+            errors.Add("La modalidad de pago debe ser 'hora', 'turno' o 'proyecto'.");
 
         if (isAutonomous)
         {
-            // --- Autonomous-specific validation ---
             if (request.StartDate == null)
-                errors.Add("The 'startDate' field is required.");
+                errors.Add("La fecha de inicio es requerida.");
 
             if (request.EndDate == null)
-                errors.Add("The 'endDate' field is required.");
+                errors.Add("La fecha de fin es requerida.");
 
             if (request.Deliverables == null || request.Deliverables.Count == 0)
-                errors.Add("The 'deliverables' field is required and must contain at least one item.");
+                errors.Add("Debes agregar al menos un entregable.");
         }
         else
         {
-            // --- Fixed-time-specific validation ---
             if (string.IsNullOrWhiteSpace(request.Date) || !DateOnly.TryParse(request.Date, out _))
-                errors.Add("The 'date' field is required and must be a valid date.");
+                errors.Add("La fecha del trabajo es requerida y debe tener el formato YYYY-MM-DD.");
 
             if (string.IsNullOrWhiteSpace(request.StartTime) || !TimeOnly.TryParse(request.StartTime, out startTime))
-                errors.Add("The 'startTime' field is required and must be a valid time.");
+                errors.Add("La hora de inicio es requerida y debe tener el formato HH:mm.");
 
             if (string.IsNullOrWhiteSpace(request.EndTime) || !TimeOnly.TryParse(request.EndTime, out endTime))
-                errors.Add("The 'endTime' field is required and must be a valid time.");
+                errors.Add("La hora de fin es requerida y debe tener el formato HH:mm.");
         }
 
         if (errors.Count > 0)
@@ -86,23 +82,22 @@ public class JobService : IJobService
 
         if (isAutonomous)
         {
-            // StartDate and EndDate are guaranteed non-null past validation
             if (request.StartDate!.Value > request.EndDate!.Value)
-                throw new ArgumentException("'startDate' must be on or before 'endDate'.");
+                throw new ArgumentException("La fecha de inicio debe ser anterior o igual a la fecha de fin.");
 
             if (request.EndDate.Value < DateOnly.FromDateTime(DateTime.UtcNow))
-                throw new ArgumentException("'endDate' must be in the future.");
+                throw new ArgumentException("La fecha de fin debe ser en el futuro.");
         }
         else
         {
             if (DateTime.TryParse(request.Date + " " + request.StartTime, out var jobDateTime))
             {
                 if (jobDateTime <= DateTime.UtcNow)
-                    throw new ArgumentException("The job date and time must be in the future.");
+                    throw new ArgumentException("La fecha y hora del trabajo deben ser en el futuro.");
             }
 
             if (startTime >= endTime)
-                throw new ArgumentException("'startTime' must be before 'endTime'.");
+                throw new ArgumentException("La hora de inicio debe ser anterior a la hora de fin.");
         }
 
         var job = JobMapper.ToEntity(request);
@@ -164,11 +159,11 @@ public class JobService : IJobService
 
         var hasAcceptedApplications = await _jobRepository.HasAcceptedApplicationsAsync(jobId);
         if (hasAcceptedApplications)
-            throw new InvalidOperationException("Cannot edit a job that has accepted students");
+            throw new InvalidOperationException("No se puede editar una oferta que ya tiene postulantes aceptados.");
 
         var hasActiveContract = await _jobRepository.HasActiveContractAsync(jobId);
         if (hasActiveContract)
-            throw new InvalidOperationException("Cannot edit a job with an active contract");
+            throw new InvalidOperationException("No se puede editar una oferta con un contrato activo.");
 
         if (!string.IsNullOrWhiteSpace(request.Title)) job.Title = request.Title;
         if (!string.IsNullOrWhiteSpace(request.Description)) job.Description = request.Description;
