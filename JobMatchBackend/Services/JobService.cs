@@ -51,9 +51,10 @@ public class JobService : IJobService
         if (request.Payment <= 0)
             errors.Add("The 'payment' field must be greater than 0.");
 
+        var allowedPaymentTypes = new[] { "hora", "turno", "proyecto" };
         if (string.IsNullOrWhiteSpace(request.PaymentType) ||
-            (request.PaymentType != "one_time" && request.PaymentType != "monthly"))
-            errors.Add("The 'paymentType' field must be 'one_time' or 'monthly'.");
+            !allowedPaymentTypes.Contains(request.PaymentType, StringComparer.OrdinalIgnoreCase))
+            errors.Add("The 'paymentType' field must be 'hora', 'turno', or 'proyecto'.");
 
         if (isAutonomous)
         {
