@@ -43,7 +43,8 @@ public class JobRepository : IJobRepository
     public async Task<Job?> GetByIdAsync(int id)
     {
         return await _dbContext.Jobs
-            .Include(j => j.Applications)
+            .Include(j => j.Company)
+            .Where(j => j.Company != null && j.Company.IsActive)
             .FirstOrDefaultAsync(j => j.IdJob == id);
     }
 

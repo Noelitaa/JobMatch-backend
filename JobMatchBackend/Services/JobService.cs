@@ -114,9 +114,8 @@ public class JobService : IJobService
         if (job == null)
             throw new KeyNotFoundException("Job not found");
 
-        // FIX 1: Verify that the authenticated company owns this job
-        var isOwner = await _jobRepository.IsCompanyOwnerAsync(jobId, companyId);
-        if (!isOwner)
+        // Ownership check using the already-loaded job entity — avoids a redundant query
+        if (job.IdCompany != companyId)
             throw new UnauthorizedAccessException("You do not have permission to edit this job");
 
         var hasAccepted = await _jobRepository.HasAcceptedApplicationsAsync(jobId);
@@ -127,8 +126,8 @@ public class JobService : IJobService
         if (hasActiveContract)
             throw new InvalidOperationException("Cannot edit a job with an active contract");
 
-        if (request.Title != null) job.Title = request.Title;
-        if (request.Description != null) job.Description = request.Description;
+        if (!string.IsNullOrWhiteSpace(request.Title)) job.Title = request.Title;
+        if (!string.IsNullOrWhiteSpace(request.Description)) job.Description = request.Description;
         if (request.Payment != null) job.Payment = request.Payment.Value;
         if (request.PaymentType != null) job.PaymentType = request.PaymentType;
         if (request.WorkDate != null) job.WorkDate = request.WorkDate.Value;
@@ -143,21 +142,6 @@ public class JobService : IJobService
         var updated = await _jobRepository.UpdateAsync(job);
 
         return ToDetailResponse(updated);
-    }
-
-    public async Task DeleteJobAsync(int id, Guid companyId)
-    {
-        var job = await _jobRepository.GetByIdAsync(id);
-        if (job == null)
-            throw new KeyNotFoundException($"Job with id {id} not found");
-
-        if (job.IdCompany != companyId)
-            throw new UnauthorizedAccessException("Only the owning company can delete this job");
-
-        if (job.Applications != null && job.Applications.Any())
-            throw new InvalidOperationException("Cannot delete a job that has existing applications.");
-
-        await _jobRepository.DeleteAsync(job);
     }
 
     public async Task CancelJobAsync(int jobId, Guid companyId)
@@ -197,7 +181,6 @@ public class JobService : IJobService
         }
     }
 
-    // FIX 4: Single private method for building JobDetailResponse — eliminates duplication
     private static JobDetailResponse ToDetailResponse(Job job)
     {
         return new JobDetailResponse
