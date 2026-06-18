@@ -50,4 +50,19 @@ public class ContractRepository : IContractRepository
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync();
     }
+
+    public async Task<List<Contract>> GetByStudentIdAsync(Guid studentId, string? status)
+    {
+        var query = _dbContext.Contracts
+            .Include(c => c.Job)
+            .Include(c => c.Company)
+            .Where(c => c.IdStudent == studentId);
+
+        if (!string.IsNullOrWhiteSpace(status))
+            query = query.Where(c => c.Status == status);
+
+        return await query
+            .OrderByDescending(c => c.CreatedAt)
+            .ToListAsync();
+    }
 }
