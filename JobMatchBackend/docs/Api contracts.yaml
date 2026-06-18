@@ -932,7 +932,7 @@ components:
         skills:
           type: array
           items:
-            type: string
+            $ref: "#/components/schemas/StudentSkillResponse"
         availability:
           $ref: "#/components/schemas/AvailabilityResponse"
         averageRating:
@@ -994,6 +994,14 @@ components:
     AddSkillResponse:
       type: object
       properties:
+        skillName:
+          type: string
+    StudentSkillResponse:
+      type: object
+      properties:
+        skillId:
+          type: string
+          format: uuid
         skillName:
           type: string
     CompanyProfileResponse:
