@@ -24,13 +24,13 @@ public class JobService : IJobService
     {
         var company = await _companyRepository.GetCompanyByIdAsync(companyId);
         if (company == null)
-            throw new KeyNotFoundException("Company not found");
+            throw new KeyNotFoundException("Empresa no encontrada.");
 
         if (!company.IsActive)
-            throw new UnauthorizedAccessException("Company is not active.");
+            throw new UnauthorizedAccessException("La empresa no está activa.");
 
         if (company.Role != "Company")
-            throw new UnauthorizedAccessException("Authenticated user is not a company.");
+            throw new UnauthorizedAccessException("Solo las empresas pueden publicar ofertas.");
 
         var errors = new List<string>();
         TimeOnly startTime = TimeOnly.MinValue;
@@ -110,7 +110,7 @@ public class JobService : IJobService
     {
         var job = await _jobRepository.GetByIdWithCompanyAsync(jobId);
         if (job == null)
-            throw new KeyNotFoundException("Job not found");
+            throw new KeyNotFoundException("Oferta no encontrada.");
 
         return new JobDetailResponse
         {
@@ -152,10 +152,10 @@ public class JobService : IJobService
     {
         var job = await _jobRepository.GetByIdWithCompanyAsync(jobId);
         if (job == null)
-            throw new KeyNotFoundException("Job not found");
+            throw new KeyNotFoundException("Oferta no encontrada.");
 
         if (job.IdCompany != companyId)
-            throw new UnauthorizedAccessException("Company does not own this job");
+            throw new UnauthorizedAccessException("No tienes permiso para modificar esta oferta.");
 
         var hasAcceptedApplications = await _jobRepository.HasAcceptedApplicationsAsync(jobId);
         if (hasAcceptedApplications)
@@ -214,17 +214,17 @@ public class JobService : IJobService
     {
         var job = await _jobRepository.GetByIdWithCompanyAsync(jobId);
         if (job == null)
-            throw new KeyNotFoundException("Job not found");
+            throw new KeyNotFoundException("Oferta no encontrada.");
 
         if (job.IdCompany != companyId)
-            throw new UnauthorizedAccessException("Company does not own this job");
+            throw new UnauthorizedAccessException("No tienes permiso para modificar esta oferta.");
 
         if (job.Status == "cancelled")
-            throw new InvalidOperationException("Job is already cancelled");
+            throw new InvalidOperationException("Esta oferta ya fue cancelada.");
 
         var hasActiveContract = await _jobRepository.HasActiveContractAsync(jobId);
         if (hasActiveContract)
-            throw new InvalidOperationException("Cannot cancel a job with an active contract");
+            throw new InvalidOperationException("No se puede cancelar una oferta con un contrato activo.");
 
         var applicantIds = await _jobRepository.GetApplicantIdsByJobIdAsync(jobId);
 
