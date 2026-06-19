@@ -59,4 +59,20 @@ public class RatingService : IRatingService
             CreatedAt = created.CreatedAt
         };
     }
+
+    public async Task<List<ReceivedRatingResponse>> GetMyRatingsAsync(Guid callerId)
+    {
+        var ratings = await _ratingRepository.GetReceivedRatingsAsync(callerId);
+
+        return ratings.Select(r => new ReceivedRatingResponse
+        {
+            IdRating = r.IdRating,
+            IdContract = r.IdContract,
+            RaterName = r.Rater?.CompanyName ?? r.Rater?.FullName ?? "Anónimo",
+            JobTitle = r.Contract?.Job?.Title ?? string.Empty,
+            Stars = r.Stars,
+            Comment = r.Comment,
+            CreatedAt = r.CreatedAt
+        }).ToList();
+    }
 }

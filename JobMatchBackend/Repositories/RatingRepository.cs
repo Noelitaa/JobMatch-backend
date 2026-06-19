@@ -42,4 +42,15 @@ public class RatingRepository : IRatingRepository
 
         return (float)ratings.Average(r => r.Stars);
     }
+
+    public async Task<List<Rating>> GetReceivedRatingsAsync(Guid userId)
+    {
+        return await _dbContext.Ratings
+            .Include(r => r.Rater)
+            .Include(r => r.Contract)
+                .ThenInclude(c => c!.Job)
+            .Where(r => r.IdRated == userId)
+            .OrderByDescending(r => r.CreatedAt)
+            .ToListAsync();
+    }
 }
