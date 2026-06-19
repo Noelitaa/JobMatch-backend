@@ -56,7 +56,10 @@ public class FcmService : IFcmService
                 }
             };
 
-            await FirebaseMessaging.DefaultInstance.SendAsync(message);
+            var messageId = await FirebaseMessaging.DefaultInstance.SendAsync(message);
+            _logger.LogInformation(
+                "FCM notification sent successfully. MessageId: {MessageId}, Title: {Title}",
+                messageId, title);
         }
         catch (FirebaseMessagingException ex)
             when (ex.MessagingErrorCode == MessagingErrorCode.Unregistered ||
@@ -68,7 +71,7 @@ public class FcmService : IFcmService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to send FCM notification to token.");
+            _logger.LogError(ex, "Failed to send FCM notification. Title: {Title}", title);
         }
     }
 }

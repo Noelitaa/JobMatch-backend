@@ -12,6 +12,7 @@ public class ApplicationService : IApplicationService
     private readonly IUserRepository _userRepository;
     private readonly IJobRepository _jobRepository;
     private readonly IContractRepository _contractRepository;
+    private readonly IFcmService _fcmService;
     private readonly ILogger<ApplicationService> _logger;
 
     public ApplicationService(
@@ -19,12 +20,14 @@ public class ApplicationService : IApplicationService
         IUserRepository userRepository,
         IJobRepository jobRepository,
         IContractRepository contractRepository,
+        IFcmService fcmService,
         ILogger<ApplicationService> logger)
     {
         _applicationRepository = applicationRepository;
         _userRepository = userRepository;
         _jobRepository = jobRepository;
         _contractRepository = contractRepository;
+        _fcmService = fcmService;
         _logger = logger;
     }
 
@@ -180,22 +183,23 @@ public class ApplicationService : IApplicationService
             Status = "pending"
         };
 
-        await _applicationRepository.CreateAsync(application);
+        var created = await _applicationRepository.CreateAsync(application);
 
-        NotifyCompany(job.Company?.Email, job.Title, student.FullName);
+        var title = "Nueva postulación";
+        var body = $"{student.FullName} aplicó a \"{job.Title}\"";
+        _ = _fcmService.SendToUserAsync(job.IdCompany, title, body, new Dictionary<string, string>
+        {
+            ["type"]    = "new_application",
+            ["entityId"] = created.IdApplication.ToString(),
+            ["title"]   = title,
+            ["body"]    = body
+        });
 
         return new CreateApplicationResponse
         {
             Message = "Application submitted successfully",
             Status = application.Status
         };
-    }
-
-    private void NotifyCompany(string? companyEmail, string jobTitle, string? studentName)
-    {
-        _logger.LogInformation(
-            "NOTIFICATION: New application received - Job: '{JobTitle}', Applicant: '{StudentName}', Company email: '{CompanyEmail}'",
-            jobTitle, studentName ?? "Unknown", companyEmail ?? "Unknown");
     }
     
     public async Task<ApplicationDetailResponse> GetApplicationDetailsAsync(int applicationId, Guid userId, string userRole)

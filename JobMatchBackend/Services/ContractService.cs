@@ -7,10 +7,12 @@ namespace JobMatchBackend.Services;
 public class ContractService : IContractService
 {
     private readonly IContractRepository _contractRepository;
+    private readonly IFcmService _fcmService;
 
-    public ContractService(IContractRepository contractRepository)
+    public ContractService(IContractRepository contractRepository, IFcmService fcmService)
     {
         _contractRepository = contractRepository;
+        _fcmService = fcmService;
     }
 
     public async Task<ContractAcceptResponse> AcceptContractAsync(int contractId, Guid studentId)
@@ -34,6 +36,18 @@ public class ContractService : IContractService
 
         contract.Job.Status = "in-progress";
         await _contractRepository.UpdateAsync(contract);
+
+        var studentName = contract.Student?.FullName ?? "El estudiante";
+        var jobTitle    = contract.Job.Title;
+        var title       = "Contrato aceptado";
+        var body        = $"{studentName} aceptó el contrato para \"{jobTitle}\"";
+        _ = _fcmService.SendToUserAsync(contract.IdCompany, title, body, new Dictionary<string, string>
+        {
+            ["type"]     = "contract_accepted",
+            ["entityId"] = contract.IdContract.ToString(),
+            ["title"]    = title,
+            ["body"]     = body
+        });
 
         return new ContractAcceptResponse
         {
