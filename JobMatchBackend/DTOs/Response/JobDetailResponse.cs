@@ -16,6 +16,7 @@ public class JobDetailResponse
     public DateOnly? StartDate { get; set; }
     public DateOnly? EndDate { get; set; }
     public List<string>? Deliverables { get; set; }
+    public List<string>? SkillsRequired { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public CompanySummaryResponse Company { get; set; } = new();

@@ -89,4 +89,12 @@ public class JobRepository : IJobRepository
             .Select(a => a.IdStudent)
             .ToListAsync();
     }
+
+    public async Task<List<Job>> GetOpenJobsAsync()
+    {
+        return await _dbContext.Jobs
+            .Include(j => j.Company)
+            .Where(j => j.Status == "open" && j.Company != null && j.Company.IsActive)
+            .ToListAsync();
+    }
 }

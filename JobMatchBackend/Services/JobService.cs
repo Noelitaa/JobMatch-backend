@@ -12,12 +12,14 @@ public class JobService : IJobService
     private readonly IJobRepository _jobRepository;
     private readonly INotificationRepository _notificationRepository;
     private readonly ICompanyRepository _companyRepository;
+    private readonly IStudentRepository _studentRepository;
 
-    public JobService(IJobRepository jobRepository, INotificationRepository notificationRepository, ICompanyRepository companyRepository)
+    public JobService(IJobRepository jobRepository, INotificationRepository notificationRepository, ICompanyRepository companyRepository, IStudentRepository studentRepository)
     {
         _jobRepository = jobRepository;
         _notificationRepository = notificationRepository;
         _companyRepository = companyRepository;
+        _studentRepository = studentRepository;
     }
 
     public async Task<JobResponse> CreateJobAsync(Guid companyId, CreateJobRequest request)
@@ -128,6 +130,7 @@ public class JobService : IJobService
             StartDate = job.StartDate,
             EndDate = job.EndDate,
             Deliverables = TryParseDeliverables(job.Deliverables),
+            SkillsRequired = TryParseSkillsRequired(job.SkillsRequired),
             CreatedAt = job.CreatedAt,
             UpdatedAt = job.UpdatedAt,
             Company = new CompanySummaryResponse
@@ -175,6 +178,7 @@ public class JobService : IJobService
         if (request.StartDate != null) job.StartDate = request.StartDate;
         if (request.EndDate != null) job.EndDate = request.EndDate;
         if (request.Deliverables != null) job.Deliverables = JsonSerializer.Serialize(request.Deliverables);
+        if (request.SkillsRequired != null) job.SkillsRequired = JsonSerializer.Serialize(request.SkillsRequired);
 
         job.UpdatedAt = DateTime.UtcNow;
 
@@ -196,6 +200,7 @@ public class JobService : IJobService
             StartDate = updated.StartDate,
             EndDate = updated.EndDate,
             Deliverables = TryParseDeliverables(updated.Deliverables),
+            SkillsRequired = TryParseSkillsRequired(updated.SkillsRequired),
             CreatedAt = updated.CreatedAt,
             UpdatedAt = updated.UpdatedAt,
             Company = new CompanySummaryResponse
@@ -247,7 +252,55 @@ public class JobService : IJobService
         }
     }
 
+    public async Task<List<JobResponse>> GetRecommendedJobsAsync(Guid studentId)
+    {
+        var student = await _studentRepository.GetByIdAsync(studentId);
+        if (student == null)
+            throw new KeyNotFoundException("Estudiante no encontrado.");
+
+        var openJobs = await _jobRepository.GetOpenJobsAsync();
+
+        var studentSkillNames = student.StudentSkills?
+            .Select(ss => ss.Skill?.Name ?? string.Empty)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase) ?? new HashSet<string>();
+
+        var recommended = openJobs.Where(job =>
+        {
+            if (string.Equals(job.Type, "fixed-time", StringComparison.OrdinalIgnoreCase))
+            {
+                if (job.WorkDate == null || job.StartTime == null || job.EndTime == null)
+                    return false;
+
+                var dayOfWeek = (int)job.WorkDate.Value.DayOfWeek;
+                return student.Availabilities != null && student.Availabilities.Any(slot =>
+                    slot.DayOfWeek == dayOfWeek &&
+                    slot.StartTime <= job.StartTime.Value &&
+                    slot.EndTime >= job.EndTime.Value);
+            }
+
+            if (string.Equals(job.Type, "autonomous", StringComparison.OrdinalIgnoreCase))
+            {
+                var requiredSkills = TryParseSkillsRequired(job.SkillsRequired);
+                if (requiredSkills == null || requiredSkills.Count == 0)
+                    return true;
+
+                return requiredSkills.Any(s => studentSkillNames.Contains(s));
+            }
+
+            return false;
+        }).ToList();
+
+        return recommended.Select(JobMapper.ToResponse).ToList();
+    }
+
     private static List<string>? TryParseDeliverables(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return null;
+        try { return JsonSerializer.Deserialize<List<string>>(raw); }
+        catch { return null; }
+    }
+
+    private static List<string>? TryParseSkillsRequired(string? raw)
     {
         if (string.IsNullOrWhiteSpace(raw)) return null;
         try { return JsonSerializer.Deserialize<List<string>>(raw); }
