@@ -12,9 +12,9 @@ public class Job
     
     public decimal Payment { get; set; }
     public string PaymentType { get; set; } = string.Empty;
-    public DateOnly WorkDate { get; set; }
-    public TimeOnly StartTime { get; set; }
-    public TimeOnly EndTime { get; set; }
+    public DateOnly? WorkDate { get; set; }
+    public TimeOnly? StartTime { get; set; }
+    public TimeOnly? EndTime { get; set; }
     public DateOnly? StartDate { get; set; }
     public DateOnly? EndDate { get; set; }
     public string? Deliverables { get; set; }

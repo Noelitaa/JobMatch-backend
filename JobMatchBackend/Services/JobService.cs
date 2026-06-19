@@ -24,60 +24,57 @@ public class JobService : IJobService
     {
         var company = await _companyRepository.GetCompanyByIdAsync(companyId);
         if (company == null)
-            throw new KeyNotFoundException("Company not found");
+            throw new KeyNotFoundException("Empresa no encontrada.");
 
         if (!company.IsActive)
-            throw new UnauthorizedAccessException("Company is not active.");
+            throw new UnauthorizedAccessException("La empresa no está activa.");
 
         if (company.Role != "Company")
-            throw new UnauthorizedAccessException("Authenticated user is not a company.");
+            throw new UnauthorizedAccessException("Solo las empresas pueden publicar ofertas.");
 
         var errors = new List<string>();
         TimeOnly startTime = TimeOnly.MinValue;
         TimeOnly endTime = TimeOnly.MinValue;
 
-        // --- Type validation (explicit allow-list, no implicit fallback) ---
         var allowedTypes = new[] { "autonomous", "fixed-time" };
         if (string.IsNullOrWhiteSpace(request.Type) ||
             !allowedTypes.Contains(request.Type, StringComparer.OrdinalIgnoreCase))
-            errors.Add("The 'type' field is required and must be 'autonomous' or 'fixed-time'.");
+            errors.Add("El tipo de trabajo es requerido y debe ser 'autonomous' o 'fixed-time'.");
 
         var isAutonomous = string.Equals(request.Type, "autonomous", StringComparison.OrdinalIgnoreCase);
 
-        // --- Common validation (applies to every job type) ---
         if (string.IsNullOrWhiteSpace(request.Title))
-            errors.Add("The 'title' field is required.");
+            errors.Add("El título es requerido.");
 
         if (request.Payment <= 0)
-            errors.Add("The 'payment' field must be greater than 0.");
+            errors.Add("El monto debe ser mayor a 0.");
 
+        var allowedPaymentTypes = new[] { "hora", "turno", "proyecto" };
         if (string.IsNullOrWhiteSpace(request.PaymentType) ||
-            (request.PaymentType != "one_time" && request.PaymentType != "monthly"))
-            errors.Add("The 'paymentType' field must be 'one_time' or 'monthly'.");
+            !allowedPaymentTypes.Contains(request.PaymentType, StringComparer.OrdinalIgnoreCase))
+            errors.Add("La modalidad de pago debe ser 'hora', 'turno' o 'proyecto'.");
 
         if (isAutonomous)
         {
-            // --- Autonomous-specific validation ---
             if (request.StartDate == null)
-                errors.Add("The 'startDate' field is required.");
+                errors.Add("La fecha de inicio es requerida.");
 
             if (request.EndDate == null)
-                errors.Add("The 'endDate' field is required.");
+                errors.Add("La fecha de fin es requerida.");
 
             if (request.Deliverables == null || request.Deliverables.Count == 0)
-                errors.Add("The 'deliverables' field is required and must contain at least one item.");
+                errors.Add("Debes agregar al menos un entregable.");
         }
         else
         {
-            // --- Fixed-time-specific validation ---
             if (string.IsNullOrWhiteSpace(request.Date) || !DateOnly.TryParse(request.Date, out _))
-                errors.Add("The 'date' field is required and must be a valid date.");
+                errors.Add("La fecha del trabajo es requerida y debe tener el formato YYYY-MM-DD.");
 
             if (string.IsNullOrWhiteSpace(request.StartTime) || !TimeOnly.TryParse(request.StartTime, out startTime))
-                errors.Add("The 'startTime' field is required and must be a valid time.");
+                errors.Add("La hora de inicio es requerida y debe tener el formato HH:mm.");
 
             if (string.IsNullOrWhiteSpace(request.EndTime) || !TimeOnly.TryParse(request.EndTime, out endTime))
-                errors.Add("The 'endTime' field is required and must be a valid time.");
+                errors.Add("La hora de fin es requerida y debe tener el formato HH:mm.");
         }
 
         if (errors.Count > 0)
@@ -85,23 +82,22 @@ public class JobService : IJobService
 
         if (isAutonomous)
         {
-            // StartDate and EndDate are guaranteed non-null past validation
             if (request.StartDate!.Value > request.EndDate!.Value)
-                throw new ArgumentException("'startDate' must be on or before 'endDate'.");
+                throw new ArgumentException("La fecha de inicio debe ser anterior o igual a la fecha de fin.");
 
             if (request.EndDate.Value < DateOnly.FromDateTime(DateTime.UtcNow))
-                throw new ArgumentException("'endDate' must be in the future.");
+                throw new ArgumentException("La fecha de fin debe ser en el futuro.");
         }
         else
         {
             if (DateTime.TryParse(request.Date + " " + request.StartTime, out var jobDateTime))
             {
                 if (jobDateTime <= DateTime.UtcNow)
-                    throw new ArgumentException("The job date and time must be in the future.");
+                    throw new ArgumentException("La fecha y hora del trabajo deben ser en el futuro.");
             }
 
             if (startTime >= endTime)
-                throw new ArgumentException("'startTime' must be before 'endTime'.");
+                throw new ArgumentException("La hora de inicio debe ser anterior a la hora de fin.");
         }
 
         var job = JobMapper.ToEntity(request);
@@ -114,7 +110,7 @@ public class JobService : IJobService
     {
         var job = await _jobRepository.GetByIdWithCompanyAsync(jobId);
         if (job == null)
-            throw new KeyNotFoundException("Job not found");
+            throw new KeyNotFoundException("Oferta no encontrada.");
 
         return new JobDetailResponse
         {
@@ -122,7 +118,7 @@ public class JobService : IJobService
             IdCompany = job.IdCompany,
             Title = job.Title,
             Description = job.Description,
-            Type = job.Type,
+            Type = job.Type ?? string.Empty,
             Status = job.Status,
             Payment = job.Payment,
             PaymentType = job.PaymentType,
@@ -131,9 +127,7 @@ public class JobService : IJobService
             EndTime = job.EndTime,
             StartDate = job.StartDate,
             EndDate = job.EndDate,
-            Deliverables = string.IsNullOrWhiteSpace(job.Deliverables)
-                ? null
-                : JsonSerializer.Deserialize<List<string>>(job.Deliverables),
+            Deliverables = TryParseDeliverables(job.Deliverables),
             CreatedAt = job.CreatedAt,
             UpdatedAt = job.UpdatedAt,
             Company = new CompanySummaryResponse
@@ -158,18 +152,18 @@ public class JobService : IJobService
     {
         var job = await _jobRepository.GetByIdWithCompanyAsync(jobId);
         if (job == null)
-            throw new KeyNotFoundException("Job not found");
+            throw new KeyNotFoundException("Oferta no encontrada.");
 
         if (job.IdCompany != companyId)
-            throw new UnauthorizedAccessException("Company does not own this job");
+            throw new UnauthorizedAccessException("No tienes permiso para modificar esta oferta.");
 
         var hasAcceptedApplications = await _jobRepository.HasAcceptedApplicationsAsync(jobId);
         if (hasAcceptedApplications)
-            throw new InvalidOperationException("Cannot edit a job that has accepted students");
+            throw new InvalidOperationException("No se puede editar una oferta que ya tiene postulantes aceptados.");
 
         var hasActiveContract = await _jobRepository.HasActiveContractAsync(jobId);
         if (hasActiveContract)
-            throw new InvalidOperationException("Cannot edit a job with an active contract");
+            throw new InvalidOperationException("No se puede editar una oferta con un contrato activo.");
 
         if (!string.IsNullOrWhiteSpace(request.Title)) job.Title = request.Title;
         if (!string.IsNullOrWhiteSpace(request.Description)) job.Description = request.Description;
@@ -192,7 +186,7 @@ public class JobService : IJobService
             IdCompany = updated.IdCompany,
             Title = updated.Title,
             Description = updated.Description,
-            Type = updated.Type,
+            Type = updated.Type ?? string.Empty,
             Status = updated.Status,
             Payment = updated.Payment,
             PaymentType = updated.PaymentType,
@@ -201,9 +195,7 @@ public class JobService : IJobService
             EndTime = updated.EndTime,
             StartDate = updated.StartDate,
             EndDate = updated.EndDate,
-            Deliverables = string.IsNullOrWhiteSpace(updated.Deliverables)
-                ? null
-                : JsonSerializer.Deserialize<List<string>>(updated.Deliverables),
+            Deliverables = TryParseDeliverables(updated.Deliverables),
             CreatedAt = updated.CreatedAt,
             UpdatedAt = updated.UpdatedAt,
             Company = new CompanySummaryResponse
@@ -222,17 +214,17 @@ public class JobService : IJobService
     {
         var job = await _jobRepository.GetByIdWithCompanyAsync(jobId);
         if (job == null)
-            throw new KeyNotFoundException("Job not found");
+            throw new KeyNotFoundException("Oferta no encontrada.");
 
         if (job.IdCompany != companyId)
-            throw new UnauthorizedAccessException("Company does not own this job");
+            throw new UnauthorizedAccessException("No tienes permiso para modificar esta oferta.");
 
         if (job.Status == "cancelled")
-            throw new InvalidOperationException("Job is already cancelled");
+            throw new InvalidOperationException("Esta oferta ya fue cancelada.");
 
         var hasActiveContract = await _jobRepository.HasActiveContractAsync(jobId);
         if (hasActiveContract)
-            throw new InvalidOperationException("Cannot cancel a job with an active contract");
+            throw new InvalidOperationException("No se puede cancelar una oferta con un contrato activo.");
 
         var applicantIds = await _jobRepository.GetApplicantIdsByJobIdAsync(jobId);
 
@@ -253,5 +245,12 @@ public class JobService : IJobService
 
             await _notificationRepository.CreateManyAsync(notifications);
         }
+    }
+
+    private static List<string>? TryParseDeliverables(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return null;
+        try { return JsonSerializer.Deserialize<List<string>>(raw); }
+        catch { return null; }
     }
 }
