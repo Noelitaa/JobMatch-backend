@@ -29,7 +29,8 @@ public static class JobMapper
             StartTime = TimeOnly.TryParse(dto.StartTime, out var start) ? start : null,
             EndTime = TimeOnly.TryParse(dto.EndTime, out var end) ? end : null,
             Type = "fixed-time",
-            Status = "open"
+            Status = "open",
+            SkillsRequired = dto.SkillsRequired != null ? JsonSerializer.Serialize(dto.SkillsRequired) : null
         };
     }
 
@@ -48,7 +49,8 @@ public static class JobMapper
             EndDate = dto.EndDate,
             Deliverables = dto.Deliverables != null ? JsonSerializer.Serialize(dto.Deliverables) : null,
             Type = "autonomous",
-            Status = "open"
+            Status = "open",
+            SkillsRequired = dto.SkillsRequired != null ? JsonSerializer.Serialize(dto.SkillsRequired) : null
         };
     }
 
@@ -70,11 +72,19 @@ public static class JobMapper
             StartDate = job.StartDate,
             EndDate = job.EndDate,
             Deliverables = TryParseDeliverables(job.Deliverables),
+            SkillsRequired = TryParseSkillsRequired(job.SkillsRequired),
             CreatedAt = job.CreatedAt
         };
     }
 
     private static List<string>? TryParseDeliverables(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return null;
+        try { return JsonSerializer.Deserialize<List<string>>(raw); }
+        catch { return null; }
+    }
+
+    private static List<string>? TryParseSkillsRequired(string? raw)
     {
         if (string.IsNullOrWhiteSpace(raw)) return null;
         try { return JsonSerializer.Deserialize<List<string>>(raw); }

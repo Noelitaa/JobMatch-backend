@@ -18,7 +18,8 @@ public class Job
     public DateOnly? StartDate { get; set; }
     public DateOnly? EndDate { get; set; }
     public string? Deliverables { get; set; }
-    
+    public string? SkillsRequired { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 

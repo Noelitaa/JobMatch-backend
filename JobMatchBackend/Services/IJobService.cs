@@ -10,4 +10,5 @@ public interface IJobService
     Task<JobDetailResponse> GetJobByIdAsync(int jobId);
     Task<JobDetailResponse> UpdateJobAsync(int jobId, Guid companyId, UpdateJobRequest request);
     Task CancelJobAsync(int jobId, Guid companyId);
+    Task<List<JobResponse>> GetRecommendedJobsAsync(Guid studentId);
 }

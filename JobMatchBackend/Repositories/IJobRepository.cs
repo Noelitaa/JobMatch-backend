@@ -14,4 +14,5 @@ public interface IJobRepository
     Task<bool> HasActiveContractAsync(int jobId);
     Task<Job> CancelAsync(Job job);
     Task<List<Guid>> GetApplicantIdsByJobIdAsync(int jobId);
+    Task<List<Job>> GetOpenJobsAsync();
 }

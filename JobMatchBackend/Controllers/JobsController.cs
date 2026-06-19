@@ -17,7 +17,27 @@ public class JobsController : ControllerBase
         _jobService = jobService;
     }
 
-    [HttpGet("{jobId}")]
+    [Authorize(Roles = "Student")]
+    [HttpGet("recommended")]
+    public async Task<IActionResult> GetRecommendedJobs()
+    {
+        try
+        {
+            var studentId = GetCurrentUserId();
+            var jobs = await _jobService.GetRecommendedJobsAsync(studentId);
+            return Ok(jobs);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
+    [HttpGet("{jobId:int}")]
     public async Task<IActionResult> GetJobById(int jobId)
     {
         try

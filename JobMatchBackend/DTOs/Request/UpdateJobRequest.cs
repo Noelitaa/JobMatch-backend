@@ -12,4 +12,5 @@ public class UpdateJobRequest
     public DateOnly? StartDate { get; set; }
     public DateOnly? EndDate { get; set; }
     public List<string>? Deliverables { get; set; }
+    public List<string>? SkillsRequired { get; set; }
 }
