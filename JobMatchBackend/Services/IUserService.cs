@@ -11,4 +11,5 @@ public interface IUserService
     Task<RegisterCompanyResponse> CreateCompanyAsync(RegisterCompany request);
     Task<string> SoftDeleteUserAsync(Guid userId, Guid authenticatedUserId, DeleteUserRequest request);
     Task<UserProfileResponse> UpdateAvatarAsync(Guid userId, IFormFile avatar);
+    Task<UserProfileResponse> UpdateDescriptionAsync(Guid userId, string description);
 }

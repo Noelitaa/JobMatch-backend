@@ -169,7 +169,33 @@ public class UserService : IUserService
             Role = user.Role,
             Avatar = user.AvatarUrl,
             Phone = user.Phone,
-            Bio = user.Bio,
+            Description = user.Description,
+            Active = user.IsActive
+        };
+    }
+
+    public async Task<UserProfileResponse> UpdateDescriptionAsync(Guid userId, string description)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+            throw new KeyNotFoundException("User not found");
+
+        if (!user.IsActive)
+            throw new KeyNotFoundException("User not found");
+
+        user.Description = description;
+        user.UpdatedAt = DateTime.UtcNow;
+        await _userRepository.UpdateAsync(user);
+
+        return new UserProfileResponse
+        {
+            Id = user.Id,
+            FullName = user.FullName,
+            Email = user.Email,
+            Role = user.Role,
+            Avatar = user.AvatarUrl,
+            Phone = user.Phone,
+            Description = user.Description,
             Active = user.IsActive
         };
     }

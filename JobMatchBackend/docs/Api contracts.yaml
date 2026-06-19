@@ -214,6 +214,41 @@ paths:
           description: User not found
         "500":
           description: Internal server error
+  /users/{userId}/description:
+    put:
+      tags:
+        - Users
+      summary: Update user description
+      description: Updates the description field for the authenticated user.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDescriptionRequest"
+      responses:
+        "200":
+          description: Description updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfileResponse"
+        "400":
+          description: Description is empty or missing
+        "401":
+          description: Missing or invalid JWT token
+        "403":
+          description: Authenticated user does not match the requested user ID
+        "404":
+          description: User not found
+        "500":
+          description: Internal server error
   /students/{studentId}:
     get:
       tags:
@@ -805,6 +840,13 @@ paths:
           description: Internal server error
 components:
   schemas:
+    UpdateDescriptionRequest:
+      required:
+        - description
+      type: object
+      properties:
+        description:
+          type: string
     RegisterStudentRequest:
       required:
         - career

@@ -8,6 +8,6 @@ public class UserProfileResponse
     public string? Role { get; set; }
     public string? Avatar { get; set; }
     public string? Phone { get; set; }
-    public string? Bio { get; set; }
+    public string? Description { get; set; }
     public bool Active { get; set; }
 }
