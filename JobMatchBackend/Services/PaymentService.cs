@@ -61,7 +61,7 @@ public class PaymentService : IPaymentService
         var jobTitle = contract.Job?.Title ?? "tu trabajo";
         var title    = "Pago recibido";
         var body     = $"Se registró un pago de ₡{(long)request.Amount:N0} para \"{jobTitle}\"";
-        _ = _fcmService.SendToUserAsync(contract.IdStudent, title, body, new Dictionary<string, string>
+        await _fcmService.SendToUserAsync(contract.IdStudent, title, body, new Dictionary<string, string>
         {
             ["type"]     = "payment_registered",
             ["entityId"] = createdPayment.IdPayment.ToString(),

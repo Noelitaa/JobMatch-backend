@@ -41,7 +41,7 @@ public class ContractService : IContractService
         var jobTitle    = contract.Job.Title;
         var title       = "Contrato aceptado";
         var body        = $"{studentName} aceptó el contrato para \"{jobTitle}\"";
-        _ = _fcmService.SendToUserAsync(contract.IdCompany, title, body, new Dictionary<string, string>
+        await _fcmService.SendToUserAsync(contract.IdCompany, title, body, new Dictionary<string, string>
         {
             ["type"]     = "contract_accepted",
             ["entityId"] = contract.IdContract.ToString(),

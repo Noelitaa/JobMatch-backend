@@ -187,7 +187,7 @@ public class ApplicationService : IApplicationService
 
         var title = "Nueva postulación";
         var body = $"{student.FullName} aplicó a \"{job.Title}\"";
-        _ = _fcmService.SendToUserAsync(job.IdCompany, title, body, new Dictionary<string, string>
+        await _fcmService.SendToUserAsync(job.IdCompany, title, body, new Dictionary<string, string>
         {
             ["type"]    = "new_application",
             ["entityId"] = created.IdApplication.ToString(),
