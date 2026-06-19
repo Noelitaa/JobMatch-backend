@@ -2,6 +2,7 @@ using System.Security.Claims;
 using JobMatchBackend.DTOs.Request;
 using JobMatchBackend.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JobMatchBackend.Controllers;
@@ -16,6 +17,39 @@ public class UsersController : ControllerBase
     public UsersController(IUserService userService)
     {
         _userService = userService;
+    }
+
+    [HttpPut("{userId}/avatar")]
+    public async Task<IActionResult> UpdateAvatar(Guid userId, [FromForm] IFormFile avatar)
+    {
+        try
+        {
+            var authenticatedUserId = GetCurrentUserId();
+            if (authenticatedUserId != userId)
+                return StatusCode(403, new { message = "You can only update your own avatar" });
+
+            if (avatar == null || avatar.Length == 0)
+                return BadRequest(new { message = "No file provided" });
+
+            var result = await _userService.UpdateAvatarAsync(userId, avatar);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { message = "User not found" });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Unauthorized(new { message = "Invalid authenticated user" });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { message = "Internal server error" });
+        }
     }
 
     [HttpDelete("{userId}")]
