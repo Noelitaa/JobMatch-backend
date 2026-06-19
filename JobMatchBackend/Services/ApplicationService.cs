@@ -125,17 +125,17 @@ public class ApplicationService : IApplicationService
             studentEmail = data.StudentEmail,
             studentUniversity = data.StudentUniversity,
             studentCareer = data.StudentCareer,
-            workType = data.JobType ?? "Not specified",
+            workType = data.JobType ?? "No especificado",
             startDate = job.StartDate?.ToString("yyyy-MM-dd"),
             endDate = job.EndDate?.ToString("yyyy-MM-dd"),
-            compensation = "To be defined by agreement",
+            compensation = "A definir por acuerdo entre las partes",
             clauses = new[]
             {
-                "The student commits to complete assigned tasks.",
-                "The company will provide the required resources.",
-                "Agreed working schedules must be respected.",
-                "Any modification must be agreed in writing.",
-                "Non-compliance may result in contract termination."
+                "El estudiante se compromete a completar las tareas asignadas.",
+                "La empresa proporcionará los recursos necesarios.",
+                "Se deben respetar los horarios de trabajo acordados.",
+                "Cualquier modificación debe acordarse por escrito.",
+                "El incumplimiento puede resultar en la terminación del contrato."
             }
         };
 
