@@ -62,6 +62,33 @@ public class RatingsController : ControllerBase
         }
     }
 
+    [HttpGet("me")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetMyRatings()
+    {
+        Guid callerId;
+        try
+        {
+            callerId = GetCurrentUserId();
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
+
+        try
+        {
+            var ratings = await _ratingService.GetMyRatingsAsync(callerId);
+            return Ok(ratings);
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
     private Guid GetCurrentUserId()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
