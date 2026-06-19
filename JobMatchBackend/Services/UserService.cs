@@ -109,36 +109,57 @@ public class UserService : IUserService
 
     public async Task<UserProfileResponse> UpdateAvatarAsync(Guid userId, IFormFile avatar)
     {
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+        var allowedMimeTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+        var extension = Path.GetExtension(avatar.FileName).ToLowerInvariant();
+        if (!allowedExtensions.Contains(extension) || !allowedMimeTypes.Contains(avatar.ContentType.ToLowerInvariant()))
+            throw new ArgumentException("Only image files are allowed (jpg, jpeg, png, webp)");
+
+        const long maxSizeBytes = 5 * 1024 * 1024;
+        if (avatar.Length > maxSizeBytes)
+            throw new ArgumentException("File size must not exceed 5 MB");
+
         var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
             throw new KeyNotFoundException("User not found");
 
+        if (!user.IsActive)
+            throw new KeyNotFoundException("User not found");
+
         var webRoot = _webHostEnvironment.WebRootPath
             ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-
-        if (!string.IsNullOrEmpty(user.AvatarUrl))
-        {
-            var oldFilename = Path.GetFileName(user.AvatarUrl);
-            var oldFilePath = Path.Combine(webRoot, "avatars", oldFilename);
-            if (File.Exists(oldFilePath))
-                File.Delete(oldFilePath);
-        }
-
         var avatarsFolder = Path.Combine(webRoot, "avatars");
         Directory.CreateDirectory(avatarsFolder);
 
-        var extension = Path.GetExtension(avatar.FileName);
-        var filename = $"{userId}_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}{extension}";
-        var filePath = Path.Combine(avatarsFolder, filename);
-
-        using (var stream = new FileStream(filePath, FileMode.Create))
+        var filename = $"{Guid.NewGuid()}{extension}";
+        string? newFilePath = null;
+        try
         {
-            await avatar.CopyToAsync(stream);
-        }
+            newFilePath = Path.Combine(avatarsFolder, filename);
+            using (var stream = new FileStream(newFilePath, FileMode.Create))
+            {
+                await avatar.CopyToAsync(stream);
+            }
 
-        user.AvatarUrl = $"/avatars/{filename}";
-        user.UpdatedAt = DateTime.UtcNow;
-        await _userRepository.UpdateAsync(user);
+            var oldAvatarUrl = user.AvatarUrl;
+            user.AvatarUrl = $"/avatars/{filename}";
+            user.UpdatedAt = DateTime.UtcNow;
+            await _userRepository.UpdateAsync(user);
+
+            if (!string.IsNullOrEmpty(oldAvatarUrl))
+            {
+                var oldFilename = Path.GetFileName(oldAvatarUrl);
+                var oldFilePath = Path.Combine(webRoot, "avatars", oldFilename);
+                if (File.Exists(oldFilePath))
+                    File.Delete(oldFilePath);
+            }
+        }
+        catch
+        {
+            if (newFilePath != null && File.Exists(newFilePath))
+                File.Delete(newFilePath);
+            throw;
+        }
 
         return new UserProfileResponse
         {

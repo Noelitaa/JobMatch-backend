@@ -38,6 +38,14 @@ public class UsersController : ControllerBase
         {
             return NotFound(new { message = "User not found" });
         }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Unauthorized(new { message = "Invalid authenticated user" });
+        }
         catch (Exception)
         {
             return StatusCode(500, new { message = "Internal server error" });
