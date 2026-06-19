@@ -41,7 +41,7 @@ public class PaymentRepository : IPaymentRepository
             .FirstOrDefaultAsync(contract => contract.IdContract == contractId);
     }
 
-    public async Task<Payment> AddPaymentAsync(Payment payment)
+    public async Task<Payment> CreatePaymentAsync(Payment payment)
     {
         _dbContext.Payments.Add(payment);
         await _dbContext.SaveChangesAsync();

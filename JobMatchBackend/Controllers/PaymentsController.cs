@@ -59,18 +59,33 @@ public class PaymentsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> RegisterPayment([FromBody] CreatePaymentRequest request)
+    public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentRequest request)
     {
+        Guid callerId;
         try
         {
-            var callerId = GetCurrentUserId();
-            var response = await _paymentService.RegisterPaymentAsync(request, callerId);
-            return StatusCode(201, response);
+            callerId = GetCurrentUserId();
         }
         catch (UnauthorizedAccessException ex)
         {
             return Unauthorized(new { message = ex.Message });
+        }
+
+        try
+        {
+            var response = await _paymentService.CreatePaymentAsync(request, callerId);
+            return StatusCode(201, response);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { message = ex.Message });
         }
         catch (InvalidOperationException ex)
         {
