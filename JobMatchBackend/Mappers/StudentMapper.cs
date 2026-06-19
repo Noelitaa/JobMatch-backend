@@ -19,7 +19,7 @@ public static class StudentMapper
                 Role = user.Role,
                 Avatar = user.AvatarUrl,
                 Phone = user.Phone,
-                Bio = user.Bio,
+                Description = user.Description,
                 Active = user.IsActive
             },
             University = user.University,

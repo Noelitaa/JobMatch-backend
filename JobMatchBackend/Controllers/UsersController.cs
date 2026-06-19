@@ -52,6 +52,35 @@ public class UsersController : ControllerBase
         }
     }
 
+    [HttpPut("{userId}/description")]
+    public async Task<IActionResult> UpdateDescription(Guid userId, [FromBody] UpdateDescriptionRequest request)
+    {
+        try
+        {
+            var authenticatedUserId = GetCurrentUserId();
+            if (authenticatedUserId != userId)
+                return StatusCode(403, new { message = "You can only update your own description" });
+
+            if (string.IsNullOrWhiteSpace(request.Description))
+                return BadRequest(new { message = "Description cannot be empty" });
+
+            var result = await _userService.UpdateDescriptionAsync(userId, request.Description);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { message = "User not found" });
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Unauthorized(new { message = "Invalid authenticated user" });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { message = "Internal server error" });
+        }
+    }
+
     [HttpDelete("{userId}")]
     public async Task<IActionResult> DeleteUser(Guid userId, [FromBody] DeleteUserRequest request)
     {
