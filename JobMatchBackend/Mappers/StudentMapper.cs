@@ -6,7 +6,7 @@ namespace JobMatchBackend.Mappers;
 
 public static class StudentMapper
 {
-    public static StudentProfileResponse ToResponse(User user)
+    public static StudentProfileResponse ToResponse(User user, float averageRating = 0.0f)
     {
         return new StudentProfileResponse
         {
@@ -29,7 +29,7 @@ public static class StudentMapper
                 .Select(ss => new StudentSkillResponse { SkillId = ss.Skill!.Id, SkillName = ss.Skill!.Name })
                 .ToList() ?? new List<StudentSkillResponse>(),
             Availability = ToAvailabilityResponse(user),
-            AverageRating = 0.0f
+            AverageRating = averageRating
         };
     }
 

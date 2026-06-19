@@ -9,10 +9,12 @@ namespace JobMatchBackend.Services;
 public class StudentService : IStudentService
 {
     private readonly IStudentRepository _studentRepository;
+    private readonly IRatingRepository _ratingRepository;
 
-    public StudentService(IStudentRepository studentRepository)
+    public StudentService(IStudentRepository studentRepository, IRatingRepository ratingRepository)
     {
         _studentRepository = studentRepository;
+        _ratingRepository = ratingRepository;
     }
 
     public async Task<StudentProfileResponse> GetStudentByIdAsync(Guid studentId)
@@ -21,7 +23,8 @@ public class StudentService : IStudentService
         if (student == null)
             throw new KeyNotFoundException("Student not found");
 
-        return StudentMapper.ToResponse(student);
+        var averageRating = await _ratingRepository.GetAverageRatingAsync(studentId);
+        return StudentMapper.ToResponse(student, averageRating);
     }
 
     public async Task<AvailabilityResponse> GetStudentAvailabilityAsync(Guid studentId)
