@@ -1,8 +1,11 @@
 using JobMatchBackend.DTOs.Response;
+using JobMatchBackend.DTOs.Response.Student;
 using JobMatchBackend.Mappers;
 using JobMatchBackend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Hosting;
 using JobMatchBackend.Models.Entities;
 using JobMatchBackend.Repositories;
 using JobMatchBackend.DTOs.Request;
@@ -13,11 +16,13 @@ public class UserService : IUserService
 {
     private readonly AppDbContext _dbContext;
     private readonly IUserRepository _userRepository;
+    private readonly IWebHostEnvironment _webHostEnvironment;
 
-    public UserService(AppDbContext dbContext, IUserRepository userRepository)
+    public UserService(AppDbContext dbContext, IUserRepository userRepository, IWebHostEnvironment webHostEnvironment)
     {
         _dbContext = dbContext;
         _userRepository = userRepository;
+        _webHostEnvironment = webHostEnvironment;
     }
 
     public async Task<RegisterStudentResponse> CreateStudentAsync(RegisterStudent request)
@@ -100,5 +105,51 @@ public class UserService : IUserService
         await _userRepository.UpdateAsync(user);
 
         return "Account successfully deleted (soft delete)";
+    }
+
+    public async Task<UserProfileResponse> UpdateAvatarAsync(Guid userId, IFormFile avatar)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+            throw new KeyNotFoundException("User not found");
+
+        var webRoot = _webHostEnvironment.WebRootPath
+            ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+
+        if (!string.IsNullOrEmpty(user.AvatarUrl))
+        {
+            var oldFilename = Path.GetFileName(user.AvatarUrl);
+            var oldFilePath = Path.Combine(webRoot, "avatars", oldFilename);
+            if (File.Exists(oldFilePath))
+                File.Delete(oldFilePath);
+        }
+
+        var avatarsFolder = Path.Combine(webRoot, "avatars");
+        Directory.CreateDirectory(avatarsFolder);
+
+        var extension = Path.GetExtension(avatar.FileName);
+        var filename = $"{userId}_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}{extension}";
+        var filePath = Path.Combine(avatarsFolder, filename);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await avatar.CopyToAsync(stream);
+        }
+
+        user.AvatarUrl = $"/avatars/{filename}";
+        user.UpdatedAt = DateTime.UtcNow;
+        await _userRepository.UpdateAsync(user);
+
+        return new UserProfileResponse
+        {
+            Id = user.Id,
+            FullName = user.FullName,
+            Email = user.Email,
+            Role = user.Role,
+            Avatar = user.AvatarUrl,
+            Phone = user.Phone,
+            Bio = user.Bio,
+            Active = user.IsActive
+        };
     }
 }

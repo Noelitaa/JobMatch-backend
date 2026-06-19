@@ -173,6 +173,47 @@ paths:
           description: User does not exist
         "500":
           description: Internal server error
+  /users/{userId}/avatar:
+    put:
+      tags:
+        - Users
+      summary: Upload user avatar
+      description: Uploads a profile photo for the authenticated user. File is saved to the server and AvatarUrl is updated.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - avatar
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Avatar updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfileResponse"
+        "400":
+          description: No file provided or file is empty
+        "401":
+          description: Missing or invalid JWT token
+        "403":
+          description: Authenticated user does not match the requested user ID
+        "404":
+          description: User not found
+        "500":
+          description: Internal server error
   /students/{studentId}:
     get:
       tags:
