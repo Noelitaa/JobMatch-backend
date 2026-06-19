@@ -9,7 +9,7 @@ public class PaymentService : IPaymentService
 {
     private static readonly string[] ValidPaymentMethods = { "transfer", "cash", "sinpe" };
 
-    private readonly IPaymentRepository _paymentRepository;
+    public  readonly IPaymentRepository _paymentRepository;
 
     public PaymentService(IPaymentRepository paymentRepository)
     {

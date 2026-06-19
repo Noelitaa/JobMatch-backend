@@ -10,6 +10,7 @@ public class CreatePaymentRequest
 
     public decimal Amount { get; set; }
 
+    /// <summary>Valores permitidos: "transfer", "cash", "sinpe"</summary>
     public string? PaymentMethod { get; set; }
 
     public string? Receipt { get; set; }
