@@ -12,3 +12,6 @@ JobMatchBackend/appsettings.json
 JobMatchBackend/appsettings.Development.json
 JobMatchBackend/appsettings.Production.json
 JobMatchBackend/appsettings.Staging.json
+**/firebase-adminsdk*.json
+**/serviceAccountKey*.json
+**/google-services*.json

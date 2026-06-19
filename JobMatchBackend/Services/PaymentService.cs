@@ -9,11 +9,13 @@ public class PaymentService : IPaymentService
 {
     private static readonly string[] ValidPaymentMethods = { "transfer", "cash", "sinpe" };
 
-    public  readonly IPaymentRepository _paymentRepository;
+    private readonly IPaymentRepository _paymentRepository;
+    private readonly IFcmService _fcmService;
 
-    public PaymentService(IPaymentRepository paymentRepository)
+    public PaymentService(IPaymentRepository paymentRepository, IFcmService fcmService)
     {
         _paymentRepository = paymentRepository;
+        _fcmService = fcmService;
     }
 
     public async Task<List<PaymentResponse>> GetPaymentHistoryAsync(Guid userId, DateOnly? startDate, DateOnly? endDate)
@@ -55,6 +57,17 @@ public class PaymentService : IPaymentService
 
         var createdPayment = await _paymentRepository.CreatePaymentAsync(payment);
         createdPayment.Contract = contract;
+
+        var jobTitle = contract.Job?.Title ?? "tu trabajo";
+        var title    = "Pago recibido";
+        var body     = $"Se registró un pago de ₡{(long)request.Amount:N0} para \"{jobTitle}\"";
+        await _fcmService.SendToUserAsync(contract.IdStudent, title, body, new Dictionary<string, string>
+        {
+            ["type"]     = "payment_registered",
+            ["entityId"] = createdPayment.IdPayment.ToString(),
+            ["title"]    = title,
+            ["body"]     = body
+        });
 
         return ToResponse(createdPayment, callerId);
     }

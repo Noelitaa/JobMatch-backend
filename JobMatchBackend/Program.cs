@@ -1,3 +1,5 @@
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using JobMatchBackend.Data;
 using JobMatchBackend.Repositories;
 using JobMatchBackend.Services;
@@ -8,6 +10,16 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Firebase Admin SDK initialization
+var credentialPath = builder.Configuration["Firebase:CredentialPath"];
+if (!string.IsNullOrWhiteSpace(credentialPath) && File.Exists(credentialPath))
+{
+    FirebaseApp.Create(new AppOptions
+    {
+        Credential = GoogleCredential.FromFile(credentialPath)
+    });
+}
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -49,6 +61,7 @@ builder.Services.AddScoped<ISkillRepository, SkillRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IRatingRepository, RatingRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IFcmTokenRepository, FcmTokenRepository>();
 
 // Services
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
@@ -61,6 +74,7 @@ builder.Services.AddScoped<IContractService, ContractService>();
 builder.Services.AddScoped<ISkillService, SkillService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IRatingService, RatingService>();
+builder.Services.AddScoped<IFcmService, FcmService>();
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
