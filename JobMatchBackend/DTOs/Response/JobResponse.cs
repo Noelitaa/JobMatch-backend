@@ -20,6 +20,7 @@ public class JobResponse
     public DateOnly? StartDate { get; set; }
     public DateOnly? EndDate { get; set; }
     public List<string>? Deliverables { get; set; }
+    public List<string>? SkillsRequired { get; set; }
 
     public DateTime CreatedAt { get; set; }
 }
